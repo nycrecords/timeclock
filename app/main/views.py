@@ -12,7 +12,7 @@ clocked_in = True
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', current_app=current_app)
 
 
 

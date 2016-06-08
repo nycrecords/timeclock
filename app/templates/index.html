@@ -3,8 +3,16 @@
 
 {% block title %}TimeClock - Home{% endblock %}
 
-{% block content %}
+{% block page_content %}
     <h1>Temporary Home Page</h1>
+    {% if current_user.is_authenticated %}
+    {{ current_user.username }}
+    {% endif %}
+
+    <h1>Current app_config['Admin'] {{ current_app.config['ADMIN'] }}</h1>
+    {% if current_user.is_administrator() %}
+    <h2>Current access credential: ADMINISTRATOR [NAME: {{ current_user.username }}</h2>
+    {%  endif %}
 {% endblock %}
 
 
