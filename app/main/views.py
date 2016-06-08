@@ -6,29 +6,20 @@ from _datetime import datetime
 from . import main
 from flask_login import login_required, current_user
 from .forms import ClockInForm, ClockOutForm
+from .modules import process_clock, set_clock_form
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    if not current_user.is_authenticated:  # Not sure if this is the best approach
+    if not current_user.is_authenticated:  # Don't pass a form
         return render_template('index.html')
 
-    if current_user.clocked_in: # How can I avoid using this twice?
-        form = ClockOutForm()
-    else:
-        form = ClockInForm()
+    form = set_clock_form()
 
     if form.validate_on_submit():
-        event = Event(type=not current_user.clocked_in, time=datetime.utcnow(), user_id=current_user.id,
-                      note=form.note.data)
-        current_user.clocked_in = not current_user.clocked_in
-        db.session.add(current_user)
-        db.session.add(event)
-        db.session.commit()
-    if current_user.clocked_in:  # Some bad code repetition here - any thoughts?
-        form = ClockOutForm()
-    else:
-        form = ClockInForm()
+        process_clock(form.note.data)
+
+    form = set_clock_form()
 
     return render_template('index.html', form=form)
 
