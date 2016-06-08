@@ -19,12 +19,12 @@ def index():
         form = ClockInForm()
 
     if form.validate_on_submit():
-        event = Event(type=not current_user.clocked_in, time=datetime.utcnow(), user_id=current_user.id)
+        event = Event(type=not current_user.clocked_in, time=datetime.utcnow(), user_id=current_user.id,
+                      note=form.note.data)
         current_user.clocked_in = not current_user.clocked_in
         db.session.add(current_user)
         db.session.add(event)
         db.session.commit()
-
     if current_user.clocked_in:  # Some bad code repetition here - any thoughts?
         form = ClockOutForm()
     else:
@@ -42,7 +42,8 @@ def clock():
 @main.route('/history')    # User history
 @login_required
 def history():
-    return render_template('history.html')
+    events = Event.query.filter_by(user_id=current_user.id).all()
+    return render_template('history.html', events=events)
 
 
 @main.route('/timepunch')

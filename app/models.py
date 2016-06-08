@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import current_app
 from . import login_manager
+import time
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -89,10 +90,15 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Boolean)   # True if clocking in, false if clocking out
     time = db.Column(db.DateTime)  # Time of clock in/out event
+    note = db.Column(db.String(120))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Event %r by User %r at time %r>' % (self.type, self.user_id, self.time)
+        in_or_out = "out"
+        if self.type:
+            in_or_out = "in"
+        time_string = self.time.strftime("%b %d, %Y | %l:%M:%S %p")
+        return'User %r clocked %r at time %r with note %r' % (self.user.username, in_or_out, time_string, self.note)
 
 
 class Permission:
