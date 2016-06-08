@@ -43,6 +43,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)  # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
+    clocked_in = db.Column(db.Boolean, default=False)
 
     @property
     def password(self):
@@ -91,7 +92,7 @@ class Event(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<%u had a %r event at %t>' % (self.user, self.type, self. time)
+        return '<Event %r by User %r at time %r>' % (self.type, self.user_id, self.time)
 
 
 class Permission:

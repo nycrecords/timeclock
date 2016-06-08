@@ -5,14 +5,28 @@
 
 {% block page_content %}
     <h1>Temporary Home Page</h1>
-    {% if current_user.is_authenticated %}
-    {{ current_user.username }}
+    {%  if current_user.is_authenticated %}
+    <h1> Welcome, {{ current_user.username }}</h1>
     {% endif %}
 
-    <h1>Current app_config['Admin'] {{ current_app.config['ADMIN'] }}</h1>
     {% if current_user.is_administrator() %}
-    <h2>Current access credential: ADMINISTRATOR [NAME: {{ current_user.username }}</h2>
+    <h2>You have admin access to the TimeClock application</h2>
     {%  endif %}
+
+    {%  if current_user.is_authenticated %}
+
+         {% if current_user.clocked_in %}
+             <h1>You are clocked in</h1>
+         {% else %}
+             <h1>You are clocked out</h1>
+         {% endif %}
+
+        {{ current_user.clocked_in }}
+
+    <div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+    </div>
+    {% endif %}
 {% endblock %}
 
 
