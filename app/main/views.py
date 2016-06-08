@@ -7,7 +7,7 @@ from . import main
 from flask_login import login_required, current_user
 from .forms import ClockInForm, ClockOutForm
 from .modules import process_clock, set_clock_form
-
+from ..decorators import admin_required
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -23,6 +23,11 @@ def index():
 
     return render_template('index.html', form=form)
 
+@main.route('/all_history')
+@admin_required
+def all_history():
+    events = Event.query.all()
+    return render_template('all_history.html', events=events)
 
 @main.route('/clock')
 @login_required
