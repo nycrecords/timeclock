@@ -19,7 +19,7 @@
             <a class="navbar-brand" href="{{ url_for('main.index') }}">TimeClock Home</a>
         </div>
         <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav" style="float:right; color: white">
+            <ul class="nav navbar-nav" style="float:right;">
                 <li><a href="{{ url_for('main.timepunch') }}">Submit Timepunch</a></li>
                 <li><a href="{{ url_for('main.history') }}">History</a></li>
                 <li><a href="{{ url_for('main.index') }}">Sign Out</a></li>
@@ -33,4 +33,6 @@
 {% endblock %}
 
 {% block scripts %} <!-- Include any JS scripts here -->
+    {{ super() }}
+    {{ moment.include_moment() }}
 {% endblock %}

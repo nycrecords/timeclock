@@ -3,16 +3,16 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'cityofnewyorkkeythatissecretandhardtoguess'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    FLASKY_MAIL_SUBJECT_PREFIX = '[TimeClock]'
-    FLASKY_MAIL_SENDER = 'Admin <timeclock@doris.com>'
-    FLASKY_ADMIN = os.environ.get('ADMIN')
+    MAIL_SUBJECT_PREFIX = '[TimeClock]'
+    MAIL_SENDER = 'Admin <timeclock@doris.com>'
+    ADMIN = os.environ.get('ADMIN')
 
     @staticmethod
     def init_app(app):
@@ -21,20 +21,19 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-    #    'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
 
 
 class TestingConfig(Config):
     TESTING = True
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
-    #    'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
 
 
 class ProductionConfig(Config):
-    pass
-    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-    #    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 
 
 config = {

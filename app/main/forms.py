@@ -1,5 +1,13 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField
-from wtforms.validators import Required
+from wtforms import StringField, SubmitField, BooleanField
+from wtforms.validators import DataRequired
 
 
+class ClockInForm(Form):
+    note = StringField("Note: ")
+    submit = SubmitField("Clock In")
+
+
+class ClockOutForm(Form):
+    note = StringField("Note: ")
+    submit = SubmitField("Clock Out")
