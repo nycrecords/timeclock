@@ -15,9 +15,9 @@
     {%  if current_user.is_authenticated %}
 
          {% if current_user.clocked_in %}
-             <h1>You are clocked in</h1>
+             <h1>You last clocked in at {{ last_event }}</h1>
          {% else %}
-             <h1>You are clocked out</h1>
+             <h1>You last clocked out at {{ last_event }}</h1>
          {% endif %}
 
         {{ current_user.clocked_in }}

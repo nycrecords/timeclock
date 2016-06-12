@@ -27,8 +27,25 @@ def set_clock_form():
     For use in main/views.py: Determine the type of form to be rendered to index.html.
     :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in
     """
-    if current_user.clocked_in:  # TODO: How can I avoid using this twice?
+    if current_user.clocked_in:
         form = ClockOutForm()
     else:
         form = ClockInForm()
     return form
+
+
+def get_last_clock():
+    """
+    Obtains the last clock in or clock out instance created by this user.
+    :return: Formatted time of last clock event
+    """
+    return Event.query.filter_by(user_id=current_user.id).first().time.strftime("%b %d, %Y | %l:%M:%S %p")
+    # This shows first time event, need last time. .last() doesn't work
+    # TODO: find alternatives when you have internet connection
+
+
+def get_events_by_username(username_input):
+    user_account = User.query.filter_by(username=username_input).first()
+    events = Event.query.filter_by(user_id=user_account.id).all()  # THIS DOESN'T WORK
+    return events
+

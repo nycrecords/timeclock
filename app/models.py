@@ -5,10 +5,10 @@ from flask import current_app
 from . import login_manager
 import time
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
+class Permission:
+    USER = 0x01         # 0b00000001
+    ADMINISTER = 0x80   # 0b10000000
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -45,6 +45,16 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     clocked_in = db.Column(db.Boolean, default=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    events = db.relationship('Event', backref='user', lazy='dynamic')
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config['ADMIN']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+        if self.role is None:
+            self.role = Role.query.filter_by(default=True).first()
 
     @property
     def password(self):
@@ -56,17 +66,6 @@ class User(UserMixin, db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    events = db.relationship('Event', backref='user', lazy='dynamic')
-
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
-        if self.role is None:
-            if self.email == current_app.config['ADMIN']:
-                self.role = Role.query.filter_by(permissions=0xff).first()
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
 
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
@@ -85,6 +84,7 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
+
 class Event(db.Model):
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
@@ -101,8 +101,9 @@ class Event(db.Model):
         return'User %r clocked %r at time %r with note %r' % (self.user.username, in_or_out, time_string, self.note)
 
 
-class Permission:
-    USER = 0x01         # 0b00000001
-    ADMINISTER = 0x80   # 0b10000000
-
 login_manager.anonymous_user = AnonymousUser
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))

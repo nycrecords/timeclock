@@ -11,3 +11,9 @@ class ClockInForm(Form):
 class ClockOutForm(Form):
     note = StringField("Note: ")
     submit = SubmitField("Clock Out")
+
+
+class FilterUserForm(Form):
+    username = StringField("Username")
+    submit = SubmitField("Search Users")
+
