@@ -41,12 +41,17 @@ class Role(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True)  # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
+    # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
+    first_name = db.Column(db.String(64), index=True)
+    last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     clocked_in = db.Column(db.Boolean, default=False)
+    division = db.Column(db.String(128))
+    tag = db.Column(db.String(128))  # One tag max for now
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
+    pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -98,7 +103,16 @@ class Event(db.Model):
         if self.type:
             in_or_out = "in"
         time_string = self.time.strftime("%b %d, %Y | %l:%M:%S %p")
-        return'User %r clocked %r at time %r with note %r' % (self.user.username, in_or_out, time_string, self.note)
+        return'User %r clocked %r at time %r with note %r' % (self.user.email, in_or_out, time_string, self.note)
+
+
+class Pay(db.Model):
+    __tablename__ = 'pays'
+    id = db.Column(db.Integer, primary_key=True)
+    rate = db.Column(db.Float)
+    start = db.Column(db.Date)
+    end = db.Column(db.Date)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
 login_manager.anonymous_user = AnonymousUser
