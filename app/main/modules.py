@@ -2,9 +2,10 @@ from flask import render_template, session, redirect, url_for, current_app, flas
 from .. import db
 from ..models import User, Event
 from ..email import send_email
-from _datetime import datetime
+from datetime import datetime, timedelta
 from . import main
 from flask_login import login_required, current_user
+from flask_sqlalchemy import Session
 from .forms import ClockInForm, ClockOutForm
 
 
@@ -48,4 +49,34 @@ def get_events_by_username(username_input):
     user_account = User.query.filter_by(username=username_input).first()
     events = Event.query.filter_by(user_id=user_account.id).all()  # THIS DOESN'T WORK
     return events
+
+
+def get_events_by_date(username_input=None, first_date=datetime(2004, 1, 1), last_date=datetime.now()):
+    """
+    Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
+    end date.
+
+    :param username_input: username to search for
+    :param first_date: the start date to return queries from
+    :param last_date: the end date to query (must be after first date)
+    :return: array of Event objects from a given user between two given dates
+    """
+
+    #  What to do if form date fields are left blank
+    if first_date is None:
+        first_date = datetime(2004, 1, 1)   # First possible clock-in date
+    if last_date is None:
+        last_date = datetime.now()          # Last possible clock-in date
+
+    events_query = db.session.query(Event).filter(
+        Event.time >= first_date,
+        Event.time < last_date)
+
+    #  User processing
+    user_id = User.query.filter_by(username=username_input).first().id
+    if username_input is not None and User.query.filter_by(username=username_input).first() is not None:
+        events_query = events_query.filter(Event.user_id.like(user_id))
+
+    return events_query.all()
+
 

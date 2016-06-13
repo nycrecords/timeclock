@@ -1,13 +1,14 @@
 from flask import render_template, session, redirect, url_for, current_app, flash
+from datetime import datetime
 from .. import db
 from ..models import User, Event
 from ..email import send_email
 from . import main
 from flask_login import login_required, current_user
-from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_username
+from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_username, get_events_by_date
 from ..decorators import admin_required, permission_required
 from ..models import Permission
-from .forms import FilterUserForm
+from .forms import AdminFilterEventsForm, UserFilterEventsForm
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -28,10 +29,10 @@ def index():
 @main.route('/all_history',  methods=['GET', 'POST'])
 @permission_required(Permission.ADMINISTER)
 def all_history():
-    form = FilterUserForm()
+    form = AdminFilterEventsForm()
     events = Event.query.all()
     if form.validate_on_submit():
-        events = get_events_by_username(form.username.data)
+        events = get_events_by_date(form.username.data, form.first_date.data, form.last_date.data)
     return render_template('all_history.html', events=events, form=form)
 
 
