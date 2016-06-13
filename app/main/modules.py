@@ -76,3 +76,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     return events_query.all()
 
 
+def get_clocked_in_users():
+    return User.query.filter_by(clocked_in=True).all()
+
+

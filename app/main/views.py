@@ -5,7 +5,7 @@ from ..models import User, Event
 from ..email import send_email
 from . import main
 from flask_login import login_required, current_user
-from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date
+from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users
 from ..decorators import admin_required, permission_required
 from ..models import Permission
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
@@ -30,7 +30,7 @@ def index():
     form = set_clock_form()
     last_event = get_last_clock()
 
-    return render_template('index.html', form=form, last_event=last_event)
+    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users())
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])

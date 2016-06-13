@@ -5,25 +5,34 @@
 
 {% block page_content %}
     {%  if current_user.is_authenticated %}
-    <h1> Welcome, {{ current_user.username }} with role {{ current_user.role }}</h1>
+    <h1> Welcome, {{ current_user.first_name }}. You have {{ current_user.role.name }} access to the TimeClock site.</h1>
+
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+    </div>
     {% endif %}
 
+
     {% if current_user.is_administrator() %}
-    <h2>You have admin access to the TimeClock application</h2>
-    {%  endif %}
+        <div class="col-md-4">
+            <h2>Currently clocked in:</h2>
+            {% for user in clocked_in_users %}
+                {{ user.first_name }} {{ user.last_name }} | {{ user.email }}
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    {%  if current_user.is_authenticated %}
 
-         {% if current_user.clocked_in %}
+    {%  if current_user.is_authenticated and last_event != None%}
+        <div class="col-md-4">
+        {% if current_user.clocked_in %}
              <h1>You last clocked in at {{ last_event }}</h1>
          {% else %}
              <h1>You last clocked out at {{ last_event }}</h1>
          {% endif %}
-
-    <div class="col-md-4">
-    {{ wtf.quick_form(form) }}
-    </div>
+        </div>
     {% endif %}
+
 {% endblock %}
 
 

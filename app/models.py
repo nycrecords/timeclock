@@ -79,7 +79,7 @@ class User(UserMixin, db.Model):
         return self.can(Permission.ADMINISTER)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.email
 
 
 class AnonymousUser(AnonymousUserMixin):
