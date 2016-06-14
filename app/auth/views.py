@@ -9,6 +9,11 @@ from .forms import LoginForm, RegistrationForm
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Renders the HTML page where users can register new accounts. If the RegistrationForm meets criteria,
+    a new user is written into the database.
+    :return: HTML page for registration.
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
             user = User(email=form.email.data,
@@ -23,6 +28,11 @@ def register():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Renders the HTML page where users can log in to the system. If a login is successful, users are redirected to
+    the index page.
+    :return:
+    """
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -36,12 +46,10 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    """
+    HTML page to logout a user, immediately redirects to index.
+    :return: Index page.
+    """
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
-
-
-@auth.route('/secret')
-@login_required
-def secret():
-    return 'Only authenticated users are allowed!'

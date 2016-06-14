@@ -28,7 +28,7 @@ class AdminFilterEventsForm(Form):
     """
     email = StringField("Email", validators=[Optional()])
     first_date = DateTimeField("From", default=datetime(2004, 1, 1), validators=[Optional()])
-    last_date = DateTimeField("To", default=datetime.now(), validators=[Optional()])
+    last_date = DateTimeField("To", default=datetime.now, validators=[Optional()])
     submit = SubmitField("Filter")
 
 

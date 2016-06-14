@@ -17,18 +17,22 @@
         <div class="col-md-4">
             <h2>Currently clocked in:</h2>
             {% for user in clocked_in_users %}
-                {{ user.first_name }} {{ user.last_name }} | {{ user.email }}
+                <ul>
+                    <li>
+                    {{ user.first_name }} {{ user.last_name }} | {{ user.email }}
+                    </li>
+                </ul>
             {% endfor %}
         </div>
     {% endif %}
 
 
-    {%  if current_user.is_authenticated and last_event != None%}
+    {%  if current_user.is_authenticated and last_event != None %}
         <div class="col-md-4">
         {% if current_user.clocked_in %}
-             <h1>You last clocked in at {{ last_event }}</h1>
+             <h4>You last clocked in at {{ last_event }}</h4>
          {% else %}
-             <h1>You last clocked out at {{ last_event }}</h1>
+             <h4>You last clocked out at {{ last_event }}</h4>
          {% endif %}
         </div>
     {% endif %}

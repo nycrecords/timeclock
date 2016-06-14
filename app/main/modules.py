@@ -50,18 +50,17 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
-
     :param email_input: username to search for
     :param first_date: the start date to return queries from
     :param last_date: the end date to query (must be after first date)
     :return: array of Event objects from a given user between two given dates
     """
 
-    #  What to do if form date fields are left blank
-    # if first_date is None:
-    #     first_date = datetime(2004, 1, 1)   # First possible clock-in date
-    # if last_date is None:
-    #     last_date = datetime.now()          # Last possible clock-in date
+    # What to do if form date fields are left blank
+    if first_date is None:
+        first_date = datetime(2004, 1, 1)   # First possible clock-in date
+    if last_date is None:
+        last_date = datetime.now()          # Last possible clock-in date
     # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
     events_query = db.session.query(Event).filter(
@@ -77,6 +76,9 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
 
 def get_clocked_in_users():
+    """
+    :return: An array of all currently clocked in users.
+    """
     return User.query.filter_by(clocked_in=True).all()
 
 
