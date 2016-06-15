@@ -1,14 +1,16 @@
-from flask import render_template, session, redirect, url_for, current_app, flash
+from flask import render_template, flash, request, make_response
 from datetime import datetime
 from .. import db
 from ..models import User, Event
 from ..email import send_email
 from . import main
 from flask_login import login_required, current_user
-from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users
+from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
+     process_time_periods
 from ..decorators import admin_required, permission_required
 from ..models import Permission
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
+import sqlalchemy
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -34,7 +36,7 @@ def index():
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])
-@permission_required(Permission.ADMINISTER)
+@admin_required
 def all_history():
     """
     View function for url/all_history page.
@@ -42,13 +44,28 @@ def all_history():
     :return: All user history, sorted (if applicable) with a form for further filtering.
     """
     form = AdminFilterEventsForm()
-    events = Event.query.all()
+    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
     if form.validate_on_submit():
-        events = get_events_by_date(form.email.data, form.first_date.data, form.last_date.data)
+        time_period = process_time_periods(form)
+        events = get_events_by_date(form.email.data, time_period[0], time_period[1])
     return render_template('all_history.html', events=events, form=form)
 
 
-@main.route('/history')    # User history
+@main.route('/download', methods=['GET', 'POST'])
+def download():
+    events = request.values
+    print(events)
+    output = ""
+    for event in sorted(events):
+        output = output + event + "\n"
+
+    response = make_response(output)
+    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
+    print(response)
+    return response
+
+
+@main.route('/history', methods=['GET', 'POST'])    # User history
 @login_required
 def history():
     """
@@ -56,7 +73,11 @@ def history():
     TODO: Make filterable by date.
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
-    events = Event.query.filter_by(user_id=current_user.id).all()
-    return render_template('history.html', events=events)
+    form = UserFilterEventsForm()
+    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    if form.validate_on_submit():
+        time_period = process_time_periods(form)
+        events = get_events_by_date(current_user.email, time_period[0], time_period[1])
+    return render_template('history.html', events=events, form=form)
 
 

@@ -13,8 +13,20 @@
         {{ wtf.quick_form(form) }}
     </div>
 
-    {% for event in events %}
-        <p>{{ event }}</p>
-    {% endfor %}
+     <div class="col-md-4">
+        {% for event in events %}
+            <p>{{ event }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-4">
+        <form action="/download" method="POST">
+            {% for event in events %}
+            <input type="hidden" name="{{ event }}">
+            {% endfor %}
+            <input type="submit" value="Generate Timesheet" name="Generate Timesheet">
+        </form>
+    </div>
+
 
 {% endblock %}

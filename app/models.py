@@ -99,11 +99,9 @@ class Event(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        in_or_out = "out"
-        if self.type:
-            in_or_out = "in"
-        time_string = self.time.strftime("%b %d, %Y | %l:%M:%S %p")
-        return'User %r clocked %r at time %r with note %r' % (self.user.email, in_or_out, time_string, self.note)
+        in_or_out = "IN" if self.type else "OUT"
+        time_string = self.time.strftime("%b %d, %Y %l:%M:%S %p")
+        return time_string + " | " + self.user.email + " | " + in_or_out + " | NOTE: " + self.note
 
 
 class Pay(db.Model):

@@ -1,9 +1,8 @@
-from flask import render_template, session, redirect, url_for, current_app, flash
+from flask import make_response
 from .. import db
 from ..models import User, Event
-from ..email import send_email
-from datetime import datetime, timedelta
-from . import main
+from datetime import datetime
+import dateutil.relativedelta
 from flask_login import login_required, current_user
 from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
@@ -72,7 +71,67 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         user_id = User.query.filter_by(email=email_input).first().id
         events_query = events_query.filter(Event.user_id == user_id)
 
-    return events_query.all()
+    return events_query.order_by(sqlalchemy.desc(Event.time)).all()
+
+
+def get_time_period(period='d'):
+    """
+    Get's the start and end date of a given time period.
+    :param period: Time periods. Accepted values are:
+        d (today)
+        w (this week)
+        m (this month)
+        ld (last day i.e. yesterday)
+        lw (last week)
+        lm (last month)
+    :return: A two-element array containing a start and end date
+    """
+    now = datetime.now()
+    first_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
+    end_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(days=-1)
+    # TODO: first_of_week
+    # TODO: end_of_last_week
+    if period == 'd':
+        return [now.replace(hour=0, minute=0, second=0, microsecond=0), now]
+    elif period == 'w':
+        # TODO
+        pass
+    elif period == 'm':
+        return [first_of_month, now]
+    elif period == 'ld':
+        yesterday = now.replace(hour=0, minute=0, second=0, microsecond=0) + dateutil.relativedelta.relativedelta(days=-1)
+        return [yesterday, yesterday.replace(hour=23, minute=59, second=59)]
+    elif period == 'lw':
+        # TODO
+        pass
+    elif period == 'lm':
+        return [first_of_last_month, end_of_last_month]
+    else:
+        return [datetime(2004, 1, 1), datetime.now]
+
+
+def process_time_periods(form):
+    """
+    Runs through the possible submit buttons on AdminFilterEventsForms and UserFilterEventsForms.
+    :param form: AdminFilterEventsForm or UserFilterEventsForm
+    :return: A two-element array containing a start and end date
+    """
+    if form.this_day.data:
+        time_period = get_time_period('d')
+    elif form.this_week.data:
+        time_period = get_time_period('w')
+    elif form.this_month.data:
+        time_period = get_time_period('m')
+    elif form.last_day.data:
+        time_period = get_time_period('ld')
+    elif form.last_week.data:
+        time_period = get_time_period('lw')
+    elif form.last_month.data:
+        time_period = get_time_period('lm')
+    else:
+        time_period = [form.first_date.data, form.last_date.data]
+    return time_period
 
 
 def get_clocked_in_users():
@@ -80,5 +139,6 @@ def get_clocked_in_users():
     :return: An array of all currently clocked in users.
     """
     return User.query.filter_by(clocked_in=True).all()
+
 
 
