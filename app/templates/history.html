@@ -13,9 +13,12 @@
     </div>
 
     <div class="col-md-4">
-        {% for event in events %}
-        <p>{{ event }}</p>
-        {% endfor %}
+        <form action="/download_timesheet" method="POST">
+            {% for event in events %}
+            <input type="hidden" name="{{ event }}">
+            {% endfor %}
+            <input type="submit" value="Generate Timesheet" name="Generate Timesheet">
+        </form>
     </div>
 
 {% endblock %}

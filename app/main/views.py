@@ -1,14 +1,10 @@
 from flask import render_template, flash, request, make_response
-from datetime import datetime
-from .. import db
-from ..models import User, Event
-from ..email import send_email
+from ..models import Event
 from . import main
 from flask_login import login_required, current_user
 from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
      process_time_periods
-from ..decorators import admin_required, permission_required
-from ..models import Permission
+from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
 import sqlalchemy
 
@@ -51,20 +47,6 @@ def all_history():
     return render_template('all_history.html', events=events, form=form)
 
 
-@main.route('/download', methods=['GET', 'POST'])
-def download():
-    events = request.values
-    print(events)
-    output = ""
-    for event in sorted(events):
-        output = output + event + "\n"
-
-    response = make_response(output)
-    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
-    print(response)
-    return response
-
-
 @main.route('/history', methods=['GET', 'POST'])    # User history
 @login_required
 def history():
@@ -81,3 +63,29 @@ def history():
     return render_template('history.html', events=events, form=form)
 
 
+@main.route('/download_timesheet', methods=['GET', 'POST'])
+def download():
+    events = request.values
+    print(events)
+    output = ""
+    for event in sorted(events):
+        output = output + event + "\n"
+
+    response = make_response(output)
+    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
+    print(response)
+    return response
+
+
+@main.route('/download_timesheet', methods=['GET', 'POST'])
+def download():
+    events = request.values
+    print(events)
+    output = ""
+    for event in sorted(events):
+        output = output + event + "\n"
+
+    response = make_response(output)
+    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
+    print(response)
+    return response

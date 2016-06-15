@@ -1,9 +1,8 @@
-from flask import make_response
 from .. import db
 from ..models import User, Event
 from datetime import datetime
 import dateutil.relativedelta
-from flask_login import login_required, current_user
+from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 

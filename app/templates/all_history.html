@@ -20,7 +20,7 @@
     </div>
 
     <div class="col-md-4">
-        <form action="/download" method="POST">
+        <form action="/download_timesheet" method="POST">
             {% for event in events %}
             <input type="hidden" name="{{ event }}">
             {% endfor %}

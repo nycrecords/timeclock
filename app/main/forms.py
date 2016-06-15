@@ -1,7 +1,8 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, BooleanField, DateTimeField
+from wtforms import StringField, SubmitField, DateTimeField
 from wtforms.validators import DataRequired, Optional, Length
 from datetime import datetime
+
 
 class ClockInForm(Form):
     """
