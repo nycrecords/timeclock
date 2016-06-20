@@ -49,7 +49,7 @@ def all_history():
 
     # Pagination code
     pagination = events_query.paginate(
-        page, per_page=50,
+        page, per_page=15,
         error_out=False)
     events = pagination.items
     print(events_query)
