@@ -10,24 +10,48 @@
 
 {% block page_content %}
 
-    <div class="col-md-4">
-        {{ wtf.quick_form(form) }}
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+        <div>
+            <form action="/download_timesheet" method="POST">
+                {% for event in generation_events %}
+                <input type="hidden" name="{{ event }}">
+                {% endfor %}
+                <input type="submit" value="Generate Timesheet" class="btn btn-success">
+            </form>
+        </div>
     </div>
 
-     <div class="col-md-4">
-        {% for event in events %}
-            <p>{{ event }}</p>
-        {% endfor %}
+
+     <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Clocked</th>
+                    <th>Time</th>
+                </tr>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.user.email }}</td>
+                    <td>{{ event.user.first_name }}</td>
+                    <td>{{ event.user.last_name }}<td>
+                    <td>{% if event.type %} {{ true }} {% else %} {{ false }} {% endif %}</td>
+                    <td>{{ event.time }}</td>
+                </tr>
+                {% endfor %}
+        </table>
+{#        {% for event in events %}#}
+{#            <p>{{ event }}</p>#}
+{#        {% endfor %}#}
     </div>
 
-    <div class="col-md-4">
-        <form action="/download_timesheet" method="POST">
-            {% for event in generation_events %}
-            <input type="hidden" name="{{ event }}">
-            {% endfor %}
-            <input type="submit" value="Generate Timesheet" name="Generate Timesheet">
-        </form>
-    </div>
+
 
     <div class="pagination">
         {{ macros.pagination_widget(pagination, '.all_history') }}

@@ -66,15 +66,11 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         Event.time >= first_date,
         Event.time <= last_date)
 
-    print("Step One:", events_query)
-
-    #  User processing
+    # User processing
     if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
         user_id = User.query.filter_by(email=email_input).first().id
         events_query = events_query.filter(Event.user_id == user_id)
-        print("Step Two:", events_query)
 
-    print("From get_events_by_date [Step Three]: ", events_query.order_by(sqlalchemy.desc(Event.time)))
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
     return events_query
 

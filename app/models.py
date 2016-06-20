@@ -135,7 +135,6 @@ class Event(db.Model):
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
-            print(u.clocked_in)
             u.clocked_in = not u.clocked_in
             e = Event(user=u, type=u.clocked_in,
                       time=datetime(
@@ -146,9 +145,8 @@ class Event(db.Model):
                           minute=randint(0, 59),
                         )
                       )
-            db.session.add(e)
+            db.session.add_all([e, u])
             db.session.commit()
-
 
 
 class Pay(db.Model):

@@ -25,6 +25,10 @@
         {% for event in events %}
             <p>{{ event }}</p>
         {% endfor %}
+
+        <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.history') }}
+    </div>
     </div>
 
 

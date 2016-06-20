@@ -54,7 +54,9 @@ def all_history():
     events = pagination.items
     print(events_query)
     return render_template('all_history.html', events=events, form=form, pagination=pagination,
-                           generation_events=events_query.all())
+                           generation_events=events)
+    # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
+    #  NOT DOING THAT RIGHT NOW TO AVOID OVERHEAD DURING DEVELOPMENT
 
 
 @main.route('/history', methods=['GET', 'POST'])    # User history
@@ -75,15 +77,17 @@ def history():
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])
 def download():
+    """
+    Created a link to download a timesheet containing the given filtered data.
+    :return: A directive to download a file timesheet.txt, which contains timesheet data
+    """
     events = request.values
-    print(events)
     output = ""
     for event in sorted(events):
         output = output + event + "\n"
 
     response = make_response(output)
-    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
-    print(response)
+    response.headers["Content-Disposition"] = "attachment; filename=timesheet.txt"
     return response
 
 
