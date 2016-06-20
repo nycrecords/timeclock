@@ -1,4 +1,4 @@
-from flask import render_template, flash, request, make_response
+from flask import render_template, flash, request, make_response, url_for, redirect
 from ..models import Event
 from . import main
 from flask_login import login_required, current_user
@@ -12,11 +12,11 @@ import sqlalchemy
 @main.route('/', methods=['GET', 'POST'])
 def index():
     """
-    View function for index page.
+    View function for index page. Reroutes to login if user is not logged in.
     :return: index.html contents
     """
     if not current_user.is_authenticated:  # Don't pass a form
-        return render_template('index.html')
+        return redirect(url_for('auth.login'))
 
     form = set_clock_form()
     if form.validate_on_submit():
@@ -68,11 +68,19 @@ def history():
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
     form = UserFilterEventsForm()
-    events = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).all()
+    events_query = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time))
+    page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
         time_period = process_time_periods(form)
-        events = get_events_by_date(current_user.email, time_period[0], time_period[1])
-    return render_template('history.html', events=events, form=form)
+        events_query = get_events_by_date(current_user.email, time_period[0], time_period[1])
+        page = 1
+
+    pagination = events_query.paginate(
+        page, per_page=15,
+        error_out=False)
+    events = pagination.items
+
+    return render_template('history.html', events=events, form=form, pagination=pagination)
 
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])

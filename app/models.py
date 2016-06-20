@@ -4,6 +4,9 @@ from flask_login import UserMixin, AnonymousUserMixin
 from flask import current_app
 from . import login_manager
 from datetime import datetime
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+import re
+
 
 
 
@@ -50,6 +53,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     clocked_in = db.Column(db.Boolean, default=False)
+    validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
     tag = db.Column(db.String(128))  # One tag max for now
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
@@ -61,6 +65,7 @@ class User(UserMixin, db.Model):
         if self.role is None:
             if self.email == current_app.config['ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
+                self.validated = True
         if self.role is None:
             self.role = Role.query.filter_by(default=True).first()
 
@@ -71,6 +76,28 @@ class User(UserMixin, db.Model):
     @password.setter
     def password(self, password):
         self.password_hash = generate_password_hash(password)
+
+    # generates token with default validity for 1 hour
+    def generate_reset_token(self, expiration=3600):
+            s = Serializer(current_app.config['SECRET_KEY'], expiration)
+            return s.dumps({'reset': self.id})
+
+            # verifies the token and if valid, resets password
+
+    def reset_password(self, token, new_password):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('reset') != self.id:
+            return False
+        # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
+        if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
+            return False
+        self.password = new_password
+        db.session.add(self)
+        return True
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -86,7 +113,9 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def generate_fake(count=100):
-        "Used to generate fake users"
+        """
+        Used to generate fake users.
+        """
         from sqlalchemy.exc import IntegrityError
         from random import seed
 
@@ -106,6 +135,9 @@ class User(UserMixin, db.Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
+    """
+    An anonymous user class to simplify user processes in other code.
+    """
     def can(self, permissions):
         return False
 
@@ -114,6 +146,9 @@ class AnonymousUser(AnonymousUserMixin):
 
 
 class Event(db.Model):
+    """
+    Model for clock events (in or out).
+    """
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Boolean)   # True if clocking in, false if clocking out
@@ -130,6 +165,11 @@ class Event(db.Model):
 
     @staticmethod
     def generate_fake(count=100):
+        """
+        Generates fake event instances.
+        :param count: Number of instances to generate
+        :return: None.
+        """
         from random import seed, randint
         seed()
         user_count = User.query.count()
@@ -150,6 +190,9 @@ class Event(db.Model):
 
 
 class Pay(db.Model):
+    """
+    A model for user pay rates.
+    """
     __tablename__ = 'pays'
     id = db.Column(db.Integer, primary_key=True)
     rate = db.Column(db.Float)

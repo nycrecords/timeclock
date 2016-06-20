@@ -5,37 +5,55 @@
 
 {% block page_content %}
     {%  if current_user.is_authenticated %}
-    <h1> Welcome, {{ current_user.first_name }}. You have {{ current_user.role.name }} access to the TimeClock site.</h1>
+        <div class="row" style="padding-bottom:10px">
+            <div class="col-md-4" style="height:300px">
+                <div>
+                    {{ wtf.quick_form(form) }}
+                </div>
 
-    <div class="col-md-4">
-        {{ wtf.quick_form(form) }}
-    </div>
-    {% endif %}
+                <div style="position: absolute; bottom:0px">
+                {% if last_event %}
+                {% if  current_user.clocked_in  %}
+                    <p>You last clocked in at {{ last_event }}</p>
+                {% else %}
+                    <p>You last clocked out at {{ last_event }}</p>
+                {% endif %}
+                {% endif %}
+                </div>
+
+            </div>
 
 
-    {% if current_user.is_administrator() %}
-        <div class="col-md-4">
-            <h2>Currently clocked in:</h2>
-            {% for user in clocked_in_users %}
-                <ul>
-                    <li>
-                    {{ user.first_name }} {{ user.last_name }} | {{ user.email }}
-                    </li>
-                </ul>
-            {% endfor %}
+        {% if current_user.is_administrator() %}
+        <div class="col-md-8" style="height:300px; overflow: auto">
+            <p>Currently clocked in:</p>
+                <table class="table" style="padding:4px">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in clocked_in_users %}
+                        <tr>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
         </div>
+            </div>
+                <hr>
+
+    {% endif %}
     {% endif %}
 
 
-    {%  if current_user.is_authenticated and last_event != None %}
-        <div class="col-md-4">
-        {% if current_user.clocked_in %}
-             <h4>You last clocked in at {{ last_event }}</h4>
-         {% else %}
-             <h4>You last clocked out at {{ last_event }}</h4>
-         {% endif %}
-        </div>
-    {% endif %}
+
 
 {% endblock %}
 

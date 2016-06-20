@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block title %}TimeClock - History{% endblock %}
 
@@ -8,28 +9,67 @@
 <!-- TODO: IMPLEMENT CALENDAR VIEW, CLICKABLE DATE EVENTS -->
 
 {% block page_content %}
-     <div class="col-md-4">
-        {{ wtf.quick_form(form) }}
+
+    <div class="row">
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info">Filter Results</button>
+        <div style="float:right">
+            <form action="/download_timesheet" method="POST">
+                {% for event in generation_events %}
+                    <input type="hidden" name="{{ event }}">
+                {% endfor %}
+                    <input type="submit" value="Generate Timesheet" class="btn btn-success">
+            </form>
+        </div>
+        <div style="float:right; margin-right:5px">
+            <form action="/download_timesheet" method="POST">
+                {% for event in generation_events %}
+                    <input type="hidden" name="{{ event }}">
+                {% endfor %}
+                <input type="submit" value="Generate Invoice" class="btn btn-success">
+            </form>
+        </div>
     </div>
 
-    <div class="col-md-4">
-        <form action="/download_timesheet" method="POST">
-            {% for event in events %}
-            <input type="hidden" name="{{ event }}">
-            {% endfor %}
-            <input type="submit" value="Generate Timesheet" name="Generate Timesheet">
-        </form>
+    {#  Collapsible form for filter options  #}
+    <div id="filter-form" class="collapse">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
     </div>
 
-        <div class="col-md-4">
-        {% for event in events %}
-            <p>{{ event }}</p>
-        {% endfor %}
 
-        <div class="pagination">
-        {{ macros.pagination_widget(pagination, '.history') }}
-    </div>
-    </div>
 
+     <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Clocked</th>
+                    <th>Time</th>
+                </tr>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.user.email }}</td>
+                    <td>{{ event.user.first_name }}</td>
+                    <td>{{ event.user.last_name }}</td>
+                    <td>{% if event.type %}
+                        <span style="color:green">IN</span>
+                        {% else %}
+                        <span style="color:orange">OUT</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ event.time }}</td>
+                </tr>
+                {% endfor %}
+        </table>
+        <div class="col-md-8 col-md-offset-4">
+            {{ macros.pagination_widget(pagination, '.history') }}
+        </div>
+    </div>
 
 {% endblock %}

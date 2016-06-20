@@ -57,7 +57,12 @@
                     <td>{{ event.user.email }}</td>
                     <td>{{ event.user.first_name }}</td>
                     <td>{{ event.user.last_name }}</td>
-                    <td>{% if event.type %}  IN  {% else %}  OUT  {% endif %}</td>
+                    <td>{% if event.type %}
+                        <span style="color:green">IN</span>
+                        {% else %}
+                        <span style="color:orange">OUT</span>
+                        {% endif %}
+                    </td>
                     <td>{{ event.time }}</td>
                 </tr>
                 {% endfor %}
