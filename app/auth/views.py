@@ -77,6 +77,7 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('auth.login'))
 
+
 @auth.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
@@ -88,6 +89,7 @@ def change_password():
                                        form.password.data,
                                        form.password2.data):
             current_user.password = form.password.data
+            current_user.validated = True  # TODO: Check to ensure this actually does validate users
             db.session.add(current_user)
             flash('Your password has been updated.')
             return redirect(url_for('auth.login'))
@@ -140,3 +142,19 @@ def password_reset(token):
         else:
             flash('Password must be at least 8 characters with at least 1 UPPERCASE and 1 NUMBER')
     return render_template('auth/reset_password.html', form=form)
+
+
+@auth.route('/unconfirmed', methods=['GET', 'POST'])
+def unconfirmed():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if check_password_requirements(current_user.email,
+                                       form.old_password.data,
+                                       form.password.data,
+                                       form.password2.data):
+            current_user.password = form.password.data
+            current_user.validated = True  # TODO: Check to ensure this actually does validate users
+            db.session.add(current_user)
+            flash('Your password has been updated.')
+            return redirect(url_for('auth.login'))
+    return render_template('auth/unconfirmed.html', form=form)

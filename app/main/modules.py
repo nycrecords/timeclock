@@ -4,7 +4,7 @@ from datetime import datetime
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
-from flask_sqlalchemy import BaseQuery
+from flask import redirect, url_for
 import sqlalchemy
 
 
@@ -140,6 +140,5 @@ def get_clocked_in_users():
     :return: An array of all currently clocked in users.
     """
     return User.query.filter_by(clocked_in=True).all()
-
 
 

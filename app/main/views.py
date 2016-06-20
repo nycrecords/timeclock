@@ -18,6 +18,9 @@ def index():
     if not current_user.is_authenticated:  # Don't pass a form
         return redirect(url_for('auth.login'))
 
+    if not current_user.validated:
+        return redirect(url_for('auth.unconfirmed'))
+
     form = set_clock_form()
     if form.validate_on_submit():
         process_clock(form.note.data)
@@ -67,6 +70,10 @@ def history():
     TODO: Make filterable by date.
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
+
+    if not current_user.validated:
+        return redirect(url_for('auth.unconfirmed'))
+
     form = UserFilterEventsForm()
     events_query = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time))
     page = request.args.get('page', 1, type=int)
