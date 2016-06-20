@@ -2,6 +2,7 @@ from flask_wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from ..models import User
+from datetime import datetime
 
 
 class LoginForm(Form):
@@ -59,6 +60,25 @@ class RegistrationForm(Form):
 
         if not has_capital:
             raise ValidationError('Password must contain at least one capital letter')
+
+
+class AdminRegistrationForm(Form):
+    """
+    Used by admins to register new users into the system.
+    """
+    email = StringField('Email', validators=[DataRequired(), Length(1,64), Email()])
+    first_name = StringField("First name")
+    last_name = StringField("Last name")
+    submit = SubmitField('Register')
+
+    def validate_email(self, field):
+        """
+        Verifies that e-mails used for registration do not already exist in the system.
+        :param field:
+        :return:
+        """
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('An account with this email address already exists')
 
 
 

@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import current_app
 from . import login_manager
+from datetime import datetime
 
 
 
@@ -33,6 +34,7 @@ class Role(db.Model):
             role.default = roles[r][1]
             db.session.add(role)
         db.session.commit()
+
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -82,6 +84,26 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.email
 
+    @staticmethod
+    def generate_fake(count=100):
+        "Used to generate fake users"
+        from sqlalchemy.exc import IntegrityError
+        from random import seed
+
+        import forgery_py
+        seed()
+        for i in range(count):
+            u = User(email=forgery_py.internet.email_address(),
+                     password=forgery_py.lorem_ipsum.word(),
+                     first_name=forgery_py.name.first_name(),
+                     last_name=forgery_py.name.last_name(),
+                     )
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
@@ -100,9 +122,33 @@ class Event(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
+        if not self.note:
+            self.note = ""
         in_or_out = "IN" if self.type else "OUT"
         time_string = self.time.strftime("%b %d, %Y %l:%M:%S %p")
         return time_string + " | " + self.user.email + " | " + in_or_out + " | NOTE: " + self.note
+
+    @staticmethod
+    def generate_fake(count=100):
+        from random import seed, randint
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            print(u.clocked_in)
+            u.clocked_in = not u.clocked_in
+            e = Event(user=u, type=u.clocked_in,
+                      time=datetime(
+                          year=randint(2004, 2016),
+                          month=randint(1, 6),
+                          day=randint(1, 28),
+                          hour=randint(0, 23),
+                          minute=randint(0, 59),
+                        )
+                      )
+            db.session.add(e)
+            db.session.commit()
+
 
 
 class Pay(db.Model):

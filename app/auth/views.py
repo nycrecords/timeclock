@@ -3,7 +3,10 @@ from flask_login import login_required, login_user, logout_user
 from . import auth
 from .. import db
 from ..models import User
-from .forms import LoginForm, RegistrationForm
+from ..decorators import admin_required
+from .forms import LoginForm, RegistrationForm, AdminRegistrationForm
+from .modules import get_day_of_week
+from datetime import datetime
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -23,6 +26,26 @@ def register():
             flash('User successfully registered')
             return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
+
+
+@auth.route('/admin_register', methods=['GET', 'POST'])
+@admin_required
+def admin_register():
+    """
+    Renders a form for admins to register new users.
+    :return: HTML page where admins can register new users
+    """
+    form = AdminRegistrationForm()
+    if form.validate_on_submit():
+        print("Temporary Password: " + get_day_of_week() + str(datetime.today().day))
+        user = User(email=form.email.data,
+                    password=get_day_of_week() + str(datetime.today().day),
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data)
+        db.session.add(user)
+        flash('User successfully registered')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/admin_register.html', form=form)
 
 
 @auth.route('/login', methods=['GET', 'POST'])

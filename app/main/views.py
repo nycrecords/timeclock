@@ -40,11 +40,21 @@ def all_history():
     :return: All user history, sorted (if applicable) with a form for further filtering.
     """
     form = AdminFilterEventsForm()
-    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    events_query = Event.query.order_by(sqlalchemy.desc(Event.time))
+    page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
         time_period = process_time_periods(form)
-        events = get_events_by_date(form.email.data, time_period[0], time_period[1])
-    return render_template('all_history.html', events=events, form=form)
+        events_query = get_events_by_date(form.email.data, time_period[0], time_period[1])
+        page = 1
+
+    # Pagination code
+    pagination = events_query.paginate(
+        page, per_page=50,
+        error_out=False)
+    events = pagination.items
+    print(events_query)
+    return render_template('all_history.html', events=events, form=form, pagination=pagination,
+                           generation_events=events_query.all())
 
 
 @main.route('/history', methods=['GET', 'POST'])    # User history
@@ -56,7 +66,7 @@ def history():
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
     form = UserFilterEventsForm()
-    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    events = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).all()
     if form.validate_on_submit():
         time_period = process_time_periods(form)
         events = get_events_by_date(current_user.email, time_period[0], time_period[1])
@@ -77,15 +87,3 @@ def download():
     return response
 
 
-@main.route('/download_timesheet', methods=['GET', 'POST'])
-def download():
-    events = request.values
-    print(events)
-    output = ""
-    for event in sorted(events):
-        output = output + event + "\n"
-
-    response = make_response(output)
-    response.headers["Content-Disposition"] = "attachment; filename=invoice.txt"
-    print(response)
-    return response

@@ -4,6 +4,7 @@ from datetime import datetime
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
+from flask_sqlalchemy import BaseQuery
 import sqlalchemy
 
 
@@ -51,7 +52,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :param email_input: username to search for
     :param first_date: the start date to return queries from
     :param last_date: the end date to query (must be after first date)
-    :return: array of Event objects from a given user between two given dates
+    :return: QUERY of Event objects from a given user between two given dates
     """
 
     # What to do if form date fields are left blank
@@ -61,16 +62,21 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         last_date = datetime.now()          # Last possible clock-in date
     # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
-    events_query = db.session.query(Event).filter(
+    events_query = Event.query.filter(
         Event.time >= first_date,
         Event.time <= last_date)
+
+    print("Step One:", events_query)
 
     #  User processing
     if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
         user_id = User.query.filter_by(email=email_input).first().id
         events_query = events_query.filter(Event.user_id == user_id)
+        print("Step Two:", events_query)
 
-    return events_query.order_by(sqlalchemy.desc(Event.time)).all()
+    print("From get_events_by_date [Step Three]: ", events_query.order_by(sqlalchemy.desc(Event.time)))
+    events_query = events_query.order_by(sqlalchemy.desc(Event.time))
+    return events_query
 
 
 def get_time_period(period='d'):

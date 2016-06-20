@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block title %}TimeClock - History{% endblock %}
 
@@ -21,12 +22,15 @@
 
     <div class="col-md-4">
         <form action="/download_timesheet" method="POST">
-            {% for event in events %}
+            {% for event in generation_events %}
             <input type="hidden" name="{{ event }}">
             {% endfor %}
             <input type="submit" value="Generate Timesheet" name="Generate Timesheet">
         </form>
     </div>
 
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.all_history') }}
+    </div>
 
 {% endblock %}
