@@ -80,6 +80,7 @@ class AdminRegistrationForm(Form):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('An account with this email address already exists')
 
+
 class ChangePasswordForm(Form):
     """Form for changing password"""
     old_password = PasswordField('Old password', validators=[DataRequired()])
