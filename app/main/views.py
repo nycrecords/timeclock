@@ -127,8 +127,8 @@ def download():
 
 @main.route('/clear_filter', methods=['GET', 'POST'])
 def clear():
-    session.pop('first_name', None)
-    session.pop('last_name', None)
+    session.pop('first_date', None)
+    session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
     return redirect(url_for('main.all_history'))
