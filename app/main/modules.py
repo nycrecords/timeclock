@@ -1,10 +1,11 @@
 from .. import db
 from ..models import User, Event, Tag
-from datetime import datetime
+from datetime import datetime, timedelta
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
+from flask import session
 
 
 def process_clock(note_data):
@@ -55,6 +56,21 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :return: QUERY of Event objects from a given user between two given dates
     """
 
+    print('first date' not in session)
+    if 'first_date' not in session:
+        session['first_date'] = datetime(2004, 1, 1)
+        session['last_date'] = datetime.now()
+    first_date = session['first_date']
+    last_date = session['last_date']
+
+    if 'tag_input' not in session:
+        session['tag_input'] = 0
+    tag_input = session['tag_input']
+
+    if 'email' not in session:
+        session['email'] = None
+    email_input = session['email']
+
     # What to do if form date fields are left blank
     if first_date is None:
         first_date = datetime(2004, 1, 1)   # First possible clock-in date
@@ -69,9 +85,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     # Tag processing - This takes a while
     if tag_input != 0:
         tag = Tag.query.filter_by(id=tag_input).first()
-        print(tag)
         users = tag.users.all()
-        print('users', users)
         events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
 
     # User processing
@@ -105,16 +119,20 @@ def get_time_period(period='d'):
     if period == 'd':
         return [now.replace(hour=0, minute=0, second=0, microsecond=0), now]
     elif period == 'w':
-        # TODO
-        pass
+        dt = now.replace(hour=0, minute=0, microsecond=0)
+        start = dt - timedelta(days=dt.weekday())
+        end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59)
+        return [start, end]
     elif period == 'm':
         return [first_of_month, now]
     elif period == 'ld':
         yesterday = now.replace(hour=0, minute=0, second=0, microsecond=0) + dateutil.relativedelta.relativedelta(days=-1)
         return [yesterday, yesterday.replace(hour=23, minute=59, second=59)]
     elif period == 'lw':
-        # TODO
-        pass
+        dt = now.replace(hour=0, minute=0, microsecond=0) + timedelta(days=-7)
+        start = dt - timedelta(days=dt.weekday())
+        end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59)
+        return [start, end]
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
     else:
