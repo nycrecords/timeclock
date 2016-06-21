@@ -4,7 +4,6 @@ from datetime import datetime
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
-from flask import redirect, url_for
 import sqlalchemy
 
 
