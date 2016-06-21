@@ -11,7 +11,7 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SUBJECT_PREFIX = '[TimeClock]'
-    MAIL_SENDER = 'Admin <timeclock@doris.com>'
+    MAIL_SENDER = 'Admin <timeclock@doris.tcom>'
     ADMIN = os.environ.get('ADMIN')
 
     @staticmethod

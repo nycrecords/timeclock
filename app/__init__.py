@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_bootstrap import Bootstrap
 from flask_mail import Mail
 from flask_moment import Moment
@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
+from datetime import timedelta
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -36,6 +37,11 @@ def create_app(config_name):                        # App Factory
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
 
+    app.permanent_session_lifetime = timedelta(minutes=15)
+
+    @app.before_request
+    def func():
+        session.modified = True
 
     return app
 
