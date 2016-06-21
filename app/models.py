@@ -11,10 +11,16 @@ import re
 
 
 class Permission:
+    """
+    Used to provide user permissions and check to ensure users have proper rights.
+    """
     USER = 0x01         # 0b00000001
     ADMINISTER = 0x80   # 0b10000000
 
 class Role(db.Model):
+    """
+    Specifies the roles a user can have (normal User, Department Head(Moderator), Administrator).
+    """
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
@@ -24,6 +30,10 @@ class Role(db.Model):
 
     @staticmethod
     def insert_roles():
+        """
+        Instantiates the roles column by initializing the User, Moderator, and Administrator rows.
+        :return: None
+        """
         roles = {
             'User': (Permission.USER, True),
             'Moderator': (Permission.ADMINISTER, False),
@@ -38,12 +48,14 @@ class Role(db.Model):
             db.session.add(role)
         db.session.commit()
 
-
     def __repr__(self):
         return '<Role %r>' % self.name
 
 
 class User(UserMixin, db.Model):
+    """
+    Specifies properties and functions of a TimeClock User.
+    """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
@@ -75,16 +87,32 @@ class User(UserMixin, db.Model):
 
     @password.setter
     def password(self, password):
+        """
+        Creates and stores password hash.
+        :param password: String to hash.
+        :return: None.
+        """
         self.password_hash = generate_password_hash(password)
 
     # generates token with default validity for 1 hour
     def generate_reset_token(self, expiration=3600):
+            """
+            Generates a token users can use to reset their accounts if locked out.
+            :param expiration: Seconds the token is valid for after being created (default one hour).
+            :return: the token.
+            """
             s = Serializer(current_app.config['SECRET_KEY'], expiration)
             return s.dumps({'reset': self.id})
 
             # verifies the token and if valid, resets password
 
     def reset_password(self, token, new_password):
+        """
+        Resets a user's password.
+        :param token: The token to verify.
+        :param new_password: The password the user will have after resetting.
+        :return: True if operation is successful, false otherwise.
+        """
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -100,12 +128,26 @@ class User(UserMixin, db.Model):
         return True
 
     def verify_password(self, password):
+        """
+        Checks user-entered passwords against hashes stored in the database.
+        :param password: The user-entered password.
+        :return: True if user has entered the correct password, False otherwise.
+        """
         return check_password_hash(self.password_hash, password)
 
     def can(self, permissions):
+        """
+        Checks to see if a user has access to certain permissions.
+        :param permissions: An int that specifies the permissions we are checking to see whether or not the user has.
+        :return: True if user is authorized for the given permission, False otherwise.
+        """
         return self.role is not None and (self.role.permissions & permissions) == permissions
 
     def is_administrator(self):
+        """
+        Checks to see whether the user is an administrator.
+        :return: True if the user is an administrator, False otherwise.
+        """
         return self.can(Permission.ADMINISTER)
 
     def __repr__(self):

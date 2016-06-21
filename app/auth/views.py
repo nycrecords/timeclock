@@ -146,6 +146,11 @@ def password_reset(token):
 
 @auth.route('/unconfirmed', methods=['GET', 'POST'])
 def unconfirmed():
+    """
+    View function for unconfirmed users to change their passwords and re-confirm their accounts. Once users have changed
+    their password, they become confirmed.
+    :return: HTML page containing a form for users to change their password.
+    """
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if check_password_requirements(current_user.email,
