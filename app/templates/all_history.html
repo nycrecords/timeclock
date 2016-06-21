@@ -53,7 +53,6 @@
                     <th>Last Name</th>
                     <th>Clocked</th>
                     <th>Time</th>
-                    <th>Tag</th>
                 </tr>
             <tbody>
                 {% for event in events %}
@@ -68,7 +67,6 @@
                         {% endif %}
                     </td>
                     <td>{{ event.time }}</td>
-                    <td>{{ event.user.tag }}</td>
                 </tr>
                 {% endfor %}
         </table>
