@@ -47,7 +47,8 @@ def all_history():
     page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
         time_period = process_time_periods(form)
-        events_query = get_events_by_date(form.email.data, time_period[0], time_period[1])
+        print("form.tag.data", form.tag.data)
+        events_query = get_events_by_date(form.email.data, time_period[0], time_period[1], form.tag.data)
         page = 1
 
     # Pagination code
@@ -55,7 +56,7 @@ def all_history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-    print(events_query)
+    # print(events_query)
     return render_template('all_history.html', events=events, form=form, pagination=pagination,
                            generation_events=events)
     # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),

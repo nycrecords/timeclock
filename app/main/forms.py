@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateTimeField
+from wtforms import StringField, SubmitField, DateTimeField, SelectField
 from wtforms.validators import DataRequired, Optional, Length
 from datetime import datetime
 
@@ -30,6 +30,10 @@ class AdminFilterEventsForm(Form):
     email = StringField("Email", validators=[Optional()])
     first_date = DateTimeField("From", default=datetime(2004, 1, 1), validators=[Optional()])
     last_date = DateTimeField("To", default=datetime.now, validators=[Optional()])
+    tag = SelectField(u"Tag",
+                      choices=[(0, 'None'), (1, 'Intern'), (2, 'Contractor'), (3, 'SYEP'), (4, 'Radical'), (5, 'Other')],
+                      coerce=int,
+                      validators=[Optional()])
     submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")

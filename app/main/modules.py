@@ -1,5 +1,5 @@
 from .. import db
-from ..models import User, Event
+from ..models import User, Event, Tag
 from datetime import datetime
 import dateutil.relativedelta
 from flask_login import current_user
@@ -45,13 +45,14 @@ def get_last_clock():
         return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().time.strftime("%b %d, %Y | %l:%M:%S %p")
 
 
-def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_date=datetime.now()):
+def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_date=datetime.now(), tag_input=0):
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
     :param email_input: username to search for
     :param first_date: the start date to return queries from
     :param last_date: the end date to query (must be after first date)
+    :param tag_input: tag to filter by
     :return: QUERY of Event objects from a given user between two given dates
     """
 
@@ -66,12 +67,21 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         Event.time >= first_date,
         Event.time <= last_date)
 
+    # Tag processing - This takes a while
+    if tag_input != 0:
+        tag = Tag.query.filter_by(id=tag_input).first()
+        print(tag)
+        users = tag.users.all()
+        print('users', users)
+        events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
+
     # User processing
     if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
         user_id = User.query.filter_by(email=email_input).first().id
         events_query = events_query.filter(Event.user_id == user_id)
 
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
+
     return events_query
 
 

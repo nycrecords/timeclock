@@ -8,14 +8,13 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import re
 
 
-
-
 class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
     """
     USER = 0x01         # 0b00000001
     ADMINISTER = 0x80   # 0b10000000
+
 
 class Role(db.Model):
     """
@@ -59,7 +58,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
-    # TODO: PAID TAG
+    # TODO: PAID TAG - necessary? We have a "pays" table, just associate a $0 pay.
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
@@ -67,8 +66,8 @@ class User(UserMixin, db.Model):
     clocked_in = db.Column(db.Boolean, default=False)
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
-    tag = db.Column(db.String(128))  # One tag max for now
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
@@ -159,15 +158,18 @@ class User(UserMixin, db.Model):
         Used to generate fake users.
         """
         from sqlalchemy.exc import IntegrityError
-        from random import seed
+        from random import seed, randint
 
         import forgery_py
         seed()
+        tag_count = Tag.query.count()
         for i in range(count):
+            t = Tag.query.offset(randint(0, tag_count - 1)).first()
             u = User(email=forgery_py.internet.email_address(),
                      password=forgery_py.lorem_ipsum.word(),
                      first_name=forgery_py.name.first_name(),
                      last_name=forgery_py.name.last_name(),
+                     tag=t
                      )
             db.session.add(u)
             try:
@@ -241,6 +243,29 @@ class Pay(db.Model):
     start = db.Column(db.Date)
     end = db.Column(db.Date)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
+class Tag(db.Model):
+    """
+    A model for different user tags.
+    """
+    __tablename__ = 'tags'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    users = db.relationship('User', backref='tag', lazy='dynamic')
+
+    @staticmethod
+    def insert_tags():
+        tags = ['Intern', 'Contractor', 'SYEP', 'Radical', 'Other']
+        for t in tags:
+            tag = Tag.query.filter_by(name=t).first()
+            if tag is None:
+                tag = Tag(name=t)
+            db.session.add(tag)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Tag %r>' % self.name
 
 
 login_manager.anonymous_user = AnonymousUser
