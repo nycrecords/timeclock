@@ -1,12 +1,10 @@
 from flask import render_template, flash, request, make_response, url_for, redirect, session
-from ..models import Event
 from . import main
 from flask_login import login_required, current_user
 from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
      process_time_periods
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
-import sqlalchemy
 from datetime import datetime
 
 
@@ -43,7 +41,6 @@ def all_history():
     Contains a form for sorting by username, start date, and end date.
     :return: All user history, sorted (if applicable) with a form for further filtering.
     """
-
     if 'first_date' not in session:
         session['first_date'] = datetime(2004, 1, 1)
         session['last_date'] = datetime.now()
@@ -51,6 +48,9 @@ def all_history():
         session['email'] = None
     if 'tag_input' not in session:
         session['tag_input'] = 0
+
+    if request.referrer:
+        session['email'] = None
 
     form = AdminFilterEventsForm()
     page = request.args.get('page', 1, type=int)
@@ -90,16 +90,22 @@ def history():
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
     session['email'] = current_user.email
+
     if not current_user.validated:
         return redirect(url_for('auth.unconfirmed'))
 
     form = UserFilterEventsForm()
-    events_query = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time))
     page = request.args.get('page', 1, type=int)
     if form.validate_on_submit():
         time_period = process_time_periods(form)
-        events_query = get_events_by_date(current_user.email, time_period[0], time_period[1])
+        session['first_date'] = time_period[0]
+        session['last_date'] = time_period[1]
         page = 1
+
+    events_query = get_events_by_date(session['email'],
+                                      session['first_date'],
+                                      session['last_date'],
+                                      session['tag_input'])
 
     pagination = events_query.paginate(
         page, per_page=15,
@@ -132,3 +138,12 @@ def clear():
     session.pop('email', None)
     session.pop('tag_input', None)
     return redirect(url_for('main.all_history'))
+
+
+@main.route('/user_clear_filter', methods=['GET', 'POST'])
+def user_clear():
+    session.pop('first_date', None)
+    session.pop('last_date', None)
+    session.pop('email', None)
+    session.pop('tag_input', None)
+    return redirect(url_for('main.history'))

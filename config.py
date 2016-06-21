@@ -20,7 +20,7 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
+    DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
         'postgresql://sarvar@localhost:5432/timeclock_dev'
 

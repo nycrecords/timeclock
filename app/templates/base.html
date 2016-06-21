@@ -4,6 +4,10 @@
 
 {% block head %}
 {{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
+type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
+type="image/x-icon">
 {% endblock %}
 
 {% block navbar %}  <!-- Navigation base HTML will go here -->
