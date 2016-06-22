@@ -147,3 +147,13 @@ def user_clear():
     session.pop('email', None)
     session.pop('tag_input', None)
     return redirect(url_for('main.history'))
+
+
+# FOR TESTING ONLY
+@main.route('/dummy_data')
+def create_dumb_data():
+    from .modules import User, Event
+    User.generate_fake(20)
+    Event.generate_fake(500)
+    return redirect(url_for('main.index'))
+

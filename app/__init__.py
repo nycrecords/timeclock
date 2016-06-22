@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
 from datetime import timedelta
+from .models import Role, Tag
 import os
 
 
@@ -20,10 +21,13 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
 login_manager.login_view = 'auth.login'
 
+
 def load_db(db):
-    db.create_all()
-    #Role.insert_roles()
-    #Tag.insert_tags()
+    db.drop_all()
+    # db.create_all()
+    # Role.insert_roles()
+    # Tag.insert_tags()
+
 
 def create_app(config_name):                        # App Factory
     app = Flask(__name__)
