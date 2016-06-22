@@ -5,7 +5,7 @@ from app.models import User, Role, Event, Pay, Tag, Password
 from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 
-app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+app = create_app(os.getenv('FLASK_CONFIG') or 'default', debug=True)
 manager = Manager(app)
 migrate = Migrate(app, db)
 
