@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
 from datetime import timedelta
+import os
+
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -23,6 +25,15 @@ def create_app(config_name):                        # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
+
+    if os.environ.get('DATABASE_URL') is None:
+        app.config[
+            'SQLALCHEMY_DATABASE_URI'] = config.get(
+            'db',
+            'SQLALCHEMY_DATABASE_URI'
+        )
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
     bootstrap.init_app(app)
     mail.init_app(app)
