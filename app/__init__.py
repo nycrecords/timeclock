@@ -24,7 +24,6 @@ login_manager.login_view = 'auth.login'
 def create_app(config_name):                        # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[
@@ -34,6 +33,8 @@ def create_app(config_name):                        # App Factory
         )
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+
+    config[config_name].init_app(app)
 
     bootstrap.init_app(app)
     mail.init_app(app)
