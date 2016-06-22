@@ -168,3 +168,4 @@ def get_clocked_in_users():
     """
     return User.query.filter_by(clocked_in=True).all()
 
+

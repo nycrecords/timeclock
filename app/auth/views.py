@@ -22,7 +22,8 @@ def register():
             user = User(email=form.email.data,
                         password=form.password.data,
                         first_name=form.first_name.data,
-                        last_name=form.last_name.data)
+                        last_name=form.last_name.data,
+                        validated=True)
             db.session.add(user)
             flash('User successfully registered')
             return redirect(url_for('auth.login'))
@@ -88,8 +89,9 @@ def change_password():
                                        form.old_password.data,
                                        form.password.data,
                                        form.password2.data):
+            current_user.password_list.update(current_user.password_hash)
             current_user.password = form.password.data
-            current_user.validated = True  # TODO: Check to ensure this actually does validate users
+            current_user.validated = True
             db.session.add(current_user)
             flash('Your password has been updated.')
             return redirect(url_for('auth.login'))

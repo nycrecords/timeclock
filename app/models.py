@@ -5,6 +5,7 @@ from flask import current_app
 from . import login_manager
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from sqlalchemy.dialects.postgresql import JSONB
 import re
 
 
@@ -68,6 +69,7 @@ class User(UserMixin, db.Model):
     division = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
+    old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
@@ -79,6 +81,7 @@ class User(UserMixin, db.Model):
                 self.validated = True
         if self.role is None:
             self.role = Role.query.filter_by(default=True).first()
+        self.password_list = Password(p1='', p2='', p3='', p4='', p5='', last_changed=datetime.now())
 
     @property
     def password(self):
@@ -267,6 +270,25 @@ class Tag(db.Model):
     def __repr__(self):
         return '<Tag %r>' % self.name
 
+
+class Password(db.Model):
+    __tablename__ = 'passwords'
+    id = db.Column(db.Integer, primary_key=True)
+    p1 = db.Column(db.String(128))
+    p2 = db.Column(db.String(128))
+    p3 = db.Column(db.String(128))
+    p4 = db.Column(db.String(128))
+    p5 = db.Column(db.String(128))
+    last_changed = db.Column(db.DateTime)
+    users = db.relationship('User', backref='password_list', lazy='dynamic')
+
+    def update(self, password_hash):
+        self.p5 = self.p4
+        self.p4 = self.p3
+        self.p3 = self.p2
+        self.p2 = self.p1
+        self.p1 = password_hash
+        self.last_changed = datetime.now()
 
 login_manager.anonymous_user = AnonymousUser
 

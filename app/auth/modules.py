@@ -1,6 +1,8 @@
 from datetime import datetime
 from werkzeug.security import check_password_hash
 from ..models import User
+from flask_login import current_user
+from .. import db
 import re
 
 
@@ -44,3 +46,4 @@ def check_password_requirements(email, old_password, password, password_confirma
         return False
 
     return True
+
