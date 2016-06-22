@@ -20,14 +20,23 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
 login_manager.login_view = 'auth.login'
 
+def load_db(db):
+    db.create_all()
+    #Role.insert_roles()
+    #Tag.insert_tags()
 
 def create_app(config_name):                        # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
+    print(app.config.get(
+            'SQLALCHEMY_DATABASE_URI'))
+    print(app.config.get(
+            'DATABASE_URL'))
+
     if os.environ.get('DATABASE_URL') is None:
         app.config[
-            'SQLALCHEMY_DATABASE_URI'] = config.get(
+            'SQLALCHEMY_DATABASE_URI'] = app.config.get(
             'SQLALCHEMY_DATABASE_URI'
         )
     else:
@@ -49,6 +58,9 @@ def create_app(config_name):                        # App Factory
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
 
     app.permanent_session_lifetime = timedelta(minutes=15)
+
+    with app.app_context():
+        load_db(db)
 
     @app.before_request
     def func():
