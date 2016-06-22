@@ -11,6 +11,7 @@ Flask-Script==0.6.6
 Flask-SQLAlchemy==1.0
 Flask-WTF==0.9.4
 ForgeryPy==0.1
+gunicorn==19.6.0
 itsdangerous==0.23
 Jinja2==2.7.1
 Mako==0.9.1
