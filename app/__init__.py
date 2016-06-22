@@ -49,6 +49,8 @@ def create_app(config_name):                        # App Factory
     moment.init_app(app)
     migrate.init_app(app, db)
     db.init_app(app)
+    with app.app_context():
+        load_db(db)
     login_manager.init_app(app)
 
     from .main import main as main_blueprint
@@ -58,9 +60,6 @@ def create_app(config_name):                        # App Factory
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
 
     app.permanent_session_lifetime = timedelta(minutes=15)
-
-    with app.app_context():
-        load_db(db)
 
     @app.before_request
     def func():
