@@ -28,7 +28,6 @@ def create_app(config_name):                        # App Factory
     if os.environ.get('DATABASE_URL') is None:
         app.config[
             'SQLALCHEMY_DATABASE_URI'] = config.get(
-            'db',
             'SQLALCHEMY_DATABASE_URI'
         )
     else:
