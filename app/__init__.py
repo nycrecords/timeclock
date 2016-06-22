@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
 from datetime import timedelta
-from .models import Role, Tag
 import os
 
 
@@ -23,13 +22,10 @@ login_manager.login_view = 'auth.login'
 
 
 def load_db(db):
-    db.drop_all()
-    # db.create_all()
-    # Role.insert_roles()
-    # Tag.insert_tags()
+    db.create_all()
 
 
-def create_app(config_name):                        # App Factory
+def create_app(config_name):  # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
