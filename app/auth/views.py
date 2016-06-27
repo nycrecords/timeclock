@@ -7,7 +7,7 @@ from ..decorators import admin_required
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm, AdminRegistrationForm, PasswordResetForm, PasswordResetRequestForm, ChangePasswordForm
 from .modules import get_day_of_week, check_password_requirements
-from datetime import datetime
+from datetime import datetime, date
 from werkzeug.security import check_password_hash
 from flask import current_app
 
@@ -68,6 +68,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
+            if (date(current_user.password_list.last_changed) - date.today()).days > 90:
+                current_user.validated = False
+                db.session.add(current_user)
+                db.session.commit()
             current_app.logger.info(user.email + 'successfully logged in')
             return redirect(request.args.get('next') or url_for('main.index'))
         current_app.logger.info(user.email + 'failed to log in')
