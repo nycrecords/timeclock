@@ -166,5 +166,5 @@ def unconfirmed():
             db.session.add(current_user)
             db.session.commit()
             flash('Your password has been updated.')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html', form=form)
