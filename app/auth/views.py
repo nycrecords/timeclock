@@ -29,7 +29,6 @@ def register():
             db.session.add(user)
             db.session.commit()
             flash('User successfully registered')
-            # app.error.info(current_user.email + ' tried to register user with email ' + form.email.data)
             return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -69,7 +68,9 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
+            current_app.logger.info(user.email + 'successfully logged in')
             return redirect(request.args.get('next') or url_for('main.index'))
+        current_app.logger.info(user.email + 'failed to log in')
         flash('Invalid username or password')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
@@ -82,6 +83,7 @@ def logout():
     :return: Index page.
     """
     logout_user()
+    current_app.logger.info(current_user.email + 'logged out')
     flash('You have been logged out.')
     return redirect(url_for('auth.login'))
 
@@ -97,6 +99,7 @@ def change_password():
             check_password_hash(pwhash=current_user.password_list.p3, password=form.password.data) or \
             check_password_hash(pwhash=current_user.password_list.p4, password=form.password.data) or \
                 check_password_hash(pwhash=current_user.password_list.p5, password=form.password.data):
+            current_app.logger.info(current_user.email + 'tried to change password. Failed: Used old password.')
             flash("You cannot repeat passwords")
         elif check_password_requirements(current_user.email,
                 form.old_password.data,
@@ -107,6 +110,7 @@ def change_password():
             current_user.validated = True
             db.session.add(current_user)
             db.session.commit()
+            current_app.logger.info(current_user.email + 'changed their password.')
             flash('Your password has been updated.')
             return redirect(url_for('main.index'))
     return render_template("auth/change_password.html", form=form)
@@ -122,6 +126,7 @@ def password_reset_request():
         return redirect(url_for('main.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
+        current_app.logger.info(current_user.email + 'tried to submit a password reset request.')
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             token = user.generate_reset_token()
@@ -129,8 +134,11 @@ def password_reset_request():
                        'auth/email/reset_password',
                        user=user, token=token,
                        next=request.args.get('next'))
+            current_app.logger.info('Sent password reset instructions to ' + current_user.email)
             flash('An email with instructions to reset your password has been sent to you.')
         else:
+            current_app.logger.info('Requested password reset for e-mail ' + form.email.data +
+                                    ' but no such account exists')
             flash('An account with this email was not found in the system.')
         return redirect(url_for('auth.login'))
     return render_template('auth/request_reset_password.html', form=form)
@@ -151,6 +159,8 @@ def password_reset(token):
         if user is None:
             return redirect(url_for('main.index'))
         if user.reset_password(token, form.password.data):
+            current_app.logger.info('Requested password reset for e-mail ' + form.email.data +
+                                    ' but no such account exists')
             flash('Your password has been updated.')
             return redirect(url_for('auth.login'))
         else:
