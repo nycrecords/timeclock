@@ -156,7 +156,7 @@ def user_clear():
 # FOR TESTING ONLY
 @main.route('/dummy_data')
 def create_dumb_data():
-    from ..models  import Role, Tag, User, Event
+    from ..models import Role, Tag, User, Event
     Role.insert_roles()
     Tag.insert_tags()
     User.generate_fake(20)

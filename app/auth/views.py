@@ -40,14 +40,15 @@ def admin_register():
     """
     form = AdminRegistrationForm()
     if form.validate_on_submit():
-        print("Temporary Password: " + get_day_of_week() + str(datetime.today().day))
+        temp_pass = get_day_of_week() + str(datetime.today().day)
         user = User(email=form.email.data,
-                    password=get_day_of_week() + str(datetime.today().day),
+                    password=temp_pass,
                     first_name=form.first_name.data,
-                    last_name=form.last_name.data)
+                    last_name=form.last_name.data,
+                    )
         db.session.add(user)
+        db.session.commit()
         flash('User successfully registered')
-        return redirect(url_for('auth.login'))
     return render_template('auth/admin_register.html', form=form)
 
 
