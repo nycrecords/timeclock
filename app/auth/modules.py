@@ -1,8 +1,7 @@
 from datetime import datetime
 from werkzeug.security import check_password_hash
 from ..models import User
-from flask_login import current_user
-from .. import db
+from flask import flash
 import re
 
 
@@ -37,12 +36,15 @@ def check_password_requirements(email, old_password, password, password_confirma
     user_password = User.query.filter_by(email=email).first().password_hash
 
     if not check_password_hash(pwhash=user_password, password=old_password):
+        flash("Your old password was incorrect")
         return False
 
     if password != password_confirmation:
+        flash("Your passwords do not match")
         return False
 
     if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', password):
+        flash("Your new password must contain at least one uppercase letter and one number")
         return False
 
     return True
