@@ -8,7 +8,8 @@ from ..email import send_email
 from .forms import LoginForm, RegistrationForm, AdminRegistrationForm, PasswordResetForm, PasswordResetRequestForm, ChangePasswordForm
 from .modules import get_day_of_week, check_password_requirements
 from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
+from flask import current_app
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -28,6 +29,7 @@ def register():
             db.session.add(user)
             db.session.commit()
             flash('User successfully registered')
+            # app.error.info(current_user.email + ' tried to register user with email ' + form.email.data)
             return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -49,6 +51,7 @@ def admin_register():
                     )
         db.session.add(user)
         db.session.commit()
+        current_app.logger.info(current_user.email + ' registered user with email ' + form.email.data)
         flash('User successfully registered')
         return redirect(url_for('main.index'))
     return render_template('auth/admin_register.html', form=form)

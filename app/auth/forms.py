@@ -34,6 +34,7 @@ class RegistrationForm(Form):
         """
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('An account with this email address already exists')
+            app.error.info(current_user.email + 'tried to register user with email ' + field.data + 'but user already exists.')
 
     def validate_password(form, field):
         """
