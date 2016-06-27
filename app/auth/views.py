@@ -185,6 +185,8 @@ def unconfirmed():
             current_user.validated = True  # TODO: Check to ensure this actually does validate users
             db.session.add(current_user)
             db.session.commit()
+            current_app.logger.info(current_user.email +
+                                    'updated their password and confirmed their account')
             flash('Your password has been updated.')
             return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html', form=form)
