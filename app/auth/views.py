@@ -95,6 +95,7 @@ def change_password():
             current_user.password = form.password.data
             current_user.validated = True
             db.session.add(current_user)
+            db.session.commit()
             flash('Your password has been updated.')
             return redirect(url_for('auth.login'))
         else:
