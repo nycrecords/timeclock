@@ -34,6 +34,7 @@ def index():
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])
+@login_required
 @admin_required
 def all_history():
     """
