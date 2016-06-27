@@ -89,14 +89,13 @@ def change_password():
     """Password change page"""
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        potential_hash = generate_password_hash(form.password.data)
-        if potential_hash == current_user.password_list.p1 or \
-            potential_hash == current_user.password_list.p2 or \
-            potential_hash == current_user.password_list.p3 or \
-            potential_hash == current_user.password_list.p4 or \
-            potential_hash == current_user.password_list.p5:
-            flash('You cannot repeat any of your last five passwords')
-        if check_password_requirements(current_user.email,
+        if check_password_hash(pwhash=current_user.password_list.p1, password=form.password.data) or \
+            check_password_hash(pwhash=current_user.password_list.p2, password=form.password.data) or \
+            check_password_hash(pwhash=current_user.password_list.p3, password=form.password.data) or \
+            check_password_hash(pwhash=current_user.password_list.p4, password=form.password.data) or \
+                check_password_hash(pwhash=current_user.password_list.p5, password=form.password.data):
+            flash("You cannot repeat passwords")
+        elif check_password_requirements(current_user.email,
                 form.old_password.data,
                 form.password.data,
                 form.password2.data):
