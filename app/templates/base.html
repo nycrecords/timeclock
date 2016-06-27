@@ -21,6 +21,7 @@ type="image/x-icon">
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                     {% if current_user.is_administrator() %}
+                         <li><a href="{{ url_for('auth.admin_register') }}" style="color:white">Register User</a></li>
                         <li><a href="{{ url_for('main.all_history') }}" style="color:white">All History</a></li>
                     {% endif %}
                         <li><a href="{{ url_for('main.history') }}" style="color:white">History</a></li>
