@@ -63,6 +63,11 @@ def login():
     the index page.
     :return:
     """
+
+    # Redirect to index if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
     if 'attempts' not in session:
             session['attempts'] = 0
 
