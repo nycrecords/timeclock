@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
@@ -7,7 +7,7 @@ from ..decorators import admin_required
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm, AdminRegistrationForm, PasswordResetForm, PasswordResetRequestForm, ChangePasswordForm
 from .modules import get_day_of_week, check_password_requirements
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
 
@@ -63,18 +63,29 @@ def login():
     the index page.
     :return:
     """
+    if 'attempts' not in session:
+            session['attempts'] = 0
+
+    if session['attempts'] >= 2:
+        flash('You have too many invalid login attempts. You must reset your password.')
+        return redirect(url_for('auth.password_reset_request'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
-            if (date(current_user.password_list.last_changed) - date.today()).days > 90:
+            session['attempts'] = 0
+            current_app.logger.info(user.email + 'successfully logged in')
+            # Check to ensure password isn't outdated
+            if (current_user.password_list.last_changed - datetime.today()).days > 90:
                 current_user.validated = False
                 db.session.add(current_user)
                 db.session.commit()
-            current_app.logger.info(user.email + 'successfully logged in')
+                flash('You haven\'t changed your password in 90 days. You must re-validate your account')
+                return redirect(url_for('auth.unconfirmed'))
             return redirect(request.args.get('next') or url_for('main.index'))
         current_app.logger.info(user.email + 'failed to log in')
+        session['attempts'] += 1
         flash('Invalid username or password')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
@@ -86,8 +97,8 @@ def logout():
     HTML page to logout a user, immediately redirects to index.
     :return: Index page.
     """
-    logout_user()
     current_app.logger.info(current_user.email + 'logged out')
+    logout_user()
     flash('You have been logged out.')
     return redirect(url_for('auth.login'))
 
@@ -130,7 +141,7 @@ def password_reset_request():
         return redirect(url_for('main.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
-        current_app.logger.info(current_user.email + 'tried to submit a password reset request.')
+        current_app.logger.info('Tried to submit a password reset request with account email ' + form.email.data)
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             token = user.generate_reset_token()
@@ -138,7 +149,7 @@ def password_reset_request():
                        'auth/email/reset_password',
                        user=user, token=token,
                        next=request.args.get('next'))
-            current_app.logger.info('Sent password reset instructions to ' + current_user.email)
+            current_app.logger.info('Sent password reset instructions to ' + form.email.data)
             flash('An email with instructions to reset your password has been sent to you.')
         else:
             current_app.logger.info('Requested password reset for e-mail ' + form.email.data +
@@ -155,6 +166,10 @@ def password_reset(token):
     :param token: The token that is checked to verify the user's credentials.
     :return: HTML page in which users can reset their passwords.
     """
+
+    if 'attempts' in session:
+        session['attempts'] = 0
+
     if not current_user.is_anonymous:
         return redirect(url_for('main.index'))
     form = PasswordResetForm()
@@ -162,9 +177,9 @@ def password_reset(token):
         user = User.query.filter_by(email=form.email.data).first()
         if user is None:
             return redirect(url_for('main.index'))
+        current_app.logger.info('Requested password reset for e-mail ' + form.email.data +
+                                ' but no such account exists')
         if user.reset_password(token, form.password.data):
-            current_app.logger.info('Requested password reset for e-mail ' + form.email.data +
-                                    ' but no such account exists')
             flash('Your password has been updated.')
             return redirect(url_for('auth.login'))
         else:
