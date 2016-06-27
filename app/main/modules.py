@@ -25,7 +25,7 @@ def process_clock(note_data):
 def set_clock_form():
     """
     For use in main/views.py: Determine the type of form to be rendered to index.html.
-    :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in
+    :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
     """
     if current_user.clocked_in:
         form = ClockOutForm()

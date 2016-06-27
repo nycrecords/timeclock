@@ -101,11 +101,14 @@ def history():
         session['first_date'] = time_period[0]
         session['last_date'] = time_period[1]
         page = 1
+    else:                   # Set a default session['first_date'] and ['last_date']
+        session['first_date'] = datetime(2004, 1, 1)
+        session['last_date'] = datetime.now()
 
     events_query = get_events_by_date(session['email'],
                                       session['first_date'],
                                       session['last_date'],
-                                      session['tag_input'])
+                                      None)
 
     pagination = events_query.paginate(
         page, per_page=15,
