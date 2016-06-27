@@ -8,6 +8,7 @@ from ..email import send_email
 from .forms import LoginForm, RegistrationForm, AdminRegistrationForm, PasswordResetForm, PasswordResetRequestForm, ChangePasswordForm
 from .modules import get_day_of_week, check_password_requirements
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -49,6 +50,7 @@ def admin_register():
         db.session.add(user)
         db.session.commit()
         flash('User successfully registered')
+        return redirect(url_for('main.index'))
     return render_template('auth/admin_register.html', form=form)
 
 
@@ -87,17 +89,24 @@ def change_password():
     """Password change page"""
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        if check_password_requirements(current_user.email,
-                                       form.old_password.data,
-                                       form.password.data,
-                                       form.password2.data):
+        potential_hash = generate_password_hash(form.password.data)
+        if potential_hash == current_user.password_list.p1 or \
+            potential_hash == current_user.password_list.p2 or \
+            potential_hash == current_user.password_list.p3 or \
+            potential_hash == current_user.password_list.p4 or \
+            potential_hash == current_user.password_list.p5:
+                flash('You cannot repeat your five past passwords')
+        elif check_password_requirements(current_user.email,
+                form.old_password.data,
+                form.password.data,
+                form.password2.data):
             current_user.password_list.update(current_user.password_hash)
             current_user.password = form.password.data
             current_user.validated = True
             db.session.add(current_user)
             db.session.commit()
             flash('Your password has been updated.')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('main.index'))
         else:
             flash('Password must be at least 8 characters with at least 1 UPPERCASE and 1 NUMBER')
     return render_template("auth/change_password.html", form=form)

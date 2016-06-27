@@ -4,9 +4,7 @@ from flask import current_app
 from . import login_manager
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from sqlalchemy.dialects.postgresql import JSONB
 import re
-import flask_sqlalchemy
 from . import db
 
 class Permission:
