@@ -95,8 +95,8 @@ def change_password():
             potential_hash == current_user.password_list.p3 or \
             potential_hash == current_user.password_list.p4 or \
             potential_hash == current_user.password_list.p5:
-                flash('You cannot repeat your five past passwords')
-        elif check_password_requirements(current_user.email,
+            flash('You cannot repeat any of your last five passwords')
+        if check_password_requirements(current_user.email,
                 form.old_password.data,
                 form.password.data,
                 form.password2.data):
@@ -107,8 +107,6 @@ def change_password():
             db.session.commit()
             flash('Your password has been updated.')
             return redirect(url_for('main.index'))
-        else:
-            flash('Password must be at least 8 characters with at least 1 UPPERCASE and 1 NUMBER')
     return render_template("auth/change_password.html", form=form)
 
 
