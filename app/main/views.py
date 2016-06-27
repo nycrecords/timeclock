@@ -6,6 +6,7 @@ from .modules import process_clock, set_clock_form, get_last_clock, get_events_b
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
 from datetime import datetime
+from flask import current_app
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -23,6 +24,7 @@ def index():
     form = set_clock_form()
     if form.validate_on_submit():
         process_clock(form.note.data)
+        current_app.logger.info(current_user.email + 'clocked ' + 'in' if current_user.clocked_in else 'out')
     else:
         if form.note.data is not None and len(form.note.data) > 120:
             flash("Your note cannot exceed 120 characters")
@@ -129,7 +131,7 @@ def download():
     output = ""
     for event in sorted(events):
         output = output + event + "\n"
-
+    current_app.logger.info(current_user.email + 'downloaded timesheet')  # TODO: Determine if we want to store what info was downloaded
     response = make_response(output)
     response.headers["Content-Disposition"] = "attachment; filename=timesheet.txt"
     return response
