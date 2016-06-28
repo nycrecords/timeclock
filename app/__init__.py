@@ -33,11 +33,6 @@ def create_app(config_name):  # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    print(app.config.get(
-            'SQLALCHEMY_DATABASE_URI'))
-    print(app.config.get(
-            'DATABASE_URL'))
-
     if os.environ.get('DATABASE_URL') is None:
         app.config[
             'SQLALCHEMY_DATABASE_URI'] = app.config.get(
