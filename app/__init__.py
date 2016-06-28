@@ -69,7 +69,6 @@ def create_app(config_name):  # App Factory
                     time.strftime("%Y%m%d-%H%M%S") + \
                     ".log"
 
-
     handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
     handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
     '[in %(pathname)s:%(lineno)d]'))
