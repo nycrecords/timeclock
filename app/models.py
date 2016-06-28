@@ -205,8 +205,8 @@ class Event(db.Model):
         if not self.note:
             self.note = ""
         in_or_out = "IN" if self.type else "OUT"
-        time_string = self.time.strftime("%b %d, %Y %l:%M:%S %p")
-        return time_string + " | " + self.user.email + " | " + in_or_out + " | NOTE: " + self.note
+        time_string = self.time.strftime("%b %d, %Y %H:%M:%S %p")
+        return time_string + " | " + self.user.email + " | " + in_or_out + " | " + self.note
 
     @staticmethod
     def generate_fake(count=100):

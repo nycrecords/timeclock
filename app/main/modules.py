@@ -169,3 +169,19 @@ def get_clocked_in_users():
     return User.query.filter_by(clocked_in=True).all()
 
 
+def get_day_of_week(datetime_input):
+    """
+    Gets the day of the week of the given datetime.
+    :param datetime_input: Datetime whose day to get.
+    :return: String day of week
+    """
+    date_int_to_str = {
+        0: "Monday",
+        1: "Tuesday",
+        2: "Wednesday",
+        3: "Thursday",
+        4: "Friday",
+        5: "Saturday",
+        6: "Sunday"
+    }
+    return date_int_to_str[datetime_input.weekday()]

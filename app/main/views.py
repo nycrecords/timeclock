@@ -5,7 +5,7 @@ from .modules import process_clock, set_clock_form, get_last_clock, get_events_b
      process_time_periods
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
-from .pdf import set_defaults, generate_header, generate_footer, generate_employee_info
+from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable
 from datetime import datetime
 from flask import current_app
 from reportlab.pdfgen import canvas
@@ -145,14 +145,12 @@ def download():
 
     generate_header(c)
     generate_employee_info(c)
-
+    generate_timetable(c, events)
     generate_footer(c)
     c.showPage()
     c.save()
-
     pdf_out = output.getvalue()
     output.close()
-
     response = make_response(pdf_out)
     response.headers['Content-Disposition'] = "attachment; filename='timesheet.pdf"
     response.mimetype = 'application/pdf'
