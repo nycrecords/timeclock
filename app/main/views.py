@@ -12,7 +12,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
 
-
 @main.route('/', methods=['GET', 'POST'])
 def index():
     """
@@ -178,7 +177,7 @@ def user_clear():
     return redirect(url_for('main.history'))
 
 
-# FOR TESTING ONLY
+# FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
 def create_dumb_data():
     from ..models import Role, Tag, User, Event

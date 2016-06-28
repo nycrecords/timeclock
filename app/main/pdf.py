@@ -110,6 +110,7 @@ def generate_timetable(canvas_field, events):
         canvas_field.drawString(450, timetable_top - (PADDING * index), note_out)
 
         index += 1
+    canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:' + str(total_hours))
 
     # for event in sorted(events):
     #     canvas_field.setFont('Courier', 8)
