@@ -111,9 +111,12 @@ def generate_timetable(canvas_field, events):
         canvas_field.drawString(330, timetable_top - (PADDING * index), str(hours_this_day))
         canvas_field.drawString(490, timetable_top - (PADDING * index), note_in)
         canvas_field.drawString(450, timetable_top - (PADDING * index), note_out)
-        canvas_field.drawString(500, timetable_top - (PADDING * index), name)
+
+        # For testing
+        canvas_field.drawString(500, timetable_top - (PADDING * index), name) # TODO: DELETE BEFORE PRODUCTION
 
         index += 1
+
     canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:' + str(total_hours))
 
 
@@ -123,9 +126,33 @@ def generate_signature_template(canvas_field):
     :param canvas_field: The canvas to add the signature template to.
     :return: None.
     """
-    canvas_field.setFont('Helvetica', 8)
-    canvas_field.line(50, 75, 200, 75)
-    canvas_field.drawString(100, 45, 'Employee Signature')
+
+    # Conditions of submission
+    canvas_field.setFont('Courier', 6)
+    canvas_field.drawString(45, 200, 'I hereby certify the following:')
+    canvas_field.drawString(45, 185, 'The time shown correctly represents my attendance and activities for the week'
+                                     'indicated. If I am an employee eligible to earn overtime compensation')
+    canvas_field.drawString(45, 175, 'under the FLSA and/or a collective bargaining agreement,I also certify that I'
+                                     'have requested compensation for any time that I worked in '
+                                     'excess of')
+    canvas_field.drawString(45, 165, 'my scheduled hours and that any time outside my scheduled hours, i.e. '
+                                     'when I may have logged in/out earlier/later than my scheduled time, for which')
+    canvas_field.drawString(45, 155, 'I have not requested compensation, was time not worked')
+
+    # Signature section
+    canvas_field.setFont('Courier', 8)
+    canvas_field.line(45, 85, 215, 85)
+    canvas_field.drawString(60, 70, 'Employee Signature')
+
+    canvas_field.line(225, 85, 285, 85)
+    canvas_field.drawString(240, 70, 'Date')
+
+    canvas_field.line(325, 85, 495, 85)
+    canvas_field.drawString(340, 70, 'Approver Signature')
+
+    canvas_field.line(505, 85, 565, 85)
+    canvas_field.drawString(520, 70, 'Date')
+
 
 def generate_footer(canvas_field):
     """
