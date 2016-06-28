@@ -16,6 +16,7 @@ itsdangerous==0.23
 Jinja2==2.7.1
 Mako==0.9.1
 MarkupSafe==0.18
+pdfdocument==3.1
 psycopg2==2.6.1
 python-dateutil==2.5.3
 python-editor==1.0
