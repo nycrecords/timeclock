@@ -1,4 +1,4 @@
-from flask import render_template, flash, request, make_response, url_for, redirect, session
+from flask import render_template, flash, request, make_response, url_for, redirect, session, current_app
 from . import main
 from flask_login import login_required, current_user
 from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
@@ -14,6 +14,7 @@ def index():
     View function for index page. Reroutes to login if user is not logged in.
     :return: index.html contents
     """
+    current_app.logger.info('def index()')
     if not current_user.is_authenticated:  # Don't pass a form
         return redirect(url_for('auth.login'))
 
@@ -42,6 +43,7 @@ def all_history():
     Contains a form for sorting by username, start date, and end date.
     :return: All user history, sorted (if applicable) with a form for further filtering.
     """
+    current_app.logger.info('def all_history()')
     if 'first_date' not in session:
         session['first_date'] = datetime(2004, 1, 1)
         session['last_date'] = datetime.now()
@@ -90,6 +92,7 @@ def history():
     TODO: Make filterable by date.
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
+    current_app.logger.info('def history()')
     session['email'] = current_user.email
 
     if not current_user.validated:
@@ -125,6 +128,7 @@ def download():
     Created a link to download a timesheet containing the given filtered data.
     :return: A directive to download a file timesheet.txt, which contains timesheet data
     """
+    current_app.logger.info('def download()')
     events = request.values
     output = ""
     for event in sorted(events):
@@ -137,6 +141,7 @@ def download():
 
 @main.route('/clear_filter', methods=['GET', 'POST'])
 def clear():
+    current_app.logger.info('def clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)
@@ -146,6 +151,7 @@ def clear():
 
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
 def user_clear():
+    current_app.logger.info('def user_clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)

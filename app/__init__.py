@@ -12,6 +12,7 @@ import time
 import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
+from flask import current_app
 
 
 bootstrap = Bootstrap()
@@ -69,17 +70,15 @@ def create_app(config_name):  # App Factory
     def func():
         session.modified = True
 
-    logfile_name = 'logfile_directory' + \
-                    "Timeclock" + \
-                    time.strftime("%Y%m%d-%H%M%S") + \
-                    ".log"
-
-
-    handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
+    logfile_name = "Timeclock " + \
+                time.strftime("%Y-%m-%d|%H:%M:%S") + \
+                ".log"
+    handler = RotatingFileHandler(os.path.join('log', logfile_name), maxBytes=10000, backupCount=1)
     handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
     '[in %(pathname)s:%(lineno)d]'))
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
+    app.logger.info('abc')
 
     return app
 
