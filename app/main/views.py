@@ -5,7 +5,7 @@ from .modules import process_clock, set_clock_form, get_last_clock, get_events_b
      process_time_periods
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
-from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable
+from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable, generate_signature_template
 from datetime import datetime
 from flask import current_app
 from reportlab.pdfgen import canvas
@@ -131,6 +131,12 @@ def download():
     Created a link to download a timesheet containing the given filtered data.
     :return: A directive to download a file timesheet.txt, which contains timesheet data
     """
+
+    if 'email' not in session or session['email'] is None:
+        # This will only happen for admin searches, so we only need to redirect to the admin page
+        flash('You must specify a user.')
+        return redirect(url_for('main.all_history'))
+
     events = request.form.getlist('event')
     # ^gets event data - we can similarly pass in other data (i.e. time start, end)
     # output = ""
@@ -145,6 +151,7 @@ def download():
     generate_header(c)
     generate_employee_info(c)
     generate_timetable(c, events)
+    generate_signature_template(c)
     generate_footer(c)
     c.showPage()
     c.save()
