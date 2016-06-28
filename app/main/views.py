@@ -67,7 +67,6 @@ def all_history():
         session['last_date'] = time_period[1]
         session['email'] = form.email.data
         session['tag_input'] = form.tag.data
-        print('form.tag.data', form.tag.data)
         page = 1
 
     events_query = get_events_by_date(session['email'],
@@ -80,7 +79,7 @@ def all_history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-    # print(events_query)
+    print(events)
     return render_template('all_history.html', events=events, form=form, pagination=pagination,
                            generation_events=events)
     # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
@@ -95,10 +94,11 @@ def history():
     TODO: Make filterable by date.
     :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
     """
-    session['email'] = current_user.email
 
     if not current_user.validated:
         return redirect(url_for('auth.unconfirmed'))
+
+    session['email'] = current_user.email
 
     form = UserFilterEventsForm()
     page = request.args.get('page', 1, type=int)
@@ -120,8 +120,8 @@ def history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-
-    return render_template('history.html', events=events, form=form, pagination=pagination)
+    print(events)
+    return render_template('history.html', events=events, form=form, pagination=pagination, generation_events=events)
 
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])
@@ -138,6 +138,7 @@ def download():
         return redirect(url_for('main.all_history'))
 
     events = request.form.getlist('event')
+    print('EVENTS', events)
     # ^gets event data - we can similarly pass in other data (i.e. time start, end)
     # output = ""
     # for event in sorted(events):

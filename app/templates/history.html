@@ -18,7 +18,7 @@
         <div style="float:right">
             <form action="/download_timesheet" method="POST">
                 {% for event in generation_events %}
-                    <input type="hidden" name="{{ event }}">
+                    <input type="hidden" name="event" value ="{{ event }}">
                 {% endfor %}
                     <input type="submit" value="Generate Timesheet" class="btn btn-success">
             </form>
