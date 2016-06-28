@@ -45,12 +45,7 @@ def generate_employee_info(canvas_field):
 
     first_date = session['first_date']
     last_date = session['last_date']
-    if (last_date-first_date).days > 7:
-        last_date = first_date + timedelta(days=7)
-        flash('Max date range for a timesheet is one week. Timesheet generated from ' +
-              first_date.strftime("%b %d, %Y %l:%M:%S %p") + ' to ' + last_date.strftime("%b %d, %Y %l:%M:%S %p"))
 
-    print(session['email'])
     canvas_field.setFont('Courier', 10)
     canvas_field.drawString(25, length - 60, 'Employee Name: ' + u.first_name + ' ' + u.last_name)
     canvas_field.drawString(25, length - 80, 'Position: ' + (u.tag.name if u.tag else "None"))

@@ -6,7 +6,7 @@ from .modules import process_clock, set_clock_form, get_last_clock, get_events_b
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
 from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable, generate_signature_template
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -132,9 +132,16 @@ def download():
     :return: A directive to download a file timesheet.txt, which contains timesheet data
     """
 
+    errors = []
     if 'email' not in session or session['email'] is None:
         # This will only happen for admin searches, so we only need to redirect to the admin page
-        flash('You must specify a user.')
+        errors.append('You must specify a user.')
+    if (session['last_date']-session['first_date']).days > 7:
+        errors.append('Maximum timesheet duration is a week. Please refine your filters')
+
+    if errors:
+        for error in errors:
+            flash(error)
         return redirect(url_for('main.all_history'))
 
     events = request.form.getlist('event')
