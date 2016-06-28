@@ -53,7 +53,7 @@ def generate_employee_info(canvas_field):
     print(session['email'])
     canvas_field.setFont('Courier', 10)
     canvas_field.drawString(25, length - 60, 'Employee Name: ' + u.first_name + ' ' + u.last_name)
-    canvas_field.drawString(25, length - 80, 'Position: ' + (u.tag if u.tag else "None"))
+    canvas_field.drawString(25, length - 80, 'Position: ' + (u.tag.name if u.tag.name else "None"))
     canvas_field.drawString(300, length - 60, 'From: ' + first_date.strftime("%b %d, %Y %l:%M:%S %p"))
     canvas_field.drawString(300, length - 80, 'To:   ' + last_date.strftime("%b %d, %Y %l:%M:%S %p"))
 
