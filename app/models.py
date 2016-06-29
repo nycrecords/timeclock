@@ -205,6 +205,7 @@ class Event(db.Model):
     type = db.Column(db.Boolean)   # True if clocking in, false if clocking out
     time = db.Column(db.DateTime)  # Time of clock in/out event
     note = db.Column(db.String(120))
+    # ip = db.Column(db.String(120))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):

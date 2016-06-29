@@ -27,7 +27,7 @@ def index():
     x = request.environ['REMOTE_ADDR']
     y = request.remote_addr
     current_app.logger.info("ip1: " + x)
-    current_app.logger.info('ip2: ' + y)
+    current_app.logger.info('ip2: ' + request.remote_addr)
     print("ip1: " + x)
     print('ip2: ' + y)
     form = set_clock_form()
