@@ -25,4 +25,6 @@ def test():  # Grinberg's unit tests, we can del if need be  - Sarvar
 
 
 if __name__ == '__main__':
+    db.drop_all()
+    db.create_all()
     manager.run()
