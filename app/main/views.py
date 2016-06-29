@@ -6,7 +6,7 @@ from .modules import process_clock, set_clock_form, get_last_clock, get_events_b
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
 from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable, generate_signature_template
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter

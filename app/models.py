@@ -7,6 +7,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import re
 from . import db
 
+
 class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
@@ -65,6 +66,8 @@ class User(UserMixin, db.Model):
     clocked_in = db.Column(db.Boolean, default=False)
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
+    login_attempts = db.Column(db.Integer, default=0)
+
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
@@ -166,10 +169,13 @@ class User(UserMixin, db.Model):
         tag_count = Tag.query.count()
         for i in range(count):
             t = Tag.query.offset(randint(0, tag_count - 1)).first()
-            u = User(email=forgery_py.internet.email_address(),
-                     password=forgery_py.lorem_ipsum.word(),
-                     first_name=forgery_py.name.first_name(),
-                     last_name=forgery_py.name.last_name(),
+            first = forgery_py.name.first_name()
+            last = forgery_py.name.last_name()
+            e = (first[:1] + last + '@records.nyc.gov').lower()
+            u = User(email=e,
+                     password=forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
+                     first_name=first,
+                     last_name=last,
                      tag=t
                      )
             db.session.add(u)
