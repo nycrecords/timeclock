@@ -28,7 +28,7 @@ def index():
     y = request.remote_addr
     current_app.logger.info("ip1: " + x)
     current_app.logger.info('ip2: ' + y)
-    print(("ip1: " + x))
+    print("ip1: " + x)
     print('ip2: ' + y)
     form = set_clock_form()
     if form.validate_on_submit():
