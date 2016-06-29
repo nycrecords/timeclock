@@ -135,8 +135,12 @@ def download():
     errors = []
     if 'email' not in session or session['email'] is None:
         # This will only happen for admin searches, so we only need to redirect to the admin page
+        current_app.error.info('User ' + current_user.email + ' tried to generate a timesheet but did not specify '
+                                                              'a user')
         errors.append('You must specify a user.')
     if (session['last_date']-session['first_date']).days > 7:
+        current_app.error.info('User ' + current_user.email + ' tried to generate a timesheet but exceeded'
+                                                              'maximum duration (one week')
         errors.append('Maximum timesheet duration is a week. Please refine your filters')
 
     if errors:
@@ -168,7 +172,8 @@ def download():
     response = make_response(pdf_out)
     response.headers['Content-Disposition'] = "attachment; filename='timesheet.pdf"
     response.mimetype = 'application/pdf'
-    current_app.logger.info(current_user.email + ' downloaded timesheet')  # TODO: Determine if we want to store what info was downloaded
+    current_app.logger.info(current_user.email + ' downloaded timesheet for user ' + session['email'] +
+                            'beginning at ' + session['first_date'].strftime("%b %d, %Y %H:%M:%S %p"))
     return response
 
 
@@ -179,6 +184,7 @@ def clear():
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
+    current_app.logger.info('User ' + current_user + ' cleared their admin history filter.')
     return redirect(url_for('main.all_history'))
 
 
@@ -189,6 +195,7 @@ def user_clear():
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
+    current_app.logger.info('User ' + current_user + ' cleared their history filter.')
     return redirect(url_for('main.history'))
 
 
@@ -200,5 +207,6 @@ def create_dumb_data():
     Tag.insert_tags()
     User.generate_fake(20)
     Event.generate_fake(500)
+    current_app.logger.info('User ' + current_user + ' generated dummy data.')
     return redirect(url_for('main.index'))
 
