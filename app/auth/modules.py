@@ -48,11 +48,11 @@ def check_password_requirements(email, old_password, password, password_confirma
         flash("Your passwords do not match")
         return False
 
-    if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', password):
+    if not re.match(r"^(?=.​*[A-Za-z])(?=.*\d)(?=.*​[$@$!%​*#?&])[A-Za-z\d$@$!%*​#?&]{8,}$", password):
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: new password missing '
                                 'uppercase letter or number')
-        flash("Your new password must contain eight characters and at least one uppercase letter and one number")
+        flash("Your new password must contain eight characters, at least one uppercase letter and one number")
         return False
 
     return True

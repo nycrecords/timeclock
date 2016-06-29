@@ -124,7 +124,7 @@ class User(UserMixin, db.Model):
         if data.get('reset') != self.id:
             return False
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
-        if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
+        if not re.match(r"^(?=.​*[A-Za-z])(?=.*\d)(?=.*​[$@$!%​*#?&])[A-Za-z\d$@$!%*​#?&]{8,}$", new_password):
             return False
         self.password = new_password
         db.session.add(self)
