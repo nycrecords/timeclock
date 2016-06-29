@@ -61,7 +61,7 @@ def generate_timetable(canvas_field, events):
     :return: None.
     """
     timetable_top = length - 150  # Top of the time_table area
-    PADDING = 20
+    PADDING = 25
     index = 1
     total_hours = 0
 

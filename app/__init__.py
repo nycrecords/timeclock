@@ -26,6 +26,7 @@ login_manager.login_view = 'auth.login'
 
 
 def load_db(db):
+    db.drop_all()
     db.create_all()
 
 
