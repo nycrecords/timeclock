@@ -210,6 +210,6 @@ def create_dumb_data():
     Tag.insert_tags()
     User.generate_fake(20)
     Event.generate_fake(500)
-    current_app.logger.info('User ' + current_user + ' generated dummy data.')
+    current_app.logger.info('Someone generated dummy data.')
     return redirect(url_for('main.index'))
 
