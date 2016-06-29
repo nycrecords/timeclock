@@ -27,7 +27,7 @@ def generate_header(canvas_field):
     :return: None
     """
     canvas_field.setFont('Courier', 8)
-    canvas_field.drawString(25, length-30, 'The City of New York - DORIS')
+    canvas_field.drawString(25, length-30, 'The City of New York - Department of Records and Information Services')
     canvas_field.drawString(470, 20, datetime.now().strftime("%b %d, %Y %l:%M:%S %p"))
     canvas_field.line(25, 30, width - 25, 30)
 
@@ -61,16 +61,19 @@ def generate_timetable(canvas_field, events):
     :return: None.
     """
     timetable_top = length - 150  # Top of the time_table area
-    PADDING = 10
+    PADDING = 20
     index = 1
     total_hours = 0
 
-    canvas_field.drawString(50, timetable_top, 'DATE')
-    canvas_field.drawString(150, timetable_top,  'TIME IN')
-    canvas_field.drawString(250, timetable_top, 'TIME OUT')
+    canvas_field.setFont('Courier', 10)
+    print(canvas_field.getAvailableFonts())
+    canvas_field.drawString(75, timetable_top, 'DATE')
+    canvas_field.drawString(155, timetable_top,  'TIME IN')
+    canvas_field.drawString(242, timetable_top, 'TIME OUT')
     canvas_field.drawString(330, timetable_top, 'HOURS')
     canvas_field.drawString(390, timetable_top, 'NOTE IN')
     canvas_field.drawString(450, timetable_top, 'NOTE OUT')
+    canvas_field.line(40, timetable_top - 5, 510, timetable_top - 5)
 
     events = sorted(events)
     if not len(events) % 2 == 0:
@@ -102,10 +105,12 @@ def generate_timetable(canvas_field, events):
 
         canvas_field.drawString(50, timetable_top - (PADDING * index), date + ' ' + time_in[:13])
         canvas_field.drawString(150, timetable_top - (PADDING * index), time_in[13:])
-        canvas_field.drawString(250, timetable_top - (PADDING * index), time_out[13:])
+        canvas_field.drawString(240, timetable_top - (PADDING * index), time_out[13:])
         canvas_field.drawString(330, timetable_top - (PADDING * index), str(hours_this_day))
         canvas_field.drawString(490, timetable_top - (PADDING * index), note_in)
         canvas_field.drawString(450, timetable_top - (PADDING * index), note_out)
+        canvas_field.setLineWidth(.5)
+        canvas_field.line(40, timetable_top - ((PADDING * index) + 10), 510, timetable_top - ((PADDING * index) + 10))
 
         # For testing
         canvas_field.drawString(500, timetable_top - (PADDING * index), name) # TODO: DELETE BEFORE PRODUCTION
@@ -113,6 +118,7 @@ def generate_timetable(canvas_field, events):
         index += 1
 
     canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:' + str(total_hours))
+    canvas_field.setLineWidth(1) # Reset line width
 
 
 def generate_signature_template(canvas_field):

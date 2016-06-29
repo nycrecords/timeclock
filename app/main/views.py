@@ -24,6 +24,12 @@ def index():
     if not current_user.validated:
         return redirect(url_for('auth.change_password'))
 
+    x = request.environ['REMOTE_ADDR']
+    y = request.remote_addr
+    current_app.logger.info("ip1: " + x)
+    current_app.logger.info('ip2: ' + y)
+    print(("ip1: " + x))
+    print('ip2: ' + y)
     form = set_clock_form()
     if form.validate_on_submit():
         process_clock(form.note.data)
@@ -135,11 +141,11 @@ def download():
     errors = []
     if 'email' not in session or session['email'] is None:
         # This will only happen for admin searches, so we only need to redirect to the admin page
-        current_app.error.info('User ' + current_user.email + ' tried to generate a timesheet but did not specify '
+        current_app.logger.error('User ' + current_user.email + ' tried to generate a timesheet but did not specify '
                                                               'a user')
         errors.append('You must specify a user.')
     if (session['last_date']-session['first_date']).days > 7:
-        current_app.error.info('User ' + current_user.email + ' tried to generate a timesheet but exceeded'
+        current_app.logger.error('User ' + current_user.email + ' tried to generate a timesheet but exceeded'
                                                               'maximum duration (one week')
         errors.append('Maximum timesheet duration is a week. Please refine your filters')
 
@@ -149,11 +155,8 @@ def download():
         return redirect(url_for('main.all_history'))
 
     events = request.form.getlist('event')
-    print('EVENTS', events)
     # ^gets event data - we can similarly pass in other data (i.e. time start, end)
     # output = ""
-    # for event in sorted(events):
-    #     output = output + event + "\n"
     import io
     output = io.BytesIO()
 
