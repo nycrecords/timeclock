@@ -194,10 +194,13 @@ def clear():
 @login_required
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
 def user_clear():
-    session.pop('first_date', None)
-    session.pop('last_date', None)
-    session.pop('email', None)
-    session.pop('tag_input', None)
+    if 'first_date' in session:
+        session.pop('first_date', None)
+        session.pop('last_date', None)
+    if 'email' in session:
+        session.pop('email', None)
+    if 'tag_input' in session:
+        session.pop('tag_input', None)
     current_app.logger.info('User ' + current_user + ' cleared their history filter.')
     return redirect(url_for('main.history'))
 
