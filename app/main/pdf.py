@@ -1,7 +1,7 @@
 """
 For generating timesheet pdf with appropriate styling.
 """
-from flask import session, flash
+from flask import session, url_for
 from flask_login import current_user
 from datetime import datetime, timedelta
 from ..models import User
@@ -28,7 +28,7 @@ def generate_header(canvas_field):
     """
     canvas_field.setFont('Courier', 8)
     canvas_field.drawString(25, length-30, 'The City of New York - Department of Records and Information Services')
-    canvas_field.drawString(470, 20, datetime.now().strftime("%b %d, %Y %l:%M:%S %p"))
+    # canvas_field.drawImage('/Users/Sarvar/PycharmProjects/timeclock/app/static/logo.jpg', 510, length - 40) THIS PIC IS UGLY!
     canvas_field.line(25, 30, width - 25, 30)
 
 
@@ -48,9 +48,9 @@ def generate_employee_info(canvas_field):
 
     canvas_field.setFont('Courier', 10)
     canvas_field.drawString(25, length - 60, 'Employee Name: ' + u.first_name + ' ' + u.last_name)
-    canvas_field.drawString(25, length - 80, 'Position: ' + (u.tag.name if u.tag else "None"))
-    canvas_field.drawString(300, length - 60, 'From: ' + first_date.strftime("%b %d, %Y %l:%M:%S %p"))
-    canvas_field.drawString(300, length - 80, 'To:   ' + last_date.strftime("%b %d, %Y %l:%M:%S %p"))
+    canvas_field.drawString(25, length - 70, 'Position: ' + (u.tag.name if u.tag else "None"))
+    canvas_field.drawString(270, length - 60, 'From: ' + first_date.strftime("%b %d, %Y %l:%M:%S %p"))
+    canvas_field.drawString(270, length - 70, 'To:   ' + last_date.strftime("%b %d, %Y %l:%M:%S %p"))
 
 
 def generate_timetable(canvas_field, events):
@@ -65,7 +65,7 @@ def generate_timetable(canvas_field, events):
     index = 1
     total_hours = 0
 
-    canvas_field.setFont('Courier', 10)
+    canvas_field.setFont('Courier-Bold', 10)
     print(canvas_field.getAvailableFonts())
     canvas_field.drawString(75, timetable_top - 5, 'DATE')
     canvas_field.drawString(155, timetable_top - 5,  'TIME IN')
@@ -75,6 +75,7 @@ def generate_timetable(canvas_field, events):
     canvas_field.drawString(450, timetable_top - 5, 'NOTE OUT')
     canvas_field.line(40, timetable_top - 10, 510, timetable_top - 10)
 
+    canvas_field.setFont('Courier', 10)
     events = sorted(events)
     if not len(events) % 2 == 0:
         events.pop()
@@ -117,8 +118,8 @@ def generate_timetable(canvas_field, events):
 
         index += 1
 
-    canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:')
-    canvas_field.drawString(330, timetable_top - (PADDING * index + 15), "{0:.2f}".format(total_hours))
+    canvas_field.drawString(50, timetable_top - (PADDING * index + 5), 'TOTAL: ' + "{0:.2f}".format(total_hours))
+
     canvas_field.setLineWidth(1) # Reset line width
 
 
@@ -133,13 +134,13 @@ def generate_signature_template(canvas_field):
     canvas_field.setFont('Courier', 6)
     canvas_field.drawString(45, 200, 'I hereby certify the following:')
     canvas_field.drawString(45, 185, 'The time shown correctly represents my attendance and activities for the week'
-                                     'indicated. If I am an employee eligible to earn overtime compensation')
-    canvas_field.drawString(45, 175, 'under the FLSA and/or a collective bargaining agreement,I also certify that I'
-                                     'have requested compensation for any time that I worked in '
+                                     ' indicated. If I am an employee eligible to earn overtime compensation')
+    canvas_field.drawString(45, 175, 'under the FLSA and/or a collective bargaining agreement, I also certify that I'
+                                     ' have requested compensation for any time that I worked in '
                                      'excess of')
     canvas_field.drawString(45, 165, 'my scheduled hours and that any time outside my scheduled hours, i.e. '
                                      'when I may have logged in/out earlier/later than my scheduled time, for which')
-    canvas_field.drawString(45, 155, 'I have not requested compensation, was time not worked')
+    canvas_field.drawString(45, 155, 'I have not requested compensation, was time not worked.')
 
     # Signature section
     canvas_field.setFont('Courier', 8)
