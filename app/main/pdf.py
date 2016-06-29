@@ -67,13 +67,13 @@ def generate_timetable(canvas_field, events):
 
     canvas_field.setFont('Courier', 10)
     print(canvas_field.getAvailableFonts())
-    canvas_field.drawString(75, timetable_top, 'DATE')
-    canvas_field.drawString(155, timetable_top,  'TIME IN')
-    canvas_field.drawString(242, timetable_top, 'TIME OUT')
-    canvas_field.drawString(330, timetable_top, 'HOURS')
-    canvas_field.drawString(390, timetable_top, 'NOTE IN')
-    canvas_field.drawString(450, timetable_top, 'NOTE OUT')
-    canvas_field.line(40, timetable_top - 5, 510, timetable_top - 5)
+    canvas_field.drawString(75, timetable_top - 5, 'DATE')
+    canvas_field.drawString(155, timetable_top - 5,  'TIME IN')
+    canvas_field.drawString(242, timetable_top - 5, 'TIME OUT')
+    canvas_field.drawString(330, timetable_top - 5, 'HOURS')
+    canvas_field.drawString(390, timetable_top - 5, 'NOTE IN')
+    canvas_field.drawString(450, timetable_top - 5, 'NOTE OUT')
+    canvas_field.line(40, timetable_top - 10, 510, timetable_top - 10)
 
     events = sorted(events)
     if not len(events) % 2 == 0:
@@ -112,8 +112,8 @@ def generate_timetable(canvas_field, events):
         canvas_field.setLineWidth(.5)
         canvas_field.line(40, timetable_top - ((PADDING * index) + 10), 510, timetable_top - ((PADDING * index) + 10))
 
-        # For testing
-        canvas_field.drawString(500, timetable_top - (PADDING * index), name) # TODO: DELETE BEFORE PRODUCTION
+        # For testing, delete before putting in production
+        #canvas_field.drawString(500, timetable_top - (PADDING * index), name)
 
         index += 1
 
