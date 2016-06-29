@@ -26,9 +26,8 @@ login_manager.login_view = 'auth.login'
 
 
 def load_db(db):
-    db.drop_all()
     db.create_all()
-    
+
 
 def create_app(config_name):  # App Factory
     app = Flask(__name__)
