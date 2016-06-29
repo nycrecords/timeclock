@@ -22,7 +22,7 @@ def index():
         return redirect(url_for('auth.login'))
 
     if not current_user.validated:
-        return redirect(url_for('auth.unconfirmed'))
+        return redirect(url_for('auth.change_password'))
 
     form = set_clock_form()
     if form.validate_on_submit():
@@ -96,7 +96,7 @@ def history():
     """
 
     if not current_user.validated:
-        return redirect(url_for('auth.unconfirmed'))
+        return redirect(url_for('auth.change_password'))
 
     session['email'] = current_user.email
 

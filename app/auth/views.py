@@ -79,14 +79,15 @@ def login():
             user.login_attempts = 0
             db.session.add(user)
             db.session.commit()
-            current_app.logger.info(user.email + 'successfully logged in')
+            current_app.logger.info(user.email + ' successfully logged in')
             # Check to ensure password isn't outdated
-            if (current_user.password_list.last_changed - datetime.today()).days > 90:
+            print('TIMEOUT PASSWORD?', (datetime.today() - current_user.password_list.last_changed).days > 90)
+            if (datetime.today() - current_user.password_list.last_changed).days > 90:
                 current_user.validated = False
                 db.session.add(current_user)
                 db.session.commit()
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account')
-                return redirect(url_for('auth.unconfirmed'))
+                return redirect(url_for('auth.change_password'))
             return redirect(request.args.get('next') or url_for('main.index'))
         current_app.logger.info(user.email + ' failed to log in: Invalid username or password')
         user.login_attempts += 1
@@ -103,7 +104,7 @@ def logout():
     HTML page to logout a user, immediately redirects to index.
     :return: Index page.
     """
-    current_app.logger.info(current_user.email + 'logged out')
+    current_app.logger.info(current_user.email + ' logged out')
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('auth.login'))
@@ -190,27 +191,3 @@ def password_reset(token):
         else:
             flash('Password must be at least 8 characters with at least 1 UPPERCASE and 1 NUMBER')
     return render_template('auth/reset_password.html', form=form)
-
-
-@auth.route('/unconfirmed', methods=['GET', 'POST'])
-def unconfirmed():
-    """
-    View function for unconfirmed users to change their passwords and re-confirm their accounts. Once users have changed
-    their password, they become confirmed.
-    :return: HTML page containing a form for users to change their password.
-    """
-    form = ChangePasswordForm()
-    if form.validate_on_submit():
-        if check_password_requirements(current_user.email,
-                                       form.old_password.data,
-                                       form.password.data,
-                                       form.password2.data):
-            current_user.password = form.password.data
-            current_user.validated = True  # TODO: Check to ensure this actually does validate users
-            db.session.add(current_user)
-            db.session.commit()
-            current_app.logger.info(current_user.email +
-                                    'updated their password and confirmed their account')
-            flash('Your password has been updated.')
-            return redirect(url_for('main.index'))
-    return render_template('auth/unconfirmed.html', form=form)
