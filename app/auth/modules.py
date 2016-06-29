@@ -52,7 +52,7 @@ def check_password_requirements(email, old_password, password, password_confirma
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: new password missing '
                                 'uppercase letter or number')
-        flash("Your new password must contain at least one uppercase letter and one number")
+        flash("Your new password must contain eight characters and at least one uppercase letter and one number")
         return False
 
     return True
