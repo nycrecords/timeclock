@@ -106,7 +106,7 @@ def generate_timetable(canvas_field, events):
         canvas_field.drawString(50, timetable_top - (PADDING * index), date + ' ' + time_in[:13])
         canvas_field.drawString(150, timetable_top - (PADDING * index), time_in[13:])
         canvas_field.drawString(240, timetable_top - (PADDING * index), time_out[13:])
-        canvas_field.drawString(330, timetable_top - (PADDING * index), str(hours_this_day))
+        canvas_field.drawString(330, timetable_top - (PADDING * index), "{0:.2f}".format(hours_this_day))
         canvas_field.drawString(490, timetable_top - (PADDING * index), note_in)
         canvas_field.drawString(450, timetable_top - (PADDING * index), note_out)
         canvas_field.setLineWidth(.5)
@@ -117,7 +117,8 @@ def generate_timetable(canvas_field, events):
 
         index += 1
 
-    canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:' + str(total_hours))
+    canvas_field.drawString(330, timetable_top - (PADDING * index + 5), 'TOTAL:')
+    canvas_field.drawString(330, timetable_top - (PADDING * index + 15), "{0:.2f}".format(total_hours))
     canvas_field.setLineWidth(1) # Reset line width
 
 
