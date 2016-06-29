@@ -89,10 +89,11 @@ def login():
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account')
                 return redirect(url_for('auth.change_password'))
             return redirect(request.args.get('next') or url_for('main.index'))
-        current_app.logger.info(user.email + ' failed to log in: Invalid username or password')
-        user.login_attempts += 1
-        db.session.add(user)
-        db.session.commit()
+        if user:
+            current_app.logger.info(user.email + ' failed to log in: Invalid username or password')
+            user.login_attempts += 1
+            db.session.add(user)
+            db.session.commit()
         flash('Invalid username or password')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
