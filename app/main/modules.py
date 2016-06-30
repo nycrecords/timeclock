@@ -7,8 +7,7 @@ from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 from flask import session
 from pytz import timezone
-import ntplib
-from time import ctime
+
 
 def process_clock(note_data, ip = None):
     """
@@ -17,12 +16,10 @@ def process_clock(note_data, ip = None):
     :return: None
     """
 
-    client = ntplib.NTPClient()
-    response = client.request('time-c.nist.gov')
-
-    punch_time = datetime.strptime(ctime(response.tx_time), "%a %b %d %H:%M:%S %Y")
+    eastern = timezone('US/Eastern')
+    est_time = datetime.now(eastern)
     event = Event(type=not current_user.clocked_in,
-                  time=punch_time,
+                  time=est_time,
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
