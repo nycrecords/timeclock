@@ -10,7 +10,7 @@ from pytz import timezone
 from flask import current_app
 
 
-def process_clock(note_data, ip=None, time=datetime.now()):
+def process_clock(note_data, ip=None):
     """
     Creates an Event and writes it to the database when a user clocks in
         or out.
@@ -19,7 +19,7 @@ def process_clock(note_data, ip=None, time=datetime.now()):
     :return: None
     """
     event = Event(type=not current_user.clocked_in,
-                  time=time,
+                  time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
