@@ -7,15 +7,14 @@ from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 from flask import session
 
-
-def process_clock(note_data):
+def process_clock(note_data, ip = None):
     """
     Creates an Event and writes it to the database when a user clocks in or out.
     :param note_data: The note associated with a ClockInForm or ClockOutForm [string]
     :return: None
     """
     event = Event(type=not current_user.clocked_in, time=datetime.now(), user_id=current_user.id,
-                  note=note_data)
+                  note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
     db.session.add(event)

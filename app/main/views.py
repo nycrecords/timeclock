@@ -24,15 +24,16 @@ def index():
     if not current_user.validated:
         return redirect(url_for('auth.change_password'))
 
-    x = request.environ['REMOTE_ADDR']
-    y = request.remote_addr
-    current_app.logger.info("ip1: " + x)
-    current_app.logger.info('ip2: ' + request.remote_addr)
-    print("ip1: " + x)
-    print('ip2: ' + y)
+    # x = request.environ['REMOTE_ADDR']
+    # y = request.remote_addr
+    # current_app.logger.info("ip1: " + x)
+    # current_app.logger.info('ip2: ' + request.remote_addr)
+    # print("ip1: " + x)
+    # print('ip2: ' + y)
     form = set_clock_form()
     if form.validate_on_submit():
-        process_clock(form.note.data)
+        ip = request.environ['REMOTE_ADDR']
+        process_clock(form.note.data, ip)
         current_app.logger.info(current_user.email + 'clocked ' + 'in' if current_user.clocked_in else 'out')
     else:
         if form.note.data is not None and len(form.note.data) > 120:
