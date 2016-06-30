@@ -24,7 +24,7 @@ def process_clock(note_data, ip = None):
     dif = now - starttime
 
     event = Event(type=not current_user.clocked_in,
-                  time=starttime,
+                  time=naive_starttime,
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
