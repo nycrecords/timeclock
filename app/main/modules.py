@@ -8,7 +8,6 @@ import sqlalchemy
 from flask import session
 from pytz import timezone
 
-eastern = timezone('US/Eastern')
 
 def process_clock(note_data, ip = None):
     """
@@ -16,8 +15,11 @@ def process_clock(note_data, ip = None):
     :param note_data: The note associated with a ClockInForm or ClockOutForm [string]
     :return: None
     """
+
+    eastern = timezone('US/Eastern')
+    est_time = datetime.now(south_africa)
     event = Event(type=not current_user.clocked_in,
-                  time=(eastern.localize(datetime.now())),
+                  time=est_time,
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
