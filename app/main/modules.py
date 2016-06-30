@@ -10,26 +10,18 @@ from pytz import timezone
 from flask import current_app
 
 
-def process_clock(note_data, ip = None):
+def process_clock(note_data, ip=None):
     """
-    Creates an Event and writes it to the database when a user clocks in or out.
-    :param note_data: The note associated with a ClockInForm or ClockOutForm [string]
+    Creates an Event and writes it to the database when a user clocks in
+        or out.
+    :param note_data: The note associated with a ClockInForm or ClockOutForm
+        [string]
     :return: None
     """
-
-    tz = timezone('America/New_York')
-    now = datetime.now(tz)
-
-    naive_starttime = datetime.combine(now, time(int(now.hour), int(now.minute)))
-    starttime = tz.localize(naive_starttime, is_dst=None)
-    dif = now - starttime
-    punch_time = datetime.now() - dif
-
     event = Event(type=not current_user.clocked_in,
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
-    current_app.logger.info(datetime.now())
     current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
     db.session.add(event)
