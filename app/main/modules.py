@@ -17,7 +17,7 @@ def process_clock(note_data, ip = None):
     """
 
     eastern = timezone('US/Eastern')
-    est_time = datetime.now(south_africa)
+    est_time = datetime.now(eastern)
     event = Event(type=not current_user.clocked_in,
                   time=est_time,
                   user_id=current_user.id,
