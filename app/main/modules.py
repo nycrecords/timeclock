@@ -1,6 +1,6 @@
 from .. import db
 from ..models import User, Event, Tag
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
@@ -16,10 +16,15 @@ def process_clock(note_data, ip = None):
     :return: None
     """
 
-    eastern = timezone('US/Eastern')
-    est_time = datetime.now(eastern)
+    tz = timezone('America/New_York')
+    now = datetime.now(tz)
+
+    naive_starttime = datetime.combine(now, time(int(now.hour), int(now.minute)))
+    starttime = tz.localize(naive_starttime, is_dst=None)
+    dif = now - starttime
+
     event = Event(type=not current_user.clocked_in,
-                  time=est_time,
+                  time=starttime,
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
