@@ -25,7 +25,7 @@ def process_clock(note_data, ip = None):
     punch_time = datetime.now() - dif
 
     event = Event(type=not current_user.clocked_in,
-                  time=punch_time,
+                  time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
