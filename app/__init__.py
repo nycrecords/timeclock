@@ -12,7 +12,6 @@ import time
 import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
-from flask import current_app
 
 
 bootstrap = Bootstrap()
@@ -33,11 +32,6 @@ def load_db(db):
 def create_app(config_name):  # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-
-    print(app.config.get(
-            'SQLALCHEMY_DATABASE_URI'))
-    print(app.config.get(
-            'DATABASE_URL'))
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[
@@ -70,15 +64,16 @@ def create_app(config_name):  # App Factory
     def func():
         session.modified = True
 
-    logfile_name = "Timeclock " + \
-                time.strftime("%Y-%m-%d|%H:%M:%S") + \
-                ".log"
-    handler = RotatingFileHandler(os.path.join('log', logfile_name), maxBytes=10000, backupCount=1)
+    logfile_name = 'logfile_directory' + \
+                    "Timeclock" + \
+                    time.strftime("%Y%m%d-%H%M%S") + \
+                    ".log"
+
+    handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
     handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
     '[in %(pathname)s:%(lineno)d]'))
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
-    app.logger.info('abc')
 
     return app
 
