@@ -24,12 +24,6 @@ def index():
     if not current_user.validated:
         return redirect(url_for('auth.change_password'))
 
-    # x = request.environ['REMOTE_ADDR']
-    # y = request.remote_addr
-    # current_app.logger.info("ip1: " + x)
-    # current_app.logger.info('ip2: ' + request.remote_addr)
-    # print("ip1: " + x)
-    # print('ip2: ' + y)
     form = set_clock_form()
     if form.validate_on_submit():
         ip = request.environ['REMOTE_ADDR']

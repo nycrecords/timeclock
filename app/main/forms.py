@@ -8,7 +8,7 @@ class ClockInForm(Form):
     """
     Form for clocked out users.
     """
-    note = StringField("Note: ")
+    note = StringField("Note: ", validators=[Length(min=0, max=120)])
     submit = SubmitField("Clock In")
 
 

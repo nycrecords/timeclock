@@ -6,6 +6,7 @@ from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 from flask import session
+from pytz import timezone
 
 def process_clock(note_data, ip = None):
     """
@@ -13,7 +14,7 @@ def process_clock(note_data, ip = None):
     :param note_data: The note associated with a ClockInForm or ClockOutForm [string]
     :return: None
     """
-    event = Event(type=not current_user.clocked_in, time=datetime.now(), user_id=current_user.id,
+    event = Event(type=not current_user.clocked_in, time=(datetime.now(timezone("America/New_York"))), user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
