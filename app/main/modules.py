@@ -22,9 +22,10 @@ def process_clock(note_data, ip = None):
     naive_starttime = datetime.combine(now, time(int(now.hour), int(now.minute)))
     starttime = tz.localize(naive_starttime, is_dst=None)
     dif = now - starttime
+    punch_time = datetime.now() - dif
 
     event = Event(type=not current_user.clocked_in,
-                  time=naive_starttime,
+                  time=punch_time,
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in
