@@ -22,18 +22,18 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://sarvar@localhost:5432/timeclock_dev'
+        'postgresql://localhost:5432/timeclock_dev'
 
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://sarvar@localhost:5432/timeclock_test'
+        'postgresql://localhost:5432/timeclock_test'
 
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://sarvar@localhost:5432/timeclock_prod'
+        'postgresql://localhost:5432/timeclock_prod'
 
 config = {
     'development': DevelopmentConfig,
