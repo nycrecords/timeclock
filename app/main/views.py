@@ -27,7 +27,8 @@ def index():
     form = set_clock_form()
     if form.validate_on_submit():
         ip = request.environ['REMOTE_ADDR']
-        process_clock(form.note.data, ip)
+        time = datetime.now()
+        process_clock(form.note.data, ip, time)
         current_app.logger.info(current_user.email + 'clocked ' + 'in' if current_user.clocked_in else 'out')
     else:
         if form.note.data is not None and len(form.note.data) > 120:
