@@ -28,6 +28,7 @@ def process_clock(note_data, ip = None):
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
+    app.logger.info(datetime.now())
     current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
     db.session.add(event)
