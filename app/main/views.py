@@ -27,6 +27,7 @@ def index():
     form = set_clock_form()
     if form.validate_on_submit():
         ip = request.environ['REMOTE_ADDR']
+        time = datetime.now()
         process_clock(form.note.data, ip)
         current_app.logger.info(current_user.email + 'clocked ' + 'in' if current_user.clocked_in else 'out')
     else:
@@ -36,7 +37,7 @@ def index():
     form = set_clock_form()
     last_event = get_last_clock()
 
-    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users())
+    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users(), current_time=datetime.now())
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])
@@ -207,4 +208,3 @@ def create_dumb_data():
     Event.generate_fake(500)
     current_app.logger.info('Someone generated dummy data.')
     return redirect(url_for('main.index'))
-

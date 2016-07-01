@@ -1,25 +1,25 @@
 from .. import db
 from ..models import User, Event, Tag
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 from flask import session
 from pytz import timezone
+from flask import current_app
 
 
-def process_clock(note_data, ip = None):
+def process_clock(note_data, ip=None):
     """
-    Creates an Event and writes it to the database when a user clocks in or out.
-    :param note_data: The note associated with a ClockInForm or ClockOutForm [string]
+    Creates an Event and writes it to the database when a user clocks in
+        or out.
+    :param note_data: The note associated with a ClockInForm or ClockOutForm
+        [string]
     :return: None
     """
-
-    eastern = timezone('US/Eastern')
-    est_time = datetime.now(eastern)
     event = Event(type=not current_user.clocked_in,
-                  time=est_time,
+                  time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_user.clocked_in = not current_user.clocked_in

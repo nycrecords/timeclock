@@ -4,6 +4,7 @@
 {% block title %}TimeClock - Home{% endblock %}
 
 {% block page_content %}
+    {{ current_time }}
     {%  if current_user.is_authenticated %}
         <div class="row" style="padding-bottom:10px">
             <div class="col-md-4" style="height:300px">
@@ -56,6 +57,3 @@
 
 
 {% endblock %}
-
-
-
