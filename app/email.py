@@ -6,7 +6,8 @@ from . import mail
 
 def send_async_email(app, msg):
     """
-    Sends asynchronous e-mails, allowing the server to avoid delay between e-mails.
+    Sends asynchronous e-mails, allowing the server to avoid delay
+        between e-mails.
     :param app: The app to use (passed from send_email)
     :param msg: The message to send (passed from send_email)
     :return: None. Sends message.
