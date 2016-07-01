@@ -1,12 +1,33 @@
-from flask import render_template, flash, request, make_response, url_for, redirect, session
+from flask import (
+    render_template,
+    flash,
+    request,
+    make_response,
+    url_for,
+    redirect,
+    session
+)
 from . import main
 from flask_login import login_required, current_user
-from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
-     process_time_periods, get_all_tags
+from .modules import (
+    process_clock,
+    set_clock_form,
+    get_last_clock,
+    get_events_by_date,
+    get_clocked_in_users,
+    process_time_periods,
+    get_all_tags
+)
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
-from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable, generate_signature_template
-from datetime import datetime
+from .pdf import (
+    generate_header,
+    generate_footer,
+    generate_employee_info,
+    generate_timetable,
+    generate_signature_template
+)
+from datetime import datetime, date
 from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -29,7 +50,10 @@ def index():
         ip = request.environ['REMOTE_ADDR']
         time = datetime.now()
         process_clock(form.note.data, ip)
-        current_app.logger.info(current_user.email + ' clocked ' + 'in' if current_user.clocked_in else 'out')
+        current_app.logger.info('%s clocked %s' % (
+            current_user.email,
+            'in' if current_user.clocked_in else 'out')
+        )
     else:
         if form.note.data is not None and len(form.note.data) > 120:
             flash("Your note cannot exceed 120 characters")
@@ -37,7 +61,11 @@ def index():
     form = set_clock_form()
     last_event = get_last_clock()
 
-    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users())
+    return render_template('index.html',
+                           form=form,
+                           last_event=last_event,
+                           clocked_in_users=get_clocked_in_users()
+                           )
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])
@@ -47,11 +75,12 @@ def all_history():
     """
     View function for url/all_history page.
     Contains a form for sorting by username, start date, and end date.
-    :return: All user history, sorted (if applicable) with a form for further filtering.
+    :return: All user history, sorted (if applicable) with a form for further
+    filtering.
     """
     if 'first_date' not in session:
-        session['first_date'] = datetime(2004, 1, 1)
-        session['last_date'] = datetime.now()
+        session['first_date'] = date(2004, 1, 1)
+        session['last_date'] = date.today()
     if 'email' not in session:
         session['email'] = None
     if 'tag_input' not in session:
@@ -82,8 +111,13 @@ def all_history():
         error_out=False)
     events = pagination.items
     tags = get_all_tags()
-    return render_template('all_history.html', events=events, form=form, pagination=pagination, tags=tags,
-                           generation_events=events)
+    return render_template('all_history.html',
+                           events=events,
+                           form=form,
+                           pagination=pagination,
+                           tags=tags,
+                           generation_events=events
+                           )
     # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
     #  NOT DOING THAT RIGHT NOW TO AVOID OVERHEAD DURING DEVELOPMENT
 
@@ -94,7 +128,8 @@ def history():
     """
     Shows a user their own history.
     TODO: Make filterable by date.
-    :return: An html page that contains user history, sorted (if applicable) with a form for further filtering.
+    :return: An html page that contains user history, sorted (if applicable)
+    with a form for further filtering.
     """
 
     if not current_user.validated:
@@ -109,9 +144,9 @@ def history():
         session['first_date'] = time_period[0]
         session['last_date'] = time_period[1]
         page = 1
-    else:                   # Set a default session['first_date'] and ['last_date']
-        session['first_date'] = datetime(2004, 1, 1)
-        session['last_date'] = datetime.now()
+    else:  # Set a default session['first_date'] and ['last_date']
+        session['first_date'] = date(2004, 1, 1)
+        session['last_date'] = date.today()
 
     events_query = get_events_by_date(session['email'],
                                       session['first_date'],
@@ -122,8 +157,13 @@ def history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-    tags=get_all_tags()
-    return render_template('history.html', events=events, form=form, pagination=pagination, generation_events=events,tags=tags)
+    tags = get_all_tags()
+    return render_template('history.html',
+                           events=events,
+                           form=form,
+                           pagination=pagination,
+                           generation_events=events,
+                           tags=tags)
 
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])
@@ -131,19 +171,26 @@ def history():
 def download():
     """
     Created a link to download a timesheet containing the given filtered data.
-    :return: A directive to download a file timesheet.txt, which contains timesheet data
+    :return: A directive to download a file timesheet.txt, which contains
+    timesheet data
     """
 
     errors = []
     if 'email' not in session or session['email'] is None:
-        # This will only happen for admin searches, so we only need to redirect to the admin page
-        current_app.logger.error('User ' + current_user.email + ' tried to generate a timesheet but did not specify '
-                                                              'a user')
+        # This will only happen for admin searches, so we only need to
+        # redirect to the admin page
+        current_app.logger.error('User %s tried to generate a timesheet but '
+                                 'did not specify a user' %
+                                 (current_user.email)
+                                 )
         errors.append('You must specify a user.')
     if (session['last_date']-session['first_date']).days > 7:
-        current_app.logger.error('User ' + current_user.email + ' tried to generate a timesheet but exceeded'
-                                                              'maximum duration (one week')
-        errors.append('Maximum timesheet duration is a week. Please refine your filters')
+        current_app.logger.error('User %s tried to generate a timesheet but '
+                                 'exceeded maximum duration (one week)' %
+                                 (current_user.email)
+                                 )
+        errors.append('Maximum timesheet duration is a week. '
+                      'Please refine your filters')
 
     if errors:
         for error in errors:
@@ -151,7 +198,8 @@ def download():
         return redirect(url_for('main.all_history'))
 
     events = request.form.getlist('event')
-    # ^gets event data - we can similarly pass in other data (i.e. time start, end)
+    # ^gets event data - we can similarly pass in other data
+    # (i.e. time start, end)
     # output = ""
     import io
     output = io.BytesIO()
@@ -169,10 +217,16 @@ def download():
     pdf_out = output.getvalue()
     output.close()
     response = make_response(pdf_out)
-    response.headers['Content-Disposition'] = "attachment; filename='timesheet.pdf"
+    response.headers['Content-Disposition'] = \
+        "attachment; filename='timesheet.pdf"
     response.mimetype = 'application/pdf'
-    current_app.logger.info(current_user.email + ' downloaded timesheet for user ' + session['email'] +
-                            'beginning at ' + session['first_date'].strftime("%b %d, %Y %H:%M:%S %p"))
+    current_app.logger.info('%s downloaded timesheet for user %s '
+                            'beginning at %s' %
+                            (current_user.email,
+                             session['email'],
+                             session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
+                             )
+                            )
     return response
 
 
@@ -183,7 +237,8 @@ def clear():
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
-    current_app.logger.info('User ' + current_user.email + ' cleared their admin history filter.')
+    current_app.logger.info('User %s cleared their admin history filter.' %
+                            current_user.email)
     return redirect(url_for('main.all_history'))
 
 
