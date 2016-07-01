@@ -50,7 +50,7 @@ class UserFilterEventsForm(Form):
     """
     first_date = DateTimeField("From",
                                default=date(2004, 1, 1),
-                               alidators=[DataRequired()]
+                               validators=[DataRequired()]
                                )
     last_date = DateTimeField("To",
                               default=date.today(),
