@@ -41,7 +41,6 @@ def check_password_requirements(email, old_password, password, password_confirma
                                 'tried to change their password but failed: entered invalid old password')
         flash("Your old password was incorrect")
         return False
-    import pdb; pdb.set_trace()
     if password != password_confirmation:
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: passwords did not match')
