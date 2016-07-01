@@ -31,6 +31,7 @@ from datetime import datetime, date
 from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from ..utils import date_handler
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -79,8 +80,8 @@ def all_history():
     filtering.
     """
     if 'first_date' not in session:
-        session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.today()
+        session['first_date'] = date_handler(date(2004, 1, 1))
+        session['last_date'] = date_handler(date.today())
     if 'email' not in session:
         session['email'] = None
     if 'tag_input' not in session:
@@ -145,8 +146,8 @@ def history():
         session['last_date'] = time_period[1]
         page = 1
     else:  # Set a default session['first_date'] and ['last_date']
-        session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.today()
+        session['first_date'] = date_handler(date(2004, 1, 1))
+        session['last_date'] = date_handler(date.today())
 
     events_query = get_events_by_date(session['email'],
                                       session['first_date'],
