@@ -169,6 +169,8 @@ def process_time_periods(form):
     if 'last_month' in form:
         if form.last_month.data:
             time_period = get_time_period('lm')
+        else:
+            time_period = [form.first_date.data, form.last_date.data]
     else:
         time_period = [form.first_date.data, form.last_date.data]
     return time_period
