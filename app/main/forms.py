@@ -31,7 +31,7 @@ class AdminFilterEventsForm(Form):
     first_date = DateTimeField("From", default=datetime(2004, 1, 1), validators=[Optional()])
     last_date = DateTimeField("To", default=datetime.now, validators=[Optional()])
     tag = SelectField(u"Tag",
-                      choices=[(0, 'None'), (1, 'Intern'), (2, 'Contractor'), (3, 'SYEP'), (4, 'Radical'), (5, 'Other')],
+                      choices=[(0, 'None'), (1, 'Intern'), (2, 'Contractor'), (3, 'SYEP'), (4, 'Radical'), (5,'Consultant'), (6, 'Other')],
                       coerce=int,
                       validators=[Optional()])
     submit = SubmitField("Filter")
@@ -48,14 +48,14 @@ class UserFilterEventsForm(Form):
     Form for users to filter their own clock events by date. Users can look at self-generated clock events
     between first_date and last_date.
     """
-    first_date = DateTimeField("From", default=datetime(2004, 1, 1), validators=[DataRequired()])
-    last_date = DateTimeField("To", default=datetime.now, validators=[DataRequired()])
-    submit = SubmitField("Filter")
+    # first_date = DateTimeField("From", default=datetime(2004, 1, 1), validators=[DataRequired()])
+    # last_date = DateTimeField("To", default=datetime.now, validators=[DataRequired()])
+    # submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")
     last_week = SubmitField("Last Week")
     this_week = SubmitField("This Week")
-    last_day = SubmitField("Yesterday")
-    this_day = SubmitField("Today")
-
+    # last_day = SubmitField("Yesterday")
+    # this_day = SubmitField("Today")
+    #
 

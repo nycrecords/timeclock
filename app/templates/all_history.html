@@ -28,7 +28,7 @@
                 {% for event in generation_events %}
                     <input type="hidden" name="{{ event }}">
                 {% endfor %}
-                <input type="submit" value="Generate Invoice" class="btn btn-success">
+{#                <input type="submit" value="Generate Invoice" class="btn btn-success">#}
             </form>
         </div>
     </div>
@@ -48,7 +48,6 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Email</th>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Clocked</th>
@@ -59,16 +58,25 @@
             <tbody>
                 {% for event in events %}
                 <tr>
-                    <td>{{ event.user.email }}</td>
                     <td>{{ event.user.first_name }}</td>
                     <td>{{ event.user.last_name }}</td>
-                    <td>{% if event.type %}
+                    <td>
+                        {% if event.type %}
                         <span style="color:green">IN</span>
                         {% else %}
                         <span style="color:orange">OUT</span>
                         {% endif %}
                     </td>
-                    <td>{{ event.user.tag }}</td>
+                    <td>{{ event.user.division }}</td>
+{#                    Use tag_id to find corresponding name in tag table #}
+                    {% for tag in tags %}
+                        {% if tag.id==event.user.tag_id %}
+                            <td>{{ tag.name }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% if event.user.tag_id==None %}
+                        <td>None</td>
+                    {% endif %}
                     <td>{{ event.time.strftime("%b %d, %Y %H:%M:%S %p") }}</td>
                 </tr>
                 {% endfor %}

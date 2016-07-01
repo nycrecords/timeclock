@@ -4,8 +4,9 @@
 {% block title %}TimeClock - Home{% endblock %}
 
 {% block page_content %}
-    {{ current_time }}
     {%  if current_user.is_authenticated %}
+        <p>Welcome, <br><br>Name: {{ current_user.first_name }} {{ current_user.last_name }}</p>
+        <p>Email: {{ current_user.email }}</p>
         <div class="row" style="padding-bottom:10px">
             <div class="col-md-4" style="height:300px">
                 <div>

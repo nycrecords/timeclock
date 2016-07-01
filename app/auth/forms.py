@@ -71,7 +71,7 @@ class AdminRegistrationForm(Form):
     first_name = StringField("First name")
     last_name = StringField("Last name")
     division = SelectField('Division', choices=[('Records Management','Records Management'),('Archives','Archives'),('Grants','Grants'),('Library','Library'),('Executive','Executive'),('MIS/Web','MIS/Web'),('Administration','Administration')])
-    tag = SelectField('Tag', choices=[('Intern','Intern'),('Contractor','Contractor'),('SYEP','SYEP'),('Radical','Radica'),('Other','Other')])
+    tag = SelectField('Tag', choices=[('Intern','Intern'),('Contractor','Contractor'),('SYEP','SYEP'),('Radical','Radical'),('Consultant','Consultant'),('Other','Other')])
     submit = SubmitField('Register')
 
 

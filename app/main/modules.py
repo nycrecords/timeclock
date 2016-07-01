@@ -151,18 +151,24 @@ def process_time_periods(form):
     :param form: AdminFilterEventsForm or UserFilterEventsForm
     :return: A two-element array containing a start and end date
     """
-    if form.this_day.data:
-        time_period = get_time_period('d')
-    elif form.this_week.data:
-        time_period = get_time_period('w')
-    elif form.this_month.data:
-        time_period = get_time_period('m')
-    elif form.last_day.data:
-        time_period = get_time_period('ld')
-    elif form.last_week.data:
-        time_period = get_time_period('lw')
-    elif form.last_month.data:
-        time_period = get_time_period('lm')
+    if 'this_day' in form:
+        if form.this_day.data:
+            time_period = get_time_period('d')
+    if 'this_week' in form:
+        if form.this_week.data:
+            time_period = get_time_period('w')
+    if 'this_month' in form:
+        if form.this_month.data:
+            time_period = get_time_period('m')
+    if 'last_day' in form:
+        if form.last_day.data:
+            time_period = get_time_period('ld')
+    if 'last_week' in form:
+        if form.last_week.data:
+            time_period = get_time_period('lw')
+    if 'last_month' in form:
+        if form.last_month.data:
+            time_period = get_time_period('lm')
     else:
         time_period = [form.first_date.data, form.last_date.data]
     return time_period
@@ -191,3 +197,6 @@ def get_day_of_week(datetime_input):
         6: "Sunday"
     }
     return date_int_to_str[datetime_input.weekday()]
+
+def get_all_tags():
+    return Tag.query.all()
