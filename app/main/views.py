@@ -2,7 +2,7 @@ from flask import render_template, flash, request, make_response, url_for, redir
 from . import main
 from flask_login import login_required, current_user
 from .modules import process_clock, set_clock_form, get_last_clock, get_events_by_date, get_clocked_in_users, \
-     process_time_periods
+     process_time_periods, get_all_tags
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
 from .pdf import generate_header, generate_footer, generate_employee_info, generate_timetable, generate_signature_template
@@ -29,7 +29,7 @@ def index():
         ip = request.environ['REMOTE_ADDR']
         time = datetime.now()
         process_clock(form.note.data, ip)
-        current_app.logger.info(current_user.email + 'clocked ' + 'in' if current_user.clocked_in else 'out')
+        current_app.logger.info(current_user.email + ' clocked ' + 'in' if current_user.clocked_in else 'out')
     else:
         if form.note.data is not None and len(form.note.data) > 120:
             flash("Your note cannot exceed 120 characters")
@@ -37,7 +37,7 @@ def index():
     form = set_clock_form()
     last_event = get_last_clock()
 
-    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users(), current_time=datetime.now())
+    return render_template('index.html', form=form, last_event=last_event, clocked_in_users=get_clocked_in_users())
 
 
 @main.route('/all_history',  methods=['GET', 'POST'])
@@ -81,8 +81,8 @@ def all_history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-    print(events)
-    return render_template('all_history.html', events=events, form=form, pagination=pagination,
+    tags = get_all_tags()
+    return render_template('all_history.html', events=events, form=form, pagination=pagination, tags=tags,
                            generation_events=events)
     # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
     #  NOT DOING THAT RIGHT NOW TO AVOID OVERHEAD DURING DEVELOPMENT
@@ -122,8 +122,8 @@ def history():
         page, per_page=15,
         error_out=False)
     events = pagination.items
-    print(events)
-    return render_template('history.html', events=events, form=form, pagination=pagination, generation_events=events)
+    tags=get_all_tags()
+    return render_template('history.html', events=events, form=form, pagination=pagination, generation_events=events,tags=tags)
 
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])
