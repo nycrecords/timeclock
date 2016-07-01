@@ -23,11 +23,6 @@ def test():  # Grinberg's unit tests, we can del if need be  - Sarvar
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
-def db_setup():
-    """Sets up the database"""
-    db.create_all()
-    Role.insert_roles()
-    Tag.insert_tags()
 
 if __name__ == '__main__':
     manager.run()
