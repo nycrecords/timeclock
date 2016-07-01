@@ -41,19 +41,23 @@ def check_password_requirements(email, old_password, password, password_confirma
                                 'tried to change their password but failed: entered invalid old password')
         flash("Your old password was incorrect")
         return False
-
+    import pdb; pdb.set_trace()
     if password != password_confirmation:
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: passwords did not match')
         flash("Your passwords do not match")
         return False
 
-    if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', password):
+    score = 0
+    if re.search('\d+', password):
+        score = score + 1
+    if re.search('[a-z]',password) and re.search('[A-Z]', password):
+        score = score + 1
+    if score < 2:
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: new password missing '
-                                'uppercase letter or number')
+                                'uppercase letter or number ')
         flash("Your new password must contain eight characters and at least one uppercase letter and one number")
         return False
 
     return True
-
