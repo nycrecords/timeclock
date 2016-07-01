@@ -2,7 +2,7 @@ from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
-from ..models import User
+from ..models import User, Tag
 from ..decorators import admin_required
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm, AdminRegistrationForm, PasswordResetForm, PasswordResetRequestForm, ChangePasswordForm
@@ -41,12 +41,18 @@ def admin_register():
     :return: HTML page where admins can register new users
     """
     form = AdminRegistrationForm()
+
     if form.validate_on_submit():
         temp_pass = get_day_of_week() + str(datetime.today().day)
+        if 'tag' in form:
+            tag_id=Tag.query.filter_by(name=form.tag.data).first().id
         user = User(email=form.email.data,
                     password=temp_pass,
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
+                    division=form.division.data,
+                    role_id=1,
+                    tag_id=tag_id
                     )
         db.session.add(user)
         db.session.commit()

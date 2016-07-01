@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, SubmitField, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from ..models import User
 from datetime import datetime
@@ -70,7 +70,10 @@ class AdminRegistrationForm(Form):
     email = StringField('Email', validators=[DataRequired(), Length(1,64), Email()])
     first_name = StringField("First name")
     last_name = StringField("Last name")
+    division = SelectField('Division', choices=[('Records Management','Records Management'),('Archives','Archives'),('Grants','Grants'),('Library','Library'),('Executive','Executive'),('MIS/Web','MIS/Web'),('Administration','Administration')])
+    tag = SelectField('Tag', choices=[('Intern','Intern'),('Contractor','Contractor'),('SYEP','SYEP'),('Radical','Radica'),('Other','Other')])
     submit = SubmitField('Register')
+
 
     def validate_email(self, field):
         """
