@@ -10,6 +10,7 @@ from .modules import get_day_of_week, check_password_requirements
 from datetime import datetime, date, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
+import calendar
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -56,6 +57,10 @@ def admin_register():
                     )
         db.session.add(user)
         db.session.commit()
+        day_of_week = calendar.day_name[date.today().weekday()]
+        day_of_month = datetime.today().day
+        send_email(user.email, 'Reset Your Password', body=render_template(template='auth/email/admin_register.html',user=user,
+                                                           day_of_week=day_of_week,day_of_month=day_of_month))
         current_app.logger.info(current_user.email + ' registered user with email ' + form.email.data)
         flash('User successfully registered')
         return redirect(url_for('main.index'))
