@@ -46,7 +46,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         # TODO: Add logging here.
-        flash('User successfully registered')
+        flash('User successfully registered', category='success')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -88,7 +88,8 @@ def admin_register():
                    temp_password=temp_password)
 
         current_app.logger.info('Sent login instructions to {}'.format(user.email))
-        flash('User successfully registered\nAn email with login instructions has been sent to {}'.format(user.email))
+        flash('User successfully registered\nAn email with login instructions has been sent to {}'.format(user.email),
+              category='success')
 
         current_app.logger.info('%s registered user with email %s' % (current_user.email, form.email.data))
         return redirect(url_for('main.index'))
@@ -111,7 +112,8 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.login_attempts >= 2:
             # TODO: Add logging
-            flash('You have too many invalid login attempts. You must reset your password.')
+            flash('You have too many invalid login attempts. You must reset your password.',
+                  category='error')
             return redirect(url_for('auth.password_reset_request'))
         if user is not None and user.verify_password(form.password.data):
             login_user(user)
@@ -128,18 +130,19 @@ def login():
                 current_user.validated = False
                 db.session.add(current_user)
                 db.session.commit()
-                flash('You haven\'t changed your password in 90 days. You must re-validate your account')
+                flash('You haven\'t changed your password in 90 days. You must re-validate your account',
+                      category='error')
                 return redirect(url_for('auth.change_password'))
             if (datetime.today() - current_user.password_list.last_changed).days > 75:
                 days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
-                flash('Your password will expire in {} days.'.format(days_to_expire))
+                flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
             return redirect(request.args.get('next') or url_for('main.index'))
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
             user.login_attempts += 1
             db.session.add(user)
             db.session.commit()
-        flash('Invalid username or password')
+        flash('Invalid username or password', category='error')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
 
@@ -153,7 +156,7 @@ def logout():
     """
     current_app.logger.info('{} logged out'.format(current_user.email))
     logout_user()
-    flash('You have been logged out.')
+    flash('You have been logged out.', category='success')
     return redirect(url_for('auth.login'))
 
 
@@ -178,7 +181,7 @@ def change_password():
         ):
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 current_user.email))
-            flash("Your password cannot be the same as the last 5 passwords")
+            flash('Your password cannot be the same as the last 5 passwords', category='error')
         elif check_password_requirements(
                 current_user.email,
                 form.old_password.data,
@@ -190,7 +193,7 @@ def change_password():
             db.session.add(current_user)
             db.session.commit()
             current_app.logger.info('{} changed their password.'.format(current_user.email))
-            flash('Your password has been updated.')
+            flash('Your password has been updated.', category='success')
             return redirect(url_for('main.index'))
     return render_template("auth/change_password.html", form=form)
 
@@ -218,11 +221,11 @@ def password_reset_request():
                        token=token,
                        next=request.args.get('next'))
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
-            flash('An email with instructions to reset your password has been sent to you.')
+            flash('An email with instructions to reset your password has been sent to you.', category='success')
         else:
             current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
                                     form.email.data)
-            flash('An account with this email was not found in the system.')
+            flash('An account with this email was not found in the system.', category='error')
         return redirect(url_for('auth.login'))
     return render_template('auth/request_reset_password.html', form=form)
 
@@ -243,7 +246,7 @@ def password_reset(token):
         try:
             data = s.loads(token)
         except JSONDecodeError:
-            flash('This token is no longer valid.')
+            flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
 
         user = User.query.filter_by(id=data.get('reset')).first()
@@ -255,12 +258,13 @@ def password_reset(token):
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
-                flash('Your password has been updated.')
+                flash('Your password has been updated.', category='success')
                 return redirect(url_for('auth.login'))
             else:
-                flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number')
+                flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
+                      category='error')
                 return render_template('auth/reset_password.html', form=form)
         except InvalidResetToken:
-            flash('This token is no longer valid.')
+            flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
