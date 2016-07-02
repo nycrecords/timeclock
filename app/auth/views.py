@@ -88,10 +88,9 @@ def admin_register():
                    temp_password=temp_password)
 
         current_app.logger.info('Sent login instructions to {}'.format(user.email))
-        flash('An email with login instructions has been sent to {}'.format(user.email))
+        flash('User successfully registered\nAn email with login instructions has been sent to {}'.format(user.email))
 
         current_app.logger.info('%s registered user with email %s' % (current_user.email, form.email.data))
-        flash('User successfully registered')
         return redirect(url_for('main.index'))
     return render_template('auth/admin_register.html', form=form)
 
