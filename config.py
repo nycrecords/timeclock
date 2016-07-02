@@ -24,6 +24,8 @@ class DevelopmentConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://localhost:5432/timeclock_dev'
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = '2500'
 
 
 class TestingConfig(Config):

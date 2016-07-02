@@ -1,24 +1,21 @@
+from flask import current_app
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from ..models import User
-from datetime import datetime
+from flask_login import current_user
 
 
 class LoginForm(Form):
-    """
-    Used for registered users to log into the system.
-    """
-    email = StringField('Email', validators=[DataRequired(), Length(1,64), Email()])
+    """Used for registered users to log into the system."""
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log In')
 
 
 class RegistrationForm(Form):
-    """
-    Used to register new users into the system.
-    """
-    email = StringField('Email', validators=[DataRequired(), Length(1,64), Email()])
+    """Used to register new users into the system."""
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     first_name = StringField("First name")
     last_name = StringField("Last name")
     password = PasswordField('Password', validators=[
@@ -29,19 +26,23 @@ class RegistrationForm(Form):
     def validate_email(self, field):
         """
         Verifies that e-mails used for registration do not already exist in the system.
+
         :param field:
         :return:
         """
         if User.query.filter_by(email=field.data).first():
+            current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
+                current_user.email, field.data))
             raise ValidationError('An account with this email address already exists')
-            app.logger.error(current_user.email + 'tried to register user with email ' + field.data + 'but user already exists.')
 
-    def validate_password(form, field):
+    def validate_password(self, field):
         """
         Used to verify that password meets security criteria.
+
         :param field: password field
         :return: A validation message if password is not secure.
         """
+        # TODO: Why are we naming the parameter field? Shouldn't it be more specific?
         if len(field.data) < 8:
             raise ValidationError('Your password must be 8 or more characters')
 
@@ -64,23 +65,26 @@ class RegistrationForm(Form):
 
 
 class AdminRegistrationForm(Form):
-    """
-    Used by admins to register new users into the system.
-    """
-    email = StringField('Email', validators=[DataRequired(), Length(1,64), Email()])
+    """Used by admins to register new users into the system."""
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
     first_name = StringField("First name")
     last_name = StringField("Last name")
-    division = SelectField('Division', choices=[('Records Management','Records Management'),('Archives','Archives'),('Grants','Grants'),('Library','Library'),('Executive','Executive'),('MIS/Web','MIS/Web'),('Administration','Administration')])
-    tag = SelectField('Tag', choices=[('Intern','Intern'),('Contractor','Contractor'),('SYEP','SYEP'),('Radical','Radical'),('Consultant','Consultant'),('Other','Other')])
+    division = SelectField('Division', choices=[('Records Management', 'Records Management'), ('Archives', 'Archives'),
+                                                ('Grants', 'Grants'), ('Library', 'Library'),
+                                                ('Executive', 'Executive'), ('MIS/Web', 'MIS/Web'),
+                                                ('Administration', 'Administration')])
+    tag = SelectField('Tag', choices=[('Intern', 'Intern'), ('Contractor', 'Contractor'), ('SYEP', 'SYEP'),
+                                      ('Radical', 'Radical'), ('Consultant', 'Consultant'), ('Other', 'Other')])
     submit = SubmitField('Register')
-
 
     def validate_email(self, field):
         """
         Verifies that e-mails used for registration do not already exist in the system.
+
         :param field:
         :return:
         """
+        # TODO: What should field be? Should this be more specific?
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('An account with this email address already exists')
 
@@ -103,8 +107,8 @@ class PasswordResetRequestForm(Form):
 
 class PasswordResetForm(Form):
     """Password reset form after email confirmation"""
-    email = StringField('Email', validators=[DataRequired(), Length(1, 100),
-                                             Email()])
+    # email = StringField('Email', validators=[DataRequired(), Length(1, 100),
+    #                                          Email()])
     password = PasswordField('New Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords must match')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])

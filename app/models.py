@@ -6,6 +6,7 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import re
 from . import db
+from .utils import InvalidResetToken
 
 
 class Permission:
@@ -116,17 +117,15 @@ class User(UserMixin, db.Model):
         :param new_password: The password the user will have after resetting.
         :return: True if operation is successful, false otherwise.
         """
-        s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            data = s.loads(token)
-        except:
-            return False
-        if data.get('reset') != self.id:
-            return False
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
         if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
             return False
+        # If the password has been changed within the last second, the token is invalid.
+        if (datetime.now() - self.password_list.last_changed).seconds < 1:
+            current_app.logger.error('User {} tried to re-use a token.'.format(self.email))
+            raise InvalidResetToken
         self.password = new_password
+        self.password_list.update(self.password_hash)
         db.session.add(self)
         return True
 

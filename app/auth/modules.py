@@ -1,3 +1,10 @@
+"""
+.. module:: auth.views.
+
+   :synopsis: Handles all authentication URL endpoints for the
+   timeclock application
+"""
+
 from datetime import datetime
 from werkzeug.security import check_password_hash
 from ..models import User
@@ -9,8 +16,10 @@ import re
 def get_day_of_week():
     """
     Gets the current day of the week.
+
     :return: The current day of the week as a string.
     """
+    # TODO: This isn't needed, can use `datetime.datetime.today().strftime('%A')`
     date_int_to_str = {
         0: "Monday",
         1: "Tuesday",
@@ -37,26 +46,26 @@ def check_password_requirements(email, old_password, password, password_confirma
     user_password = User.query.filter_by(email=email).first().password_hash
 
     if not check_password_hash(pwhash=user_password, password=old_password):
-        current_app.logger.info(current_user.email +
-                                'tried to change their password but failed: entered invalid old password')
-        flash("Your old password was incorrect")
+        current_app.logger.info('%s tried to change their password but failed: entered invalid old password' %
+                                current_user.email)
+        flash('Your old password did not match')
         return False
     if password != password_confirmation:
-        current_app.logger.info(current_user.email +
-                                'tried to change their password but failed: passwords did not match')
-        flash("Your passwords do not match")
+        current_app.logger.info('%s tried to change their password but failed: passwords did not match' %
+                                current_user.email)
+        flash('Your passwords do not match')
         return False
 
     score = 0
     if re.search('\d+', password):
-        score = score + 1
-    if re.search('[a-z]',password) and re.search('[A-Z]', password):
-        score = score + 1
+        score += 1
+    if re.search('[a-z]', password) and re.search('[A-Z]', password):
+        score += 1
     if score < 2:
         current_app.logger.info(current_user.email +
-                                'tried to change their password but failed: new password missing '
-                                'uppercase letter or number ')
-        flash("Your new password must contain eight characters and at least one uppercase letter and one number")
+                                'tried to change their password but failed: new password missing uppercase letter '
+                                'or number ')
+        flash('Your new password must contain eight characters and at least one uppercase letter and one number')
         return False
 
     return True

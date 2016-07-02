@@ -1,0 +1,16 @@
+Hi {{ user.first_name }},
+
+Your account for the NYC Department of Records and Information Services TimeClock has been created.
+
+Please visit {{ url_for('auth.login') }} to login to the site.
+
+Your username is {{ user.email }}
+Your initial password is {{ temp_password }}. You will be prompted to reset it upon login.
+
+If you have any questions, please contact the Office of Administration (administration@records.nyc.gov)
+
+Sincerely,
+
+The TimeClock Team
+
+Note: replies to this email address are not monitored.

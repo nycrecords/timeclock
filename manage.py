@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+.. module:: manage.
+
+   :synopsis: Provides CLI for the timeclock application
+"""
+
 import os
 from app import create_app, db
 from app.models import User, Role, Event, Pay, Tag, Password

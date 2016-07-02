@@ -1,3 +1,9 @@
+"""
+.. module:: main.views.
+
+   :synopsis: Handles all core URL endpoints for the timeclock application
+"""
+
 from flask import (
     render_template,
     flash,
@@ -51,9 +57,10 @@ def index():
         ip = request.environ['REMOTE_ADDR']
         time = datetime.now()
         process_clock(form.note.data, ip)
-        current_app.logger.info('%s clocked %s' % (
+        current_app.logger.info('%s clocked %s at %s' % (
             current_user.email,
-            'in' if current_user.clocked_in else 'out')
+            'in' if current_user.clocked_in else 'out',
+            time)
         )
     else:
         if form.note.data is not None and len(form.note.data) > 120:
@@ -250,7 +257,8 @@ def user_clear():
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
-    current_app.logger.info('User ' + current_user.email + ' cleared their history filter.')
+    current_app.logger.info('User %s cleared their history filter.' %
+                            current_user.email)
     return redirect(url_for('main.history'))
 
 
