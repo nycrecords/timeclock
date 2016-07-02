@@ -38,8 +38,8 @@ type="image/x-icon">
 
 {% block content %}
 <div class="container" style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">
-    {% for message in get_flashed_messages() %}
-    <div class="alert alert-warning">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{ category }}">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         {{ message }}
     </div>
