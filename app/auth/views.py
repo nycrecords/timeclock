@@ -74,7 +74,7 @@ def admin_register():
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
                     division=form.division.data,
-                    role_id=1,
+                    role_id=form.role.data,
                     tag_id=tag_id
                     )
         # user.password_list.valid

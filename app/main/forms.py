@@ -2,6 +2,7 @@ from flask_wtf import Form
 from wtforms import StringField, SubmitField, DateField, SelectField
 from wtforms.validators import DataRequired, Optional, Length
 from datetime import date
+from ..utils import tags, divisions
 
 
 class ClockInForm(Form):
@@ -20,6 +21,15 @@ class ClockOutForm(Form):
     submit = SubmitField("Clock Out")
 
 
+class TimePunchForm(Form):
+    """
+    Form for requesting a time punch.
+    """
+    punch_type = SelectField("Punch Type", validators=[DataRequired()], choices=[(0, 'In'), (1, 'Out')])
+    note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=120)])
+    submit = SubmitField("Submit Request")
+
+
 class AdminFilterEventsForm(Form):
     """
     Form for Administrators to filter all clock events.
@@ -30,10 +40,7 @@ class AdminFilterEventsForm(Form):
     email = StringField("Email", validators=[Optional()])
     first_date = DateField("From", default=date(2004, 1, 1), validators=[Optional()])
     last_date = DateField("To", default=date.today(), validators=[Optional()])
-    tag = SelectField(u"Tag",
-                      choices=[(0, 'None'), (1, 'Intern'), (2, 'Contractor'), (3, 'SYEP'), (4, 'Radical'), (5,'Consultant'), (6, 'Other')],
-                      coerce=int,
-                      validators=[Optional()])
+    tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
     submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")

@@ -13,8 +13,8 @@ class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
     """
-    USER = 0x01         # 0b00000001
-    ADMINISTER = 0x80   # 0b10000000
+    USER = 0x01  # 0b00000001
+    ADMINISTER = 0x80  # 0b10000000
 
 
 class Role(db.Model):
@@ -100,15 +100,15 @@ class User(UserMixin, db.Model):
 
     # generates token with default validity for 1 hour
     def generate_reset_token(self, expiration=3600):
-            """
-            Generates a token users can use to reset their accounts if locked out.
-            :param expiration: Seconds the token is valid for after being created (default one hour).
-            :return: the token.
-            """
-            s = Serializer(current_app.config['SECRET_KEY'], expiration)
-            return s.dumps({'reset': self.id})
+        """
+        Generates a token users can use to reset their accounts if locked out.
+        :param expiration: Seconds the token is valid for after being created (default one hour).
+        :return: the token.
+        """
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'reset': self.id})
 
-            # verifies the token and if valid, resets password
+        # verifies the token and if valid, resets password
 
     def reset_password(self, token, new_password):
         """
@@ -188,6 +188,7 @@ class AnonymousUser(AnonymousUserMixin):
     """
     An anonymous user class to simplify user processes in other code.
     """
+
     def can(self, permissions):
         return False
 
@@ -201,7 +202,7 @@ class Event(db.Model):
     """
     __tablename__ = 'events'
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Boolean)   # True if clocking in, false if clocking out
+    type = db.Column(db.Boolean)  # True if clocking in, false if clocking out
     time = db.Column(db.DateTime)  # Time of clock in/out event
     note = db.Column(db.String(120))
     ip = db.Column(db.String(120))
@@ -234,7 +235,7 @@ class Event(db.Model):
                           day=randint(1, 28),
                           hour=randint(0, 23),
                           minute=randint(0, 59),
-                        )
+                      )
                       )
             db.session.add_all([e, u])
             db.session.commit()
@@ -263,7 +264,7 @@ class Tag(db.Model):
 
     @staticmethod
     def insert_tags():
-        tags = ['Intern', 'Contractor', 'SYEP', 'Radical','Consultant', 'Other']
+        tags = ['Intern', 'Contractor', 'SYEP', 'Radical', 'Consultant', 'Other']
         for t in tags:
             tag = Tag.query.filter_by(name=t).first()
             if tag is None:
@@ -294,11 +295,10 @@ class Password(db.Model):
         self.p1 = password_hash
         self.last_changed = datetime.now()
 
+
 login_manager.anonymous_user = AnonymousUser
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-

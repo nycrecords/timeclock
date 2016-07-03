@@ -13,7 +13,6 @@ import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
 
-
 bootstrap = Bootstrap()
 mail = Mail()
 moment = Moment()
@@ -35,9 +34,8 @@ def create_app(config_name):  # App Factory
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[
-            'SQLALCHEMY_DATABASE_URI'] = app.config.get(
-            'SQLALCHEMY_DATABASE_URI'
-        )
+            'SQLALCHEMY_DATABASE_URI'] = \
+            app.config.get('SQLALCHEMY_DATABASE_URI')
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
@@ -65,15 +63,14 @@ def create_app(config_name):  # App Factory
         session.modified = True
 
     logfile_name = 'logfile_directory' + \
-                    "Timeclock" + \
-                    time.strftime("%Y%m%d-%H%M%S") + \
-                    ".log"
+                   "Timeclock" + \
+                   time.strftime("%Y%m%d-%H%M%S") + \
+                   ".log"
 
     handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
     handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
-    '[in %(pathname)s:%(lineno)d]'))
+                                   '[in %(pathname)s:%(lineno)d]'))
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
 
     return app
-

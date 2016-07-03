@@ -10,13 +10,16 @@ def permission_required(permission):
     :param permission: The permission to check for.
     :return: Boolean (True if current user has current permission, False otherwise)
     """
+
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not current_user.can(permission):
                 abort(403)  # 'Forbidden' HTTP Error
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
 
@@ -28,4 +31,3 @@ def admin_required(f):
     :return: Boolean (True if current user has the ADMINISTER permission, False otherwise)
     """
     return permission_required(Permission.ADMINISTER)(f)
-
