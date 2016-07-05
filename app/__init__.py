@@ -5,6 +5,7 @@ from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_session import Session
 from config import config
 import os
 import time
@@ -17,11 +18,12 @@ mail = Mail()
 moment = Moment()
 migrate = Migrate()
 db = SQLAlchemy()
-# session = Session()
+sess = Session()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
 login_manager.login_view = 'auth.login'
+
 
 def load_db(db):
     db.create_all()
@@ -48,6 +50,7 @@ def create_app(config_name):  # App Factory
     with app.app_context():
         load_db(db)
     login_manager.init_app(app)
+    sess.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
