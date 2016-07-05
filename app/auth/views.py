@@ -142,6 +142,8 @@ def login():
             current_app.logger.error('{} is still logged in. Redirecting to main.index'.format(current_user.email))
             # return redirect(request.args.get('next') or url_for('main.index'))
             # current_app.logger.info('{}'.format(request.args.get('next')))
+            if request.args.get('next') is not None:
+                return redirect(request.args.get('next'))
             return index()
 
         if user:
