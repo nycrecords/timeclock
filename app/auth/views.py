@@ -203,7 +203,7 @@ def change_password():
             db.session.commit()
             current_app.logger.info('{} changed their password.'.format(current_user.email))
             flash('Your password has been updated.', category='success')
-            from ..main import index
+            from app.main.views import index
             return index()
     return render_template("auth/change_password.html", form=form)
 
@@ -216,7 +216,7 @@ def password_reset_request():
     :return: HTML page in which users can request a password reset.
     """
     if not current_user.is_anonymous:
-        from ..main import index
+        from app.main.views import index
         return index()
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
@@ -263,7 +263,7 @@ def password_reset(token):
         user = User.query.filter_by(id=data.get('reset')).first()
         if user is None:
             current_app.logger.info('Requested password reset for invalid account.')
-            from ..main import index
+            from app.main.views import index
             return index()
         try:
             if user.reset_password(token, form.password.data):
