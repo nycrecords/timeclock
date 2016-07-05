@@ -120,11 +120,12 @@ def login():
             db.session.add(user)
             db.session.commit()
             current_app.logger.info('{} successfully logged in'.format(current_user.email))
-
+            current_app.logger.error('{} is still logged in.'.format(current_user.email))
             # Check to ensure password isn't outdated
             current_app.logger.info('TIMEOUT PASSWORD? {}'.format(
                 (datetime.today() - current_user.password_list.last_changed).days > 90
             ))
+            current_app.logger.error('{} is still logged in. - Checked password timeout'.format(current_user.email))
             if (datetime.today() - current_user.password_list.last_changed).days > 90:
                 current_user.validated = False
                 db.session.add(current_user)
@@ -132,9 +133,12 @@ def login():
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account',
                       category='error')
                 return redirect(url_for('auth.change_password'))
+            current_app.logger.error('{} is still logged in. Check days to change password'.format(current_user.email))
+
             if (datetime.today() - current_user.password_list.last_changed).days > 75:
                 days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
                 flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
+            current_app.logger.error('{} is still logged in. Redirecting to main.index'.format(current_user.email))
             return redirect(request.args.get('next') or url_for('main.index'))
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
