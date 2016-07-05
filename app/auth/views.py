@@ -203,7 +203,8 @@ def change_password():
             db.session.commit()
             current_app.logger.info('{} changed their password.'.format(current_user.email))
             flash('Your password has been updated.', category='success')
-            return redirect(url_for('main.index'))
+            from ..main import index
+            return index()
     return render_template("auth/change_password.html", form=form)
 
 
