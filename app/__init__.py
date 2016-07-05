@@ -45,7 +45,7 @@ def create_app(config_name):  # App Factory
     mail.init_app(app)
     moment.init_app(app)
     migrate.init_app(app, db)
-    CORS.init_app(app)
+    CORS(app)
     db.init_app(app)
     with app.app_context():
         load_db(db)
@@ -60,7 +60,6 @@ def create_app(config_name):  # App Factory
     # app.permanent_session_lifetime = timedelta(minutes=15)
 
     @app.before_request
-    @cross_origin()
     def func():
         session.modified = True
 
