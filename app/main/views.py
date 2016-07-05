@@ -38,9 +38,11 @@ from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from ..utils import date_handler
+from flask_cors import cross_origin
 
 
 @main.route('/', methods=['GET', 'POST'])
+@cross_origin()
 def index():
     """
     View function for index page. Reroutes to login if user is not logged in.
