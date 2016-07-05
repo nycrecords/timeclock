@@ -73,7 +73,7 @@ class AdminRegistrationForm(Form):
     last_name = StringField("Last name")
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, validators=[DataRequired()])
-    role = SelectField('Role', choices=roles)
+    role = SelectField('Role', choices=roles, validators=[DataRequired()])
 
     submit = SubmitField('Register')
 
@@ -87,6 +87,7 @@ class AdminRegistrationForm(Form):
         # TODO: What should field be? Should this be more specific?
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('An account with this email address already exists')
+        return True
 
     def validate_tag(self, field):
         """
@@ -97,6 +98,7 @@ class AdminRegistrationForm(Form):
         """
         if not field.data or field.data == '':
             raise ValidationError('All users must be tagged')
+        return True
 
     def validate_division(self, field):
         """
@@ -107,6 +109,7 @@ class AdminRegistrationForm(Form):
         """
         if not field.data or field.data == '':
             raise ValidationError('All users must belong to a division')
+        return True
 
 
 
