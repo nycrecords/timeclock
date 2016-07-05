@@ -45,7 +45,6 @@ def create_app(config_name):  # App Factory
     mail.init_app(app)
     moment.init_app(app)
     migrate.init_app(app, db)
-    CORS.init_app(app)
     db.init_app(app)
     with app.app_context():
         load_db(db)
