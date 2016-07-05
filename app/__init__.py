@@ -6,20 +6,18 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
-from datetime import timedelta
 import os
 import time
 import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
-from flask_cors import CORS, cross_origin
-from werkzeug.contrib.fixers import ProxyFix
 
 bootstrap = Bootstrap()
 mail = Mail()
 moment = Moment()
 migrate = Migrate()
 db = SQLAlchemy()
+# session = Session()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
@@ -50,9 +48,6 @@ def create_app(config_name):  # App Factory
     with app.app_context():
         load_db(db)
     login_manager.init_app(app)
-    app.wsgi_app = ProxyFix(app.wsgi_app)
-    # CORS(app)
-    # app.config['CORS_HEADERS'] = 'Content-Type'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

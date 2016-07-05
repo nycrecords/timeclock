@@ -22,13 +22,13 @@ roles = [
 ]
 
 tags = [
-    ('', ''),
-    ('Intern', 'Intern'),
-    ('Contractor', 'Contractor'),
-    ('SYEP', 'SYEP'),
-    ('Radical', 'Radical'),
-    ('Consultant', 'Consultant'),
-    ('Other', 'Other')
+    (0, ''),
+    (1, 'Intern'),
+    (2, 'Contractor'),
+    (3, 'SYEP'),
+    (4, 'Radical'),
+    (5, 'Consultant'),
+    (6, 'Other')
 ]
 
 

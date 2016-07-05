@@ -65,7 +65,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     print('first date' not in session)
     if 'first_date' not in session:
         session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.now()
+        session['last_date'] = date.today() + timedelta(days=1)
     first_date = session['first_date']
     last_date = session['last_date']
 
@@ -81,15 +81,16 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     if first_date is None:
         first_date = date(2004, 1, 1)   # First possible clock-in date
     if last_date is None:
-        last_date = date.now()          # Last possible clock-in date
+        last_date = date.today() + timedelta(days=1)          # Last possible clock-in date
     # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
     events_query = Event.query.filter(
         Event.time >= first_date,
         Event.time <= last_date)
-
+    print("TAG INPUT", tag_input)
     # Tag processing - This takes a while
     if tag_input != 0:
+        print('IN MODULES', tag_input)
         tag = Tag.query.filter_by(id=tag_input).first()
         users = tag.users.all()
         events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
@@ -100,7 +101,6 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         events_query = events_query.filter(Event.user_id == user_id)
 
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
-
     return events_query
 
 

@@ -38,11 +38,9 @@ from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from ..utils import date_handler
-from flask_cors import cross_origin
 
 
 @main.route('/', methods=['GET', 'POST'])
-@cross_origin()
 def index():
     """
     View function for index page. Reroutes to login if user is not logged in.
@@ -96,6 +94,8 @@ def all_history():
     if 'tag_input' not in session:
         session['tag_input'] = 0
 
+    print(session['first_date'], session['last_date'], session['email'], session['tag_input'])
+
     if request.referrer:
         session['email'] = None
 
@@ -108,6 +108,7 @@ def all_history():
         session['last_date'] = time_period[1]
         session['email'] = form.email.data
         session['tag_input'] = form.tag.data
+        print('FORM TAG DATA', form.tag.data)
         page = 1
 
     events_query = get_events_by_date(session['email'],

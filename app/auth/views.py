@@ -25,7 +25,6 @@ from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask_cors import cross_origin
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -66,9 +65,9 @@ def admin_register():
         temp_password = get_day_of_week() + str(datetime.today().day)
 
         # TODO: What is a valid 'default' tag?
-        tag_id = None
+        tag_id = 6
         if 'tag' in form:
-            tag_id = Tag.query.filter_by(name=form.tag.data).first().id
+            tag_id = form.tag.data
         user = User(email=form.email.data,
                     password=temp_password,
                     first_name=form.first_name.data,
@@ -97,7 +96,6 @@ def admin_register():
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-@cross_origin()
 def login():
     """
     View function to login a user. Redirects the user to the index page on successful login.
