@@ -5,7 +5,8 @@ from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_session import Session
+from flask_kvsession import KVSessionExtension
+from simplekv.db.sql import SQLAlchemyStore
 from config import config
 import os
 import time
@@ -18,7 +19,6 @@ mail = Mail()
 moment = Moment()
 migrate = Migrate()
 db = SQLAlchemy()
-sess = Session()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
@@ -41,7 +41,6 @@ def create_app(config_name):  # App Factory
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
     config[config_name].init_app(app)
-
     bootstrap.init_app(app)
     mail.init_app(app)
     moment.init_app(app)
@@ -49,8 +48,9 @@ def create_app(config_name):  # App Factory
     db.init_app(app)
     with app.app_context():
         load_db(db)
+        store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
+        kvsession = KVSessionExtension(store, app)
     login_manager.init_app(app)
-    sess.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

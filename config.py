@@ -14,7 +14,7 @@ class Config:
     MAIL_SUBJECT_PREFIX = '[TimeClock]'
     MAIL_SENDER = 'Records Timeclock <RTimeclock@records.nyc.gov>'
     ADMIN = os.environ.get('ADMIN') or 'admin@records.nyc.gov'
-    SESSION_TYPE = 'filesystem'
+    SESSION_TYPE = 'sqlalchemy'
 
     @staticmethod
     def init_app(app):
