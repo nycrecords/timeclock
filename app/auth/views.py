@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from flask_cors import cross_origin
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -96,6 +97,7 @@ def admin_register():
 
 
 @auth.route('/login', methods=['GET', 'POST'])
+@cross_origin()
 def login():
     """
     View function to login a user. Redirects the user to the index page on successful login.
