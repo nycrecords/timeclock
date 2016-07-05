@@ -12,6 +12,7 @@ import time
 import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
+from werkzeug.contrib.fixers import ProxyFix
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -23,7 +24,6 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
 login_manager.login_view = 'auth.login'
 
-
 def load_db(db):
     db.create_all()
 
@@ -31,6 +31,8 @@ def load_db(db):
 def create_app(config_name):  # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[
