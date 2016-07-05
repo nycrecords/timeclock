@@ -10,7 +10,7 @@ from . import auth
 from .. import db
 from ..models import User, Tag
 from ..decorators import admin_required
-from ..email import send_email
+from ..email_notification import send_email
 from ..utils import InvalidResetToken
 from .forms import (
     LoginForm,
@@ -25,7 +25,6 @@ from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from json import JSONDecodeError
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -245,7 +244,7 @@ def password_reset(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except JSONDecodeError:
+        except ValueError:
             flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
 
