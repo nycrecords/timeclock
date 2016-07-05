@@ -13,6 +13,7 @@ import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
 from flask_cors import CORS, cross_origin
+from werkzeug.contrib.fixers import ProxyFix
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -49,8 +50,9 @@ def create_app(config_name):  # App Factory
     with app.app_context():
         load_db(db)
     login_manager.init_app(app)
-    CORS(app)
-    app.config['CORS_HEADERS'] = 'Content-Type'
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    # CORS(app)
+    # app.config['CORS_HEADERS'] = 'Content-Type'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
