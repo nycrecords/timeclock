@@ -60,7 +60,6 @@ def create_app(config_name):  # App Factory
     # app.permanent_session_lifetime = timedelta(minutes=15)
 
     @app.before_request
-    @cross_origin()
     def func():
         session.modified = True
 
