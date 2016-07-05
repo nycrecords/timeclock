@@ -39,7 +39,6 @@ class Role(db.Model):
             'Moderator': (Permission.ADMINISTER, False),
             'Administrator': (0xff, False)
         }
-        import pdb; pdb.set_trace()
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
