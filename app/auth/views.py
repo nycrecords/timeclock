@@ -139,8 +139,8 @@ def login():
                 days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
                 flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
             current_app.logger.error('{} is still logged in. Redirecting to main.index'.format(current_user.email))
-            # return redirect(request.args.get('next') or url_for('main.index'))
-            current_app.logger.info('{}'.format(request.args.get('next')))
+            return redirect(request.args.get('next') or url_for('main.index', _external=True))
+            # current_app.logger.info('{}'.format(request.args.get('next')))
             return render_template('index.html')
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
