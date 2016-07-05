@@ -45,11 +45,12 @@ def create_app(config_name):  # App Factory
     mail.init_app(app)
     moment.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
     db.init_app(app)
     with app.app_context():
         load_db(db)
     login_manager.init_app(app)
+    CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
