@@ -8,7 +8,6 @@ from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
-from ..main.views import index
 from ..models import User, Tag
 from ..decorators import admin_required
 from ..email_notification import send_email
@@ -133,7 +132,7 @@ def login():
                 db.session.commit()
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account',
                       category='error')
-                return redirect(url_for('auth.change_password'))
+                return change_password()
             # current_app.logger.error('{} is still logged in. Check days to change password'.format(current_user.email))
 
             if (datetime.today() - current_user.password_list.last_changed).days > 75:
@@ -144,6 +143,7 @@ def login():
             # current_app.logger.info('{}'.format(request.args.get('next')))
             # if request.args.get('next') is not None:
             #     return redirect(request.args.get('next'))
+            from app.main.views import index
             return index()
 
         if user:
