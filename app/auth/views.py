@@ -216,7 +216,8 @@ def password_reset_request():
     :return: HTML page in which users can request a password reset.
     """
     if not current_user.is_anonymous:
-        return redirect(url_for('main.index'))
+        from ..main import index
+        return index()
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         current_app.logger.info('Tried to submit a password reset request with account email {}'.format(
@@ -236,7 +237,7 @@ def password_reset_request():
             current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
                                     form.email.data)
             flash('An account with this email was not found in the system.', category='error')
-        return redirect(url_for('auth.login'))
+        return login()
     return render_template('auth/request_reset_password.html', form=form)
 
 
@@ -257,24 +258,25 @@ def password_reset(token):
             data = s.loads(token)
         except ValueError:
             flash('This token is no longer valid.', category='warning')
-            return redirect(url_for('auth.login'))
+            return login()
 
         user = User.query.filter_by(id=data.get('reset')).first()
         if user is None:
             current_app.logger.info('Requested password reset for invalid account.')
-            return redirect(url_for('main.index'))
+            from ..main import index
+            return index()
         try:
             if user.reset_password(token, form.password.data):
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
                 flash('Your password has been updated.', category='success')
-                return redirect(url_for('auth.login'))
+                return login()
             else:
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
                 return render_template('auth/reset_password.html', form=form)
         except InvalidResetToken:
             flash('This token is no longer valid.', category='warning')
-            return redirect(url_for('auth.login'))
+            return login()
     return render_template('auth/reset_password.html', form=form)
