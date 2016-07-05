@@ -38,6 +38,7 @@ from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from ..utils import date_handler
+from ..auth.views import change_password
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -52,7 +53,7 @@ def index():
         return redirect(url_for('auth.login'))
 
     if not current_user.validated:
-        return redirect(url_for('auth.change_password'))
+        return change_password()
 
     form = set_clock_form()
     if form.validate_on_submit():
@@ -146,7 +147,7 @@ def history():
     """
 
     if not current_user.validated:
-        return redirect(url_for('auth.change_password'))
+        return change_password()
 
     session['email'] = current_user.email
 
