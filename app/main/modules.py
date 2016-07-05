@@ -1,6 +1,6 @@
 from .. import db
 from ..models import User, Event, Tag
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 import dateutil.relativedelta
 from flask_login import current_user
 from .forms import ClockInForm, ClockOutForm
@@ -64,8 +64,8 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     print('first date' not in session)
     if 'first_date' not in session:
-        session['first_date'] = datetime(2004, 1, 1)
-        session['last_date'] = datetime.now()
+        session['first_date'] = date(2004, 1, 1)
+        session['last_date'] = date.now()
     first_date = session['first_date']
     last_date = session['last_date']
 
@@ -79,9 +79,9 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     # What to do if form date fields are left blank
     if first_date is None:
-        first_date = datetime(2004, 1, 1)   # First possible clock-in date
+        first_date = date(2004, 1, 1)   # First possible clock-in date
     if last_date is None:
-        last_date = datetime.now()          # Last possible clock-in date
+        last_date = date.now()          # Last possible clock-in date
     # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
     events_query = Event.query.filter(

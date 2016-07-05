@@ -11,7 +11,7 @@ from ..models import Permission
 def inject_permissions():
     return dict(Permission=Permission)
 
-main.permanent_session_lifetime = timedelta(minutes=15)
+# main.permanent_session_lifetime = timedelta(minutes=15)
 
 
 @main.before_request

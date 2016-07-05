@@ -108,7 +108,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=(form.email.data).lower()).first()
         if user and user.login_attempts >= 2:
             # TODO: Add logging
             flash('You have too many invalid login attempts. You must reset your password.',

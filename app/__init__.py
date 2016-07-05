@@ -56,7 +56,7 @@ def create_app(config_name):  # App Factory
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
 
-    app.permanent_session_lifetime = timedelta(minutes=15)
+    # app.permanent_session_lifetime = timedelta(minutes=15)
 
     @app.before_request
     def func():
