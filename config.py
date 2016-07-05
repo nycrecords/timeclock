@@ -3,7 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SECRET_KEY = 'cityofnewyorkkeythatissecretandhardtoguess' or os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'cityofnewyorkkeythatissecretandhardtoguess'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'localhost'
     MAIL_PORT = os.environ.get('MAIL_PORT') or 1111
