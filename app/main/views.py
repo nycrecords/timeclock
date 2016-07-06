@@ -66,7 +66,7 @@ def index():
         )
     else:
         if form.note.data is not None and len(form.note.data) > 120:
-            flash("Your note cannot exceed 120 characters")
+            flash("Your note cannot exceed 120 characters", category='warning')
 
     form = set_clock_form()
     last_event = get_last_clock()

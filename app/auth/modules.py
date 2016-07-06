@@ -48,12 +48,12 @@ def check_password_requirements(email, old_password, password, password_confirma
     if not check_password_hash(pwhash=user_password, password=old_password):
         current_app.logger.info('%s tried to change their password but failed: entered invalid old password' %
                                 current_user.email)
-        flash('Your old password did not match')
+        flash('Your old password did not match', category='warning')
         return False
     if password != password_confirmation:
         current_app.logger.info('%s tried to change their password but failed: passwords did not match' %
                                 current_user.email)
-        flash('Your passwords do not match')
+        flash('Your passwords do not match', category='warning')
         return False
 
     score = 0
@@ -65,7 +65,7 @@ def check_password_requirements(email, old_password, password, password_confirma
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: new password missing uppercase letter '
                                 'or number ')
-        flash('Your new password must contain eight characters and at least one uppercase letter and one number')
+        flash('Your new password must contain eight characters and at least one uppercase letter and one number', category='warning')
         return False
 
     return True
