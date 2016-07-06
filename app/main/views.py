@@ -271,6 +271,7 @@ def user_clear():
 # FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
 def create_dumb_data():
+    from config import config
     from ..models import Role, Tag, User, Event
     Role.insert_roles()
     Tag.insert_tags()

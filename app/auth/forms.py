@@ -25,37 +25,36 @@ class RegistrationForm(Form):
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
     submit = SubmitField('Register')
 
-    def validate_email(self, field):
+    def validate_email(self, email_field):
         """
         Verifies that e-mails used for registration do not already exist in the system.
 
         :param field:
         :return:
         """
-        user = User.query.filter_by(email=field.data).first()
+        user = User.query.filter_by(email=email_field.data).first()
         if user:
             if user.email:
                 current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
-                    user.email, field.data))
+                    user.email, email_field.data))
             else:
                 current_app.logger.error('Anonymous user tried to register user with email {} but user already exists.'.
-                                         format(field.data))
+                                         format(email_field.data))
             raise ValidationError('An account with this email address already exists')
 
-    def validate_password(self, field):
+    def validate_password(self, password_field):
         """
         Used to verify that password meets security criteria.
 
         :param field: password field
         :return: A validation message if password is not secure.
         """
-        # TODO: Why are we naming the parameter field? Shouldn't it be more specific?
-        if len(field.data) < 8:
+        if len(password_field.data) < 8:
             raise ValidationError('Your password must be 8 or more characters')
 
         has_num = False
         has_capital = False
-        for i in field.data:
+        for i in password_field.data:
             if i.isdigit():
                 has_num = True
             if i.isupper():
@@ -82,37 +81,36 @@ class AdminRegistrationForm(Form):
 
     submit = SubmitField('Register')
 
-    def validate_email(self, field):
+    def validate_email(self, email_field):
         """
         Verifies that e-mails used for registration do not already exist in the system.
 
         :param field:
         :return:
         """
-        # TODO: What should field be? Should this be more specific?
-        if User.query.filter_by(email=field.data).first():
+        if User.query.filter_by(email=email_field.data).first():
             raise ValidationError('An account with this email address already exists')
         return True
 
-    def validate_tag(self, field):
+    def validate_tag(self, tag_field):
         """
         Verify that the tag is valid.
 
         :param field: Field passed in to validate (Tag)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not field.data or field.data == '':
+        if not tag_field.data or tag_field.data == '':
             raise ValidationError('All users must be tagged')
         return True
 
-    def validate_division(self, field):
+    def validate_division(self, div_field):
         """
         Verify that the division is valid.
 
         :param field: Field passed in to validate (Division)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not field.data or field.data == '':
+        if not div_field.data or div_field.data == '':
             raise ValidationError('All users must belong to a division')
         return True
 
