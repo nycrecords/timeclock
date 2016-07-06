@@ -198,7 +198,8 @@ def download():
                                  (current_user.email)
                                  )
         errors.append('You must specify a user.')
-    if (session['last_date']-session['first_date']).days > 7:
+    print(session['last_date']-session['first_date'])
+    if (session['last_date']-session['first_date']).days > 8:
         current_app.logger.error('User %s tried to generate a timesheet but '
                                  'exceeded maximum duration (one week)' %
                                  (current_user.email)

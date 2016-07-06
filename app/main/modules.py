@@ -138,7 +138,7 @@ def get_time_period(period='d'):
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
     else:
-        return [datetime(2004, 1, 1), datetime.today()]
+        return [datetime(2004, 1, 1), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
 
 
 def process_time_periods(form):
