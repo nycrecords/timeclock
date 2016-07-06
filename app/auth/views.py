@@ -143,8 +143,7 @@ def login():
             # current_app.logger.info('{}'.format(request.args.get('next')))
             # if request.args.get('next') is not None:
             #     return redirect(request.args.get('next'))
-            from app.main.views import index
-            return index()
+            return redirect(url_for('main.index'))
 
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
@@ -180,13 +179,16 @@ def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if (
-                                check_password_hash(pwhash=current_user.password_list.p1,
-                                                    password=form.password.data) or
-                                check_password_hash(pwhash=current_user.password_list.p2,
-                                                    password=form.password.data) or
-                            check_password_hash(pwhash=current_user.password_list.p3, password=form.password.data) or
-                        check_password_hash(pwhash=current_user.password_list.p4, password=form.password.data) or
-                    check_password_hash(pwhash=current_user.password_list.p5, password=form.password.data)
+            check_password_hash(pwhash=current_user.password_list.p1,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p2,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p3,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p4,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p5,
+                                password=form.password.data)
         ):
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 current_user.email))
@@ -203,8 +205,7 @@ def change_password():
             db.session.commit()
             current_app.logger.info('{} changed their password.'.format(current_user.email))
             flash('Your password has been updated.', category='success')
-            from app.main.views import index
-            return index()
+            return redirect(url_for('main.index'))
     return render_template("auth/change_password.html", form=form)
 
 
@@ -216,8 +217,7 @@ def password_reset_request():
     :return: HTML page in which users can request a password reset.
     """
     if not current_user.is_anonymous:
-        from app.main.views import index
-        return index()
+        return redirect(url_for('main.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         current_app.logger.info('Tried to submit a password reset request with account email {}'.format(
@@ -237,7 +237,7 @@ def password_reset_request():
             current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
                                     form.email.data)
             flash('An account with this email was not found in the system.', category='error')
-        return login()
+        return redirect(url_for('auth.login'))
     return render_template('auth/request_reset_password.html', form=form)
 
 
@@ -258,20 +258,19 @@ def password_reset(token):
             data = s.loads(token)
         except ValueError:
             flash('This token is no longer valid.', category='warning')
-            return login()
+            return redirect(url_for('auth.login'))
 
         user = User.query.filter_by(id=data.get('reset')).first()
         if user is None:
             current_app.logger.info('Requested password reset for invalid account.')
-            from app.main.views import index
-            return index()
+            return redirect(url_for('main.index'))
         try:
             if user.reset_password(token, form.password.data):
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
                 flash('Your password has been updated.', category='success')
-                return login()
+                return redirect(url_for('login'))
             else:
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
