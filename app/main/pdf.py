@@ -87,14 +87,13 @@ def generate_timetable(canvas_field, events):
         canvas_field.setFont('Courier', 8)
         time_in = event[:event.index('|') - 1]
         event = event[(event.index('|') + 2):]
-        name = event[:event.index('|')]
         event = event[(event.index('|') + 2):]
         note_in = event[(event.index('|') + 2):]
-        note_out = event[(event.index('|') + 2):]
 
         time_out = next_event[:next_event.index('|') - 1]
         next_event = next_event[(next_event.index('|') + 2):]
         next_event = next_event[(next_event.index('|') + 2):]
+        note_out = next_event[(event.index('|') + 2):]
 
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
@@ -102,7 +101,6 @@ def generate_timetable(canvas_field, events):
         date = get_day_of_week(time_in_datetime)[:3]
         hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
         total_hours += hours_this_day
-        # canvas_field.drawString(10, timetable_top - (PADDING * index), event)
         canvas_field.drawString(30, timetable_top - (PADDING * index), date + ' ' + time_in[:13])
         canvas_field.drawString(130, timetable_top - (PADDING * index), time_in[13:])
         canvas_field.drawString(220, timetable_top - (PADDING * index), time_out[13:])
