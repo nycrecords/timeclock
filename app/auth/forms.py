@@ -32,10 +32,11 @@ class RegistrationForm(Form):
         :param field:
         :return:
         """
-        if User.query.filter_by(email=field.data).first():
-            if current_user.email:
+        user = User.query.filter_by(email=field.data).first()
+        if user:
+            if user.email:
                 current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
-                    current_user.email, field.data))
+                    user.email, field.data))
             else:
                 current_app.logger.error('Anonymous user tried to register user with email {} but user already exists.'.
                                          format(field.data))
