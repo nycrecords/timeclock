@@ -209,7 +209,7 @@ def download():
 
     if errors:
         for error in errors:
-            flash(error)
+            flash(error, 'warning')
         return redirect(url_for('main.all_history'))
 
     events = request.form.getlist('event')
