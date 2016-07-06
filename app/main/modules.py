@@ -61,7 +61,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :param tag_input: tag to filter by
     :return: QUERY of Event objects from a given user between two given dates
     """
-
+    #TODO: MAKE EMAIL INPUTS PLAY A ROLE IN FILTERING
     if 'first_date' not in session:
         session['first_date'] = date(2004, 1, 1)
         session['last_date'] = date.today() + timedelta(days=1)
@@ -73,7 +73,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     tag_input = session['tag_input']
 
     if 'email' not in session:
-        session['email'] = None
+        session['email'] = current_user.email
     email_input = session['email']
 
     # What to do if form date fields are left blank

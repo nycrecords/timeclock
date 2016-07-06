@@ -188,7 +188,7 @@ def download():
     """
 
     errors = []
-    if 'email' not in session or session['email'] is None:
+    if 'email' not in session or session['email'] is None or session['email'] == '':
         # This will only happen for admin searches, so we only need to
         # redirect to the admin page
         current_app.logger.error('User %s tried to generate a timesheet but '
