@@ -38,7 +38,6 @@ from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
-
 @main.route('/', methods=['GET', 'POST'])
 def index():
     """
@@ -210,7 +209,7 @@ def download():
     if errors:
         for error in errors:
             flash(error, 'warning')
-        return redirect(url_for('main.all_history'))
+        return redirect(url_for('main.' + (request.referrer).split('/')[3]))
 
     events = request.form.getlist('event')
     # ^gets event data - we can similarly pass in other data
