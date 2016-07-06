@@ -37,7 +37,7 @@ def register():
     """
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(email=form.email.data,
+        user = User(email=(form.email.data).lower(),
                     password=form.password.data,
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
@@ -68,7 +68,7 @@ def admin_register():
         tag_id = 6
         if 'tag' in form:
             tag_id = form.tag.data
-        user = User(email=form.email.data,
+        user = User(email=(form.email.data).lower(),
                     password=temp_password,
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
