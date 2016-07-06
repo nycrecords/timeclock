@@ -270,7 +270,7 @@ def password_reset(token):
                 db.session.add(user)
                 db.session.commit()
                 flash('Your password has been updated.', category='success')
-                return redirect(url_for('login'))
+                return redirect(url_for('auth.login'))
             else:
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
