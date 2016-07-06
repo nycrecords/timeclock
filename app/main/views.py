@@ -147,7 +147,7 @@ def history():
     """
 
     if not current_user.validated:
-        return change_password()
+        return redirect(url_for('auth.change_password'))
 
     session['email'] = current_user.email
 

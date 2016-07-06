@@ -33,8 +33,12 @@ class RegistrationForm(Form):
         :return:
         """
         if User.query.filter_by(email=field.data).first():
-            current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
-                current_user.email, field.data))
+            if current_user.email:
+                current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
+                    current_user.email, field.data))
+            else:
+                current_app.logger.error('Anonymous user tried to register user with email {} but user already exists.'.
+                                         format(field.data))
             raise ValidationError('An account with this email address already exists')
 
     def validate_password(self, field):
