@@ -62,7 +62,6 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :return: QUERY of Event objects from a given user between two given dates
     """
 
-    print('first date' not in session)
     if 'first_date' not in session:
         session['first_date'] = date(2004, 1, 1)
         session['last_date'] = date.today() + timedelta(days=1)
@@ -86,11 +85,9 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     events_query = Event.query.filter(
         Event.time >= first_date,
-        Event.time <= last_date)
-    print("TAG INPUT", tag_input)
+        Event.time < last_date)
     # Tag processing - This takes a while
     if tag_input != 0:
-        print('IN MODULES', tag_input)
         tag = Tag.query.filter_by(id=tag_input).first()
         users = tag.users.all()
         events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
@@ -117,16 +114,16 @@ def get_time_period(period='d'):
     :return: A two-element array containing a start and end date
     """
     today = datetime.today()
-    print('TODAY', today)
-    first_of_month = today.replace(day=1)
+    first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
-    end_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(days=-1)
+    end_of_last_month = (first_of_month + dateutil.relativedelta.relativedelta(days=-1)).\
+        replace(hour=23, minute=59, second=59, microsecond=99)
     if period == 'd':
-        return [today, today + timedelta(days=1)]
+        return [(today + dateutil.relativedelta.relativedelta(days=-1)).replace(hour=23, minute=59, second=59), today]
     elif period == 'w':
         dt = today
-        start = dt - timedelta(days=dt.weekday())
-        end = start + timedelta(days=7)
+        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=8)
         return [start, end]
     elif period == 'm':
         return [first_of_month, today]
@@ -135,8 +132,8 @@ def get_time_period(period='d'):
         return [yesterday, yesterday]
     elif period == 'lw':
         dt = today + timedelta(days=-7)
-        start = dt - timedelta(days=dt.weekday())
-        end = start + timedelta(days=7)
+        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=8)
         return [start, end]
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
