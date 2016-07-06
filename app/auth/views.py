@@ -25,7 +25,6 @@ from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask_cors import cross_origin
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -47,7 +46,7 @@ def register():
         db.session.commit()
         # TODO: Add logging here.
         flash('User successfully registered', category='success')
-        return redirect(url_for('auth.login'))
+        return
     return render_template('auth/register.html', form=form)
 
 
@@ -66,9 +65,9 @@ def admin_register():
         temp_password = get_day_of_week() + str(datetime.today().day)
 
         # TODO: What is a valid 'default' tag?
-        tag_id = None
+        tag_id = 6
         if 'tag' in form:
-            tag_id = Tag.query.filter_by(name=form.tag.data).first().id
+            tag_id = form.tag.data
         user = User(email=form.email.data,
                     password=temp_password,
                     first_name=form.first_name.data,
@@ -97,7 +96,6 @@ def admin_register():
 
 
 @auth.route('/login', methods=['GET', 'POST'])
-@cross_origin()
 def login():
     """
     View function to login a user. Redirects the user to the index page on successful login.
@@ -121,23 +119,32 @@ def login():
             user.login_attempts = 0
             db.session.add(user)
             db.session.commit()
-            current_app.logger.info('{} successfully logged in'.format(current_user.email))
-
+            # current_app.logger.info('{} successfully logged in'.format(current_user.email))
+            # current_app.logger.error('{} is still logged in.'.format(current_user.email))
             # Check to ensure password isn't outdated
             current_app.logger.info('TIMEOUT PASSWORD? {}'.format(
                 (datetime.today() - current_user.password_list.last_changed).days > 90
             ))
+            # current_app.logger.error('{} is still logged in. - Checked password timeout'.format(current_user.email))
             if (datetime.today() - current_user.password_list.last_changed).days > 90:
                 current_user.validated = False
                 db.session.add(current_user)
                 db.session.commit()
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account',
                       category='error')
-                return redirect(url_for('auth.change_password'))
+                return change_password()
+            # current_app.logger.error('{} is still logged in. Check days to change password'.format(current_user.email))
+
             if (datetime.today() - current_user.password_list.last_changed).days > 75:
                 days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
                 flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
-            return redirect(request.args.get('next') or url_for('main.index'))
+            # current_app.logger.error('{} is still logged in. Redirecting to main.index'.format(current_user.email))
+            # return redirect(request.args.get('next') or url_for('main.index'))
+            # current_app.logger.info('{}'.format(request.args.get('next')))
+            # if request.args.get('next') is not None:
+            #     return redirect(request.args.get('next'))
+            return redirect(url_for('main.index'))
+
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
             user.login_attempts += 1
@@ -172,13 +179,16 @@ def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if (
-                                check_password_hash(pwhash=current_user.password_list.p1,
-                                                    password=form.password.data) or
-                                check_password_hash(pwhash=current_user.password_list.p2,
-                                                    password=form.password.data) or
-                            check_password_hash(pwhash=current_user.password_list.p3, password=form.password.data) or
-                        check_password_hash(pwhash=current_user.password_list.p4, password=form.password.data) or
-                    check_password_hash(pwhash=current_user.password_list.p5, password=form.password.data)
+            check_password_hash(pwhash=current_user.password_list.p1,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p2,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p3,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p4,
+                                password=form.password.data) or
+            check_password_hash(pwhash=current_user.password_list.p5,
+                                password=form.password.data)
         ):
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 current_user.email))
@@ -267,5 +277,5 @@ def password_reset(token):
                 return render_template('auth/reset_password.html', form=form)
         except InvalidResetToken:
             flash('This token is no longer valid.', category='warning')
-            return redirect(url_for('auth.login'))
+            return login()
     return render_template('auth/reset_password.html', form=form)

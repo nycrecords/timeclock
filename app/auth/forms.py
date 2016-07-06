@@ -72,7 +72,7 @@ class AdminRegistrationForm(Form):
     first_name = StringField("First name")
     last_name = StringField("Last name")
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
-    tag = SelectField('Tag', choices=tags, validators=[DataRequired()])
+    tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
     role = SelectField('Role', choices=roles, validators=[DataRequired()])
 
     submit = SubmitField('Register')

@@ -5,15 +5,14 @@ from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_kvsession import KVSessionExtension
+from simplekv.db.sql import SQLAlchemyStore
 from config import config
-from datetime import timedelta
 import os
 import time
 import logging
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
-from flask_cors import CORS, cross_origin
-from werkzeug.contrib.fixers import ProxyFix
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -25,9 +24,9 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
 login_manager.login_view = 'auth.login'
 
+
 def load_db(db):
     db.create_all()
-
 
 def create_app(config_name):  # App Factory
     app = Flask(__name__)
@@ -41,7 +40,6 @@ def create_app(config_name):  # App Factory
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
     config[config_name].init_app(app)
-
     bootstrap.init_app(app)
     mail.init_app(app)
     moment.init_app(app)
@@ -49,10 +47,9 @@ def create_app(config_name):  # App Factory
     db.init_app(app)
     with app.app_context():
         load_db(db)
+        store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
+        kvsession = KVSessionExtension(store, app)
     login_manager.init_app(app)
-    app.wsgi_app = ProxyFix(app.wsgi_app)
-    # CORS(app)
-    # app.config['CORS_HEADERS'] = 'Content-Type'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

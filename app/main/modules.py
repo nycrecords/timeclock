@@ -65,7 +65,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     print('first date' not in session)
     if 'first_date' not in session:
         session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.now()
+        session['last_date'] = date.today() + timedelta(days=1)
     first_date = session['first_date']
     last_date = session['last_date']
 
@@ -81,15 +81,16 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     if first_date is None:
         first_date = date(2004, 1, 1)   # First possible clock-in date
     if last_date is None:
-        last_date = date.now()          # Last possible clock-in date
+        last_date = date.today() + timedelta(days=1)          # Last possible clock-in date
     # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
     events_query = Event.query.filter(
         Event.time >= first_date,
         Event.time <= last_date)
-
+    print("TAG INPUT", tag_input)
     # Tag processing - This takes a while
     if tag_input != 0:
+        print('IN MODULES', tag_input)
         tag = Tag.query.filter_by(id=tag_input).first()
         users = tag.users.all()
         events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
@@ -100,7 +101,6 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         events_query = events_query.filter(Event.user_id == user_id)
 
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
-
     return events_query
 
 
@@ -116,33 +116,32 @@ def get_time_period(period='d'):
         lm (last month)
     :return: A two-element array containing a start and end date
     """
-    now = datetime.now()
-    first_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.today()
+    print('TODAY', today)
+    first_of_month = today.replace(day=1)
     first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
     end_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(days=-1)
-    # TODO: first_of_week
-    # TODO: end_of_last_week
     if period == 'd':
-        return [now.replace(hour=0, minute=0, second=0, microsecond=0), now]
+        return [today, today + timedelta(days=1)]
     elif period == 'w':
-        dt = now.replace(hour=0, minute=0, microsecond=0)
+        dt = today
         start = dt - timedelta(days=dt.weekday())
-        end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59)
+        end = start + timedelta(days=7)
         return [start, end]
     elif period == 'm':
-        return [first_of_month, now]
+        return [first_of_month, today]
     elif period == 'ld':
-        yesterday = now.replace(hour=0, minute=0, second=0, microsecond=0) + dateutil.relativedelta.relativedelta(days=-1)
-        return [yesterday, yesterday.replace(hour=23, minute=59, second=59)]
+        yesterday = today + dateutil.relativedelta.relativedelta(days=-1)
+        return [yesterday, yesterday]
     elif period == 'lw':
-        dt = now.replace(hour=0, minute=0, microsecond=0) + timedelta(days=-7)
+        dt = today + timedelta(days=-7)
         start = dt - timedelta(days=dt.weekday())
-        end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59)
+        end = start + timedelta(days=7)
         return [start, end]
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
     else:
-        return [datetime(2004, 1, 1), datetime.now]
+        return [datetime(2004, 1, 1), datetime.today()]
 
 
 def process_time_periods(form):
@@ -151,6 +150,7 @@ def process_time_periods(form):
     :param form: AdminFilterEventsForm or UserFilterEventsForm
     :return: A two-element array containing a start and end date
     """
+    time_period = [form.first_date.data, form.last_date.data]
     if 'this_day' in form:
         if form.this_day.data:
             time_period = get_time_period('d')
@@ -169,10 +169,6 @@ def process_time_periods(form):
     if 'last_month' in form:
         if form.last_month.data:
             time_period = get_time_period('lm')
-        else:
-            time_period = [form.first_date.data, form.last_date.data]
-    else:
-        time_period = [form.first_date.data, form.last_date.data]
     return time_period
 
 
