@@ -29,7 +29,7 @@ class RegistrationForm(Form):
         """
         Verifies that e-mails used for registration do not already exist in the system.
 
-        :param field:
+        :param email_field:
         :return:
         """
         user = User.query.filter_by(email=email_field.data).first()
@@ -46,7 +46,7 @@ class RegistrationForm(Form):
         """
         Used to verify that password meets security criteria.
 
-        :param field: password field
+        :param password_field: password field
         :return: A validation message if password is not secure.
         """
         if len(password_field.data) < 8:
@@ -85,7 +85,7 @@ class AdminRegistrationForm(Form):
         """
         Verifies that e-mails used for registration do not already exist in the system.
 
-        :param field:
+        :param email_field:
         :return:
         """
         if User.query.filter_by(email=email_field.data).first():
@@ -96,7 +96,7 @@ class AdminRegistrationForm(Form):
         """
         Verify that the tag is valid.
 
-        :param field: Field passed in to validate (Tag)
+        :param tag_field: Field passed in to validate (Tag)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
         if not tag_field.data or tag_field.data == '':
@@ -107,7 +107,7 @@ class AdminRegistrationForm(Form):
         """
         Verify that the division is valid.
 
-        :param field: Field passed in to validate (Division)
+        :param div_field: Field passed in to validate (Division)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
         if not div_field.data or div_field.data == '':
