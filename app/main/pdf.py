@@ -62,7 +62,6 @@ def generate_timetable(canvas_field, events):
     :return: None.
     """
     timetable_top = length - 150  # Top of the time_table area
-    PADDING = 45
     index = 1
     total_hours = 0
 
@@ -81,6 +80,7 @@ def generate_timetable(canvas_field, events):
     if not len(events) % 2 == 0:
         events.pop()
 
+    next_line = timetable_top
     for x in range(0, len(events), 2):
         event = events[x]
         next_event = events[x + 1]
@@ -95,37 +95,53 @@ def generate_timetable(canvas_field, events):
         next_event = next_event[(next_event.index('|') + 2):]
         note_out = next_event[(event.index('|') + 2):]
 
+        if note_in or note_out:
+            if len(note_in) > len(note_out):
+                max_note_length = len(note_in)
+            else:
+                max_note_length = len(note_out)
+        else:
+            max_note_length = 20
+
+        PADDING = 20 + max_note_length/7
+        #TODO: FIX PADDING TO ADJUST TO TEXT LENGTH
+
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
 
         date = get_day_of_week(time_in_datetime)[:3]
         hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
         total_hours += hours_this_day
-        canvas_field.drawString(30, timetable_top - (PADDING * index), date + ' ' + time_in[:13])
-        canvas_field.drawString(130, timetable_top - (PADDING * index), time_in[13:])
-        canvas_field.drawString(220, timetable_top - (PADDING * index), time_out[13:])
-        canvas_field.drawString(310, timetable_top - (PADDING * index), "{0:.2f}".format(hours_this_day))
-        canvas_field.drawString(370, timetable_top - (PADDING * index) + 27, note_in[0:20])
-        canvas_field.drawString(370, timetable_top - (PADDING * index) + 20, note_in[21:40])
-        canvas_field.drawString(370, timetable_top - (PADDING * index) + 13, note_in[41:60])
-        canvas_field.drawString(370, timetable_top - (PADDING * index) + 6, note_in[61:80])
-        canvas_field.drawString(370, timetable_top - (PADDING * index) - 1, note_in[81:100])
-        canvas_field.drawString(370, timetable_top - (PADDING * index) - 8, note_in[100:120])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) + 27, note_out[0:20])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) + 20, note_out[21:40])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) + 13, note_out[41:60])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) + 6, note_out[61:80])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) - 1, note_out[81:100])
-        canvas_field.drawString(480, timetable_top - (PADDING * index) - 8, note_out[101:120])
+
+        next_line -= PADDING
+        print('PADDING', PADDING)
+        print('NEXT LINE', next_line)
+        print('MAX NOTE LENGTH', max_note_length)
+        canvas_field.drawString(30, next_line, date + ' ' + time_in[:13])
+        canvas_field.drawString(130, next_line, time_in[13:])
+        canvas_field.drawString(220, next_line, time_out[13:])
+        canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
+        canvas_field.drawString(370, next_line + max_note_length/1, note_in[0:20])
+        canvas_field.drawString(370, next_line + max_note_length/6, note_in[21:40])
+        canvas_field.drawString(370, next_line + max_note_length/13, note_in[41:60])
+        canvas_field.drawString(370, next_line + max_note_length/20, note_in[61:80])
+        canvas_field.drawString(370, next_line - max_note_length/20, note_in[81:100])
+        canvas_field.drawString(370, next_line - max_note_length/13, note_in[100:120])
+        canvas_field.drawString(480, next_line + max_note_length/1, note_out[0:20])
+        canvas_field.drawString(480, next_line + max_note_length/6, note_out[21:40])
+        canvas_field.drawString(480, next_line + max_note_length/13, note_out[41:60])
+        canvas_field.drawString(480, next_line + max_note_length/20, note_out[61:80])
+        canvas_field.drawString(480, next_line - max_note_length/20, note_out[81:100])
+        canvas_field.drawString(480, next_line - max_note_length/13, note_out[101:120])
         canvas_field.setLineWidth(.5)
-        canvas_field.line(20, timetable_top - ((PADDING * index) + 10), 600, timetable_top - ((PADDING * index) + 10))
+        canvas_field.line(20, next_line - 10, 600, next_line - 10)
 
         # For testing, delete before putting in production
-        #canvas_field.drawString(500, timetable_top - (PADDING * index), name)
+        # canvas_field.drawString(500, timetable_top - (PADDING * index), name)
 
         index += 1
 
-    canvas_field.drawString(50, timetable_top - (PADDING * index + 5), 'TOTAL: ' + "{0:.2f}".format(total_hours))
+    canvas_field.drawString(50, next_line - 25, 'TOTAL: ' + "{0:.2f}".format(total_hours))
 
     canvas_field.setLineWidth(1) # Reset line width
 
