@@ -9,7 +9,7 @@ class ClockInForm(Form):
     """
     Form for clocked out users.
     """
-    note = StringField("Note: ", validators=[Length(min=0, max=120)])
+    note = StringField("Note: ", validators=[Length(min=0, max=50)])
     submit = SubmitField("Clock In")
 
 
@@ -17,7 +17,7 @@ class ClockOutForm(Form):
     """
     Form for clocked in users.
     """
-    note = StringField("Note: ", validators=[Length(min=0, max=120)])
+    note = StringField("Note: ", validators=[Length(min=0, max=50)])
     submit = SubmitField("Clock Out")
 
 

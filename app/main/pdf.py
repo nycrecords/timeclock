@@ -105,7 +105,7 @@ def generate_timetable(canvas_field, events):
             max_note_length = 20
 
         PADDING = 25 + max_note_length/7
-        #TODO: FIX PADDING TO ADJUST TO TEXT LENGTH
+        #  TODO: FIX PADDING TO ADJUST TO TEXT LENGTH
 
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
@@ -119,8 +119,8 @@ def generate_timetable(canvas_field, events):
         # print('NEXT LINE', next_line)
         # print('MAX NOTE LENGTH', max_note_length)
         canvas_field.drawString(30, next_line, date)
-        canvas_field.drawString(130, next_line, time_in_datetime.strftime('%I:%M:%S %p'))
-        canvas_field.drawString(220, next_line, time_out_datetime.strftime('%I:%M:%S %p'))
+        canvas_field.drawString(130, next_line, time_in_datetime.strftime('%H:%M:%S'))
+        canvas_field.drawString(220, next_line, time_out_datetime.strftime('%H:%M:%S'))
         canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
         canvas_field.drawString(370, next_line + max_note_length/PADDING + 10, note_in[0:20])
         canvas_field.drawString(370, next_line + max_note_length/PADDING + 3, note_in[20:40])

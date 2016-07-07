@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
-from flask import current_app
+from flask import current_app, session
 from . import login_manager
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -105,6 +105,7 @@ class User(UserMixin, db.Model):
         :return: the token.
         """
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        session['reset_token'] = s
         return s.dumps({'reset': self.id})
 
         # verifies the token and if valid, resets password
