@@ -3,7 +3,6 @@ from ..models import User, Event, Tag
 from datetime import datetime, timedelta, time, date
 import dateutil.relativedelta
 from flask_login import current_user
-from .forms import ClockInForm, ClockOutForm
 import sqlalchemy
 from flask import session
 from pytz import timezone
@@ -29,6 +28,7 @@ def process_clock(note_data, ip=None):
 
 
 def set_clock_form():
+    from .forms import ClockInForm, ClockOutForm
     """
     For use in main/views.py: Determine the type of form to be rendered to index.html.
     :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
@@ -81,7 +81,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     events_query = Event.query.filter(
         Event.time >= first_date,
-        Event.time < last_date)
+        Event.time <= last_date)
     # Tag processing - This takes a while
     if tag_input != 0:
         tag = Tag.query.filter_by(id=tag_input).first()
