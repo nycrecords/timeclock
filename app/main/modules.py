@@ -45,8 +45,6 @@ def get_last_clock():
     Obtains the last clock in or clock out instance created by this user.
     :return: Formatted time of last clock event
     """
-    # This shows first time event, need last time. .last() doesn't work
-    # TODO: find alternatives when you have internet connection
     if Event.query.filter_by(user_id=current_user.id).first() is not None:
         return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().time.strftime("%b %d, %Y | %l:%M:%S %p")
 
@@ -61,7 +59,6 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :param tag_input: tag to filter by
     :return: QUERY of Event objects from a given user between two given dates
     """
-    #TODO: MAKE EMAIL INPUTS PLAY A ROLE IN FILTERING
     if 'first_date' not in session:
         session['first_date'] = date(2004, 1, 1)
         session['last_date'] = date.today() + timedelta(days=1)
@@ -81,7 +78,6 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
         first_date = date(2004, 1, 1)   # First possible clock-in date
     if last_date is None:
         last_date = date.today() + timedelta(days=1)          # Last possible clock-in date
-    # TODO: CHECK WITH JOEL TO SEE IF ABOVE CODE IS STILL NEEDED
 
     events_query = Event.query.filter(
         Event.time >= first_date,

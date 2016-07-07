@@ -44,7 +44,7 @@ def register():
                     validated=True)
         db.session.add(user)
         db.session.commit()
-        # TODO: Add logging here.
+        current_app.logger.info('Successfully registered user {}'.format(user.email))
         flash('User successfully registered', category='success')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
@@ -64,7 +64,7 @@ def admin_register():
         # TODO: Can this be done using `datetime.datetime.today().strftime('%A%d')`? This outputs 'Saturday02'
         temp_password = get_day_of_week() + str(datetime.today().day)
 
-        # TODO: What is a valid 'default' tag?
+        # Default tag set to 6: Other
         tag_id = 6
         if 'tag' in form:
             tag_id = form.tag.data

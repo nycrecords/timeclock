@@ -59,7 +59,6 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
-    # TODO: PAID TAG - necessary? We have a "pays" table, just associate a $0 pay.
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
