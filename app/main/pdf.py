@@ -121,28 +121,26 @@ def generate_timetable(canvas_field, events):
         canvas_field.drawString(220, next_line, time_out_datetime.strftime('%I:%M:%S %p'))
         canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
         canvas_field.drawString(370, next_line + max_note_length/PADDING + 10, note_in[0:20])
-        canvas_field.drawString(370, next_line + max_note_length/PADDING + 3, note_in[21:40])
-        canvas_field.drawString(370, next_line + max_note_length/PADDING - 4, note_in[41:60])
-        canvas_field.drawString(370, next_line + max_note_length/PADDING - 11, note_in[61:80])
-        canvas_field.drawString(370, next_line + max_note_length/PADDING - 18, note_in[81:100])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING + 3, note_in[20:40])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 4, note_in[40:60])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 11, note_in[60:80])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 18, note_in[80:100])
         canvas_field.drawString(370, next_line + max_note_length/PADDING - 25, note_in[100:120])
         canvas_field.drawString(480, next_line + max_note_length/PADDING + 10, note_out[0:20])
-        canvas_field.drawString(480, next_line + max_note_length/PADDING + 3, note_out[21:40])
-        canvas_field.drawString(480, next_line + max_note_length/PADDING - 4, note_out[41:60])
-        canvas_field.drawString(480, next_line + max_note_length/PADDING - 11, note_out[61:80])
-        canvas_field.drawString(480, next_line + max_note_length/PADDING - 18, note_out[81:100])
-        canvas_field.drawString(480, next_line + max_note_length/PADDING - 25, note_out[101:120])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING + 3, note_out[20:40])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 4, note_out[40:60])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 11, note_out[60:80])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 18, note_out[80:100])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 25, note_out[100:120])
         next_line -= max_note_length/PADDING
         canvas_field.setLineWidth(.5)
         canvas_field.line(20, next_line - 10, 600, next_line - 10)
 
-        # For testing, delete before putting in production
-        # canvas_field.drawString(500, timetable_top - (PADDING * index), name)
         index += 1
 
     canvas_field.drawString(50, next_line - 25, 'TOTAL: ' + "{0:.2f}".format(total_hours))
 
-    canvas_field.setLineWidth(1) # Reset line width
+    canvas_field.setLineWidth(1)  # Reset line width
 
 
 def generate_signature_template(canvas_field):
