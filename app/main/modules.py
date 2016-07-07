@@ -60,8 +60,8 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     :return: QUERY of Event objects from a given user between two given dates
     """
     if 'first_date' not in session:
-        session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.today() + timedelta(days=1)
+        session['first_date'] = get_time_period('w')[0]
+        session['last_date'] = get_time_period('w')[1]
     first_date = session['first_date']
     last_date = session['last_date']
 
@@ -75,9 +75,9 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     # What to do if form date fields are left blank
     if first_date is None:
-        first_date = date(2004, 1, 1)   # First possible clock-in date
+        first_date = get_time_period('w')[0]   # First possible clock-in date
     if last_date is None:
-        last_date = date.today() + timedelta(days=1)          # Last possible clock-in date
+        last_date = get_time_period(['w'])[1]          # Last possible clock-in date
 
     events_query = Event.query.filter(
         Event.time >= first_date,
@@ -171,23 +171,6 @@ def get_clocked_in_users():
     """
     return User.query.filter_by(clocked_in=True).all()
 
-
-def get_day_of_week(datetime_input):
-    """
-    Gets the day of the week of the given datetime.
-    :param datetime_input: Datetime whose day to get.
-    :return: String day of week
-    """
-    date_int_to_str = {
-        0: "Monday",
-        1: "Tuesday",
-        2: "Wednesday",
-        3: "Thursday",
-        4: "Friday",
-        5: "Saturday",
-        6: "Sunday"
-    }
-    return date_int_to_str[datetime_input.weekday()]
 
 def get_all_tags():
     return Tag.query.all()

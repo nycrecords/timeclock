@@ -3,7 +3,6 @@
 
    :synopsis: Utiltiy functions used throughout the application.
 """
-from datetime import datetime
 
 divisions = [
     ('', ''),

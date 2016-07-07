@@ -13,25 +13,6 @@ from flask_login import current_user
 import re
 
 
-def get_day_of_week():
-    """
-    Gets the current day of the week.
-
-    :return: The current day of the week as a string.
-    """
-    # TODO: This isn't needed, can use `datetime.datetime.today().strftime('%A')`
-    date_int_to_str = {
-        0: "Monday",
-        1: "Tuesday",
-        2: "Wednesday",
-        3: "Thursday",
-        4: "Friday",
-        5: "Saturday",
-        6: "Sunday"
-    }
-    return date_int_to_str[datetime.today().weekday()]
-
-
 def check_password_requirements(email, old_password, password, password_confirmation):
     """
     Check a password against security requirements.

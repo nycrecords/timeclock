@@ -20,8 +20,8 @@ from .forms import (
     PasswordResetRequestForm,
     ChangePasswordForm
 )
-from .modules import get_day_of_week, check_password_requirements
-from datetime import datetime, timedelta
+from .modules import check_password_requirements
+from datetime import datetime
 from werkzeug.security import check_password_hash
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -61,8 +61,7 @@ def admin_register():
     form = AdminRegistrationForm()
 
     if form.validate_on_submit():
-        # TODO: Can this be done using `datetime.datetime.today().strftime('%A%d')`? This outputs 'Saturday02'
-        temp_password = get_day_of_week() + str(datetime.today().day)
+        temp_password = datetime.today().strftime('%A%-d')
 
         # Default tag set to 6: Other
         tag_id = 6

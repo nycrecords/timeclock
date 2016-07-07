@@ -5,7 +5,6 @@ from flask import session, url_for
 from flask_login import current_user
 from datetime import datetime, timedelta
 from ..models import User
-from .modules import get_day_of_week
 
 from reportlab.lib.pagesizes import letter
 width, length = letter
@@ -84,6 +83,7 @@ def generate_timetable(canvas_field, events):
     for x in range(0, len(events), 2):
         event = events[x]
         next_event = events[x + 1]
+        print('EVENT:', event, '|', 'NEXT EVENT:', next_event)
         canvas_field.setFont('Courier', 8)
         time_in = event[:event.index('|') - 1]
         event = event[(event.index('|') + 2):]
@@ -109,7 +109,7 @@ def generate_timetable(canvas_field, events):
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
 
-        date = get_day_of_week(time_in_datetime)[:3]
+        date = time_in_datetime.strftime('%a %b %m, %Y')
         hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
         total_hours += hours_this_day
 
@@ -117,22 +117,22 @@ def generate_timetable(canvas_field, events):
         print('PADDING', PADDING)
         print('NEXT LINE', next_line)
         print('MAX NOTE LENGTH', max_note_length)
-        canvas_field.drawString(30, next_line, date + ' ' + time_in[:13])
-        canvas_field.drawString(130, next_line, time_in[13:])
-        canvas_field.drawString(220, next_line, time_out[13:])
+        canvas_field.drawString(30, next_line, date)
+        canvas_field.drawString(130, next_line, time_in_datetime.strftime('%I:%M:%S %p'))
+        canvas_field.drawString(220, next_line, time_out_datetime.strftime('%I:%M:%S %p'))
         canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
-        canvas_field.drawString(370, next_line + max_note_length/1, note_in[0:20])
-        canvas_field.drawString(370, next_line + max_note_length/6, note_in[21:40])
-        canvas_field.drawString(370, next_line + max_note_length/13, note_in[41:60])
-        canvas_field.drawString(370, next_line + max_note_length/20, note_in[61:80])
-        canvas_field.drawString(370, next_line - max_note_length/20, note_in[81:100])
-        canvas_field.drawString(370, next_line - max_note_length/13, note_in[100:120])
-        canvas_field.drawString(480, next_line + max_note_length/1, note_out[0:20])
-        canvas_field.drawString(480, next_line + max_note_length/6, note_out[21:40])
-        canvas_field.drawString(480, next_line + max_note_length/13, note_out[41:60])
-        canvas_field.drawString(480, next_line + max_note_length/20, note_out[61:80])
-        canvas_field.drawString(480, next_line - max_note_length/20, note_out[81:100])
-        canvas_field.drawString(480, next_line - max_note_length/13, note_out[101:120])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING + 12, note_in[0:20])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING + 5, note_in[20:40])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 2, note_in[40:60])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 9, note_in[60:80])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 16, note_in[80:100])
+        canvas_field.drawString(370, next_line + max_note_length/PADDING - 23, note_in[100:120])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING + 12, note_out[0:20])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING + 5, note_out[20:40])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 2, note_out[40:60])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 9, note_out[60:80])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 16, note_out[80:100])
+        canvas_field.drawString(480, next_line + max_note_length/PADDING - 23, note_out[100:120])
         canvas_field.setLineWidth(.5)
         canvas_field.line(20, next_line - 10, 600, next_line - 10)
 

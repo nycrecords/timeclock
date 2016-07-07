@@ -21,6 +21,7 @@ from .modules import (
     get_last_clock,
     get_events_by_date,
     get_clocked_in_users,
+    get_time_period,
     process_time_periods,
     get_all_tags
 )
@@ -88,8 +89,8 @@ def all_history():
     filtering.
     """
     if 'first_date' not in session:
-        session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.today()
+        session['first_date'] = get_time_period('w')[0]
+        session['last_date'] = get_time_period('w')[1]
     if 'email' not in session:
         session['email'] = None
     if 'tag_input' not in session:
@@ -157,8 +158,8 @@ def history():
         session['last_date'] = time_period[1]
         page = 1
     else:  # Set a default session['first_date'] and ['last_date']
-        session['first_date'] = date(2004, 1, 1)
-        session['last_date'] = date.today()
+        session['first_date'] = get_time_period('w')[0]
+        session['last_date'] = get_time_period('w')[1]
 
     events_query = get_events_by_date(session['email'],
                                       session['first_date'],
