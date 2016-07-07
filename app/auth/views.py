@@ -8,7 +8,7 @@ from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
-from ..models import User, Tag
+from ..models import User, Role
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..utils import InvalidResetToken
@@ -72,9 +72,10 @@ def admin_register():
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
                     division=form.division.data,
-                    role_id=form.role.data,
+                    role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id
                     )
+        print (form.role.data)
         # user.password_list.valid
         db.session.add(user)
         db.session.commit()
