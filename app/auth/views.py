@@ -75,7 +75,6 @@ def admin_register():
                     role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id
                     )
-        print (form.role.data)
         # user.password_list.valid
         db.session.add(user)
         db.session.commit()
