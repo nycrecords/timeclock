@@ -143,7 +143,7 @@ def process_time_periods(form):
     :param form: AdminFilterEventsForm or UserFilterEventsForm
     :return: A two-element array containing a start and end date
     """
-    time_period = [get_time_period('w')[0], date.today()]
+    time_period = [form.first_date.data, form.last_date.data]
     if 'this_day' in form:
         if form.this_day.data:
             time_period = get_time_period('d')
