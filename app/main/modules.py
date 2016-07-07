@@ -49,7 +49,7 @@ def get_last_clock():
         return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().time.strftime("%b %d, %Y | %l:%M:%S %p")
 
 
-def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_date=datetime.now(), tag_input=0):
+def get_events_by_date():
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
@@ -143,7 +143,7 @@ def process_time_periods(form):
     :param form: AdminFilterEventsForm or UserFilterEventsForm
     :return: A two-element array containing a start and end date
     """
-    time_period = [date(2004, 1, 1), date.today()]
+    time_period = [get_time_period('w')[0], date.today()]
     if 'this_day' in form:
         if form.this_day.data:
             time_period = get_time_period('d')

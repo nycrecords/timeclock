@@ -114,7 +114,6 @@ class AdminRegistrationForm(Form):
         return True
 
 
-
 class ChangePasswordForm(Form):
     """Form for changing password"""
     old_password = PasswordField('Old password', validators=[DataRequired()])

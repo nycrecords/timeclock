@@ -113,10 +113,7 @@ def all_history():
         print('FORM TAG DATA', form.tag.data)
         page = 1
 
-    events_query = get_events_by_date(session['email'],
-                                      session['first_date'],
-                                      session['last_date'],
-                                      session['tag_input'])
+    events_query = get_events_by_date()
 
     # Pagination code
     pagination = events_query.paginate(
@@ -161,10 +158,7 @@ def history():
         session['first_date'] = get_time_period('w')[0]
         session['last_date'] = get_time_period('w')[1]
 
-    events_query = get_events_by_date(session['email'],
-                                      session['first_date'],
-                                      session['last_date'],
-                                      None)
+    events_query = get_events_by_date()
 
     pagination = events_query.paginate(
         page, per_page=15,
