@@ -77,11 +77,12 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
     if first_date is None:
         first_date = get_time_period('w')[0]   # First possible clock-in date
     if last_date is None:
-        last_date = get_time_period(['w'])[1]          # Last possible clock-in date
+        last_date = get_time_period('w')[1]          # Last possible clock-in date
 
     events_query = Event.query.filter(
         Event.time >= first_date,
         Event.time <= last_date)
+
     # Tag processing - This takes a while
     if tag_input != 0:
         tag = Tag.query.filter_by(id=tag_input).first()
