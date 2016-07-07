@@ -81,7 +81,7 @@ def get_events_by_date(email_input=None, first_date=datetime(2004, 1, 1), last_d
 
     events_query = Event.query.filter(
         Event.time >= first_date,
-        Event.time <= last_date)
+        Event.time <= last_date + timedelta(days=1))
 
     # Tag processing - This takes a while
     if tag_input != 0:
@@ -110,17 +110,16 @@ def get_time_period(period='d'):
         lm (last month)
     :return: A two-element array containing a start and end date
     """
-    today = datetime.today()
-    first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    today = date.today()
+    first_of_month = today.replace(day=1)
     first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
-    end_of_last_month = (first_of_month + dateutil.relativedelta.relativedelta(days=-1)).\
-        replace(hour=23, minute=59, second=59, microsecond=99)
+    end_of_last_month = (first_of_month + dateutil.relativedelta.relativedelta(days=-1))
     if period == 'd':
-        return [(today + dateutil.relativedelta.relativedelta(days=-1)).replace(hour=23, minute=59, second=59), today]
+        return [(today + dateutil.relativedelta.relativedelta(days=-1)), today]
     elif period == 'w':
         dt = today
-        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        end = start + timedelta(days=8)
+        start = dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=7)
         return [start, end]
     elif period == 'm':
         return [first_of_month, today]
@@ -129,13 +128,13 @@ def get_time_period(period='d'):
         return [yesterday, yesterday]
     elif period == 'lw':
         dt = today + timedelta(days=-7)
-        start = (dt - timedelta(days=dt.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-        end = start + timedelta(days=8)
+        start = dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=7)
         return [start, end]
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
     else:
-        return [datetime(2004, 1, 1), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
+        return [today - timedelta(days=today.weekday()), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
 
 
 def process_time_periods(form):

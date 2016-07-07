@@ -83,8 +83,10 @@ def generate_timetable(canvas_field, events):
     for x in range(0, len(events), 2):
         event = events[x]
         next_event = events[x + 1]
+        print(event)
         canvas_field.setFont('Courier', 8)
         time_in = event[:event.index('|') - 1]
+        print(time_in)
         event = event[(event.index('|') + 2):]
         event = event[(event.index('|') + 2):]
         note_in = event[(event.index('|') + 2):]
@@ -108,14 +110,14 @@ def generate_timetable(canvas_field, events):
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
 
-        date = time_in_datetime.strftime('%a %b %m, %Y')
+        date = time_in_datetime.strftime('%a %b %d, %Y')
         hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
         total_hours += hours_this_day
 
         next_line -= PADDING
-        print('PADDING', PADDING)
-        print('NEXT LINE', next_line)
-        print('MAX NOTE LENGTH', max_note_length)
+        # print('PADDING', PADDING)
+        # print('NEXT LINE', next_line)
+        # print('MAX NOTE LENGTH', max_note_length)
         canvas_field.drawString(30, next_line, date)
         canvas_field.drawString(130, next_line, time_in_datetime.strftime('%I:%M:%S %p'))
         canvas_field.drawString(220, next_line, time_out_datetime.strftime('%I:%M:%S %p'))

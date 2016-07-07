@@ -40,7 +40,7 @@ class AdminFilterEventsForm(Form):
     from .modules import get_time_period
     email = StringField("Email", validators=[Optional()])
     first_date = DateField("From", default=get_time_period('w')[0], validators=[Optional()])
-    last_date = DateField("To", default=get_time_period('w')[1], validators=[Optional()])
+    last_date = DateField("To", default=date.today(), validators=[Optional()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
     submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
