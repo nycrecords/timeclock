@@ -5,8 +5,6 @@ import dateutil.relativedelta
 from flask_login import current_user
 import sqlalchemy
 from flask import session
-from pytz import timezone
-from flask import current_app
 
 
 def process_clock(note_data, ip=None):
@@ -143,7 +141,8 @@ def process_time_periods(form):
     :param form: AdminFilterEventsForm or UserFilterEventsForm
     :return: A two-element array containing a start and end date
     """
-    time_period = [form.first_date.data, form.last_date.data]
+    if 'first_date' in form:  # This is the case where we have an AdminForm
+        time_period = [form.first_date.data, form.last_date.data]
     if 'this_day' in form:
         if form.this_day.data:
             time_period = get_time_period('d')
