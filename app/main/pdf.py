@@ -77,7 +77,7 @@ def generate_timetable(canvas_field, events):
     canvas_field.setFont('Courier', 10)
     events = sorted(events)
     if not len(events) % 2 == 0:
-        events.pop(0)
+        events.pop()
     next_line = timetable_top
     for x in range(0, len(events), 2):
         event = events[x]
