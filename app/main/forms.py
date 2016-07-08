@@ -10,7 +10,7 @@ class ClockInForm(Form):
     Form for clocked out users.
     """
     note = StringField("Note: ", validators=[Length(min=0, max=50)])
-    submit = SubmitField("Clock In")
+    submit = SubmitField("Clock In",render_kw={"style": "background-color:lime;"})
 
 
 class ClockOutForm(Form):
@@ -18,7 +18,7 @@ class ClockOutForm(Form):
     Form for clocked in users.
     """
     note = StringField("Note: ", validators=[Length(min=0, max=50)])
-    submit = SubmitField("Clock Out")
+    submit = SubmitField("Clock Out",render_kw={"style": "background-color:crimson;"})
 
 
 class TimePunchForm(Form):

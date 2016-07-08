@@ -44,5 +44,5 @@ SQLAlchemy==0.9.9
 tinycss==0.3
 WeasyPrint==0.29
 Werkzeug==0.11.10
-WTForms==1.0.5
-xhtml2pdf==0.0.6
+WTForms==2.1
+xhtml2pdf==0.0.609

@@ -123,7 +123,7 @@ def all_history():
         error_out=False)
     events = pagination.items
     tags = get_all_tags()
-    return render_template('def all_history.html',
+    return render_template('all_history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
