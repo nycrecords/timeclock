@@ -128,7 +128,7 @@ def all_history():
                            form=form,
                            pagination=pagination,
                            tags=tags,
-                           generation_events=events
+                           generation_events=events_query.all()
                            )
     # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
     #  NOT DOING THAT RIGHT NOW TO AVOID OVERHEAD DURING DEVELOPMENT
@@ -171,7 +171,7 @@ def history():
                            events=events,
                            form=form,
                            pagination=pagination,
-                           generation_events=events,
+                           generation_events=events_query.all(),
                            tags=tags)
 
 

@@ -48,6 +48,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>Email</th>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Clocked</th>
@@ -58,6 +59,7 @@
             <tbody>
                 {% for event in events %}
                 <tr>
+                    <td>{{ event.user.email }}</td>
                     <td>{{ event.user.first_name }}</td>
                     <td>{{ event.user.last_name }}</td>
                     <td>
