@@ -6,13 +6,15 @@
 
 divisions = [
     ('', ''),
-    ('Records Management', 'Records Management'),
+    ('Administration', 'Administration'),
     ('Archives', 'Archives'),
     ('Grants', 'Grants'),
     ('Library', 'Library'),
-    ('Executive', 'Executive'),
-    ('MIS/Web', 'MIS/Web'),
-    ('Administration', 'Administration')
+    ('Records Management', 'Records Management'),
+    ('Reference Room', 'Reference Room'),
+    ('Social Media', 'Social Media'),
+    ('Tech', 'Tech'),
+    ("Women's", "Women's")
 ]
 
 roles = [
@@ -26,9 +28,10 @@ tags = [
     (1, 'Intern'),
     (2, 'Contractor'),
     (3, 'SYEP'),
-    (4, 'Radical'),
-    (5, 'Consultant'),
-    (6, 'Other')
+    (4, 'Employee'),
+    (5, 'Pencil'),
+    (6, 'Volunteer'),
+    (7, 'Other')
 ]
 
 
