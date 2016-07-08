@@ -4,7 +4,7 @@
    :synopsis: Handles all authentication URL endpoints for the
    timeclock application
 """
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
@@ -255,7 +255,7 @@ def password_reset(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except ValueError:
+        except:
             flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
 

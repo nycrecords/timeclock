@@ -15,11 +15,11 @@ def process_clock(note_data, ip=None):
         [string]
     :return: None
     """
-    event = Event(type=not current_user.clocked_in,
+
+    event = Event(type=not get_last_clock_type(user_id=current_user.id),
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
-    current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
     db.session.add(event)
     db.session.commit()
@@ -173,3 +173,6 @@ def get_clocked_in_users():
 
 def get_all_tags():
     return Tag.query.all()
+
+def get_last_clock_type(user_id=None):
+    return Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first().type

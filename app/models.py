@@ -98,7 +98,7 @@ class User(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
 
     # generates token with default validity for 1 hour
-    def generate_reset_token(self, expiration=5):
+    def generate_reset_token(self, expiration=3600):
         """
         Generates a token users can use to reset their accounts if locked out.
         :param expiration: Seconds the token is valid for after being created (default one hour).
@@ -127,8 +127,6 @@ class User(UserMixin, db.Model):
         self.password = new_password
         self.password_list.update(self.password_hash)
         db.session.add(self)
-        # if 'reset_token' in session:
-        #     session['reset_token'].dumps({'reset': self.id})
         return True
 
     def verify_password(self, password):
@@ -229,8 +227,8 @@ class Event(db.Model):
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
-            u.clocked_in = not u.clocked_in
-            e = Event(user=u, type=u.clocked_in,
+            # u.clocked_in = not u.clocked_in
+            e = Event(user=u,
                       time=datetime(
                           year=randint(2004, 2016),
                           month=randint(1, 6),

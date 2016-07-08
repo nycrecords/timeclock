@@ -14,12 +14,10 @@
                 </div>
 
                 <div style="position: absolute; bottom:0px">
-                {% if last_event %}
-                {% if  current_user.clocked_in  %}
+                {% if last_clock_event==True %}
                     <p><b>You last clocked in</b> at {{ last_event }}</p>
                 {% else %}
                     <p><b>You last clocked out</b> at {{ last_event }}</p>
-                {% endif %}
                 {% endif %}
                 </div>
 
