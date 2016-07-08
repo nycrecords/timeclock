@@ -46,9 +46,9 @@ def index():
     :return: index.html contents
     """
     current_app.logger.info('def index()')
-    current_app.logger.error('{} is still logged in. In main.index'.format(current_user.email))
+    # current_app.logger.error('{} is still logged in. In main.index'.format(current_user.email))
     if not current_user.is_authenticated:  # Don't pass a form
-        current_app.logger.error('{} is not logged in anymore'.format(current_user.email))
+        # current_app.logger.error('{} is not logged in anymore'.format(current_user.email))
         return redirect(url_for('auth.login'))
 
     if not current_user.validated:
