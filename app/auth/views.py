@@ -221,7 +221,7 @@ def password_reset_request():
     if form.validate_on_submit():
         current_app.logger.info('Tried to submit a password reset request with account email {}'.format(
             form.email.data))
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=(form.email.data).lower()).first()
         if user:
             token = user.generate_reset_token()
             send_email(user.email,
