@@ -45,9 +45,10 @@ def index():
     View function for index page. Reroutes to login if user is not logged in.
     :return: index.html contents
     """
-    # current_app.logger.error('{} is still logged in. In main.index'.format(current_user.email))
+    current_app.logger.info('def index()')
+    current_app.logger.error('{} is still logged in. In main.index'.format(current_user.email))
     if not current_user.is_authenticated:  # Don't pass a form
-        # current_app.logger.error('{} is not logged in anymore'.format(current_user.email))
+        current_app.logger.error('{} is not logged in anymore'.format(current_user.email))
         return redirect(url_for('auth.login'))
 
     if not current_user.validated:
@@ -88,6 +89,7 @@ def all_history():
     :return: All user history, sorted (if applicable) with a form for further
     filtering.
     """
+    current_app.logger.info('def all_history()')
     if 'first_date' not in session:
         session['first_date'] = get_time_period('w')[0]
         session['last_date'] = get_time_period('w')[1]
@@ -121,7 +123,7 @@ def all_history():
         error_out=False)
     events = pagination.items
     tags = get_all_tags()
-    return render_template('all_history.html',
+    return render_template('def all_history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
@@ -141,7 +143,7 @@ def history():
     :return: An html page that contains user history, sorted (if applicable)
     with a form for further filtering.
     """
-
+    current_app.logger.info('def history()')
     if not current_user.validated:
         return redirect(url_for('auth.change_password'))
 
@@ -181,7 +183,7 @@ def download():
     :return: A directive to download a file timesheet.txt, which contains
     timesheet data
     """
-
+    current_app.logger.info('def download')
     errors = []
     if 'email' not in session or session['email'] is None or session['email'] == '':
         # This will only happen for admin searches, so we only need to
@@ -242,6 +244,7 @@ def download():
 @login_required
 @main.route('/clear_filter', methods=['GET', 'POST'])
 def clear():
+    current_app.logger.info('def clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)
@@ -254,6 +257,7 @@ def clear():
 @login_required
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
 def user_clear():
+    current_app.logger.info('def user_clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)
@@ -266,6 +270,7 @@ def user_clear():
 # FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
 def create_dumb_data():
+    current_app.logger.info('def create_dumb_date()')
     from config import config
     from ..models import Role, Tag, User, Event
     Role.insert_roles()
