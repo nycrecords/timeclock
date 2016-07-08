@@ -46,7 +46,7 @@ def get_last_clock():
     :return: Formatted time of last clock event
     """
     if Event.query.filter_by(user_id=current_user.id).first() is not None:
-        return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().time.strftime("%b %d, %Y | %l:%M:%S")
+        return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().time.strftime("%b %d, %Y | %H:%M:%S")
 
 
 def get_events_by_date():
