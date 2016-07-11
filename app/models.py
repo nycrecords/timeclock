@@ -98,7 +98,7 @@ class User(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
 
     # generates token with default validity for 1 hour
-    def generate_reset_token(self, expiration=5):
+    def generate_reset_token(self, expiration=3600):
         """
         Generates a token users can use to reset their accounts if locked out.
         :param expiration: Seconds the token is valid for after being created (default one hour).
