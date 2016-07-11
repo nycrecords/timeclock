@@ -63,7 +63,6 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    clocked_in = db.Column(db.Boolean, default=False)
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
     login_attempts = db.Column(db.Integer, default=0)
