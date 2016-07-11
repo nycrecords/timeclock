@@ -127,7 +127,7 @@ def get_time_period(period='d'):
     elif period == 'lw':
         dt = today + timedelta(days=-7)
         start = dt - timedelta(days=dt.weekday())
-        end = start + timedelta(days=7)
+        end = start + timedelta(days=6)
         return [start, end]
     elif period == 'lm':
         return [first_of_last_month, end_of_last_month]
