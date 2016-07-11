@@ -250,6 +250,7 @@ def password_reset(token):
     :return: HTML page in which users can reset their passwords.
     """
     if not current_user.is_anonymous:
+        # If a user is signed in already, redirect them to index
         return redirect(url_for('main.index'))
     form = PasswordResetForm()
     if form.validate_on_submit():
@@ -257,11 +258,13 @@ def password_reset(token):
         try:
             data = s.loads(token)
         except ValueError:
+            # Token has timed out
             flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
 
         user = User.query.filter_by(id=data.get('reset')).first()
         if user is None:
+            # If the user associated with the token does not exist, log an error and redirect user to index
             current_app.logger.info('Requested password reset for invalid account.')
             return redirect(url_for('main.index'))
         if (
@@ -276,30 +279,32 @@ def password_reset(token):
             check_password_hash(pwhash=user.password_list.p5,
                                 password=form.password.data)
         ):
+            # If user tries to set password to one of last five passwords, flash an error and reset the form
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
             return render_template("auth/reset_password.html", form=form)
         try:
-            print ('VALID?', session['reset_token']['valid'])
             if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
-                print('USED TOKEN WAS VALID')
+                # If the token has not been used and the user submits a proper new password, reset users password
+                # and login attempts
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
-                session['reset_token']['valid'] = False
-                print('VALID?', session['reset_token']['valid'])
+                session['reset_token']['valid'] = False  # Now that the token has been used, invalidate it
                 flash('Your password has been updated.', category='success')
                 return redirect(url_for('auth.login'))
             elif 'reset_token' in session and not session['reset_token']['valid']:
-                print('USED TOKEN WAS NOT VALID')
+                # If the token has already been used, flash an error message
                 flash('You can only use a reset token once. Please generate a new reset token.', category='error')
                 return render_template('auth/reset_password.html', form=form)
             else:
+                # New password didn't meet minimum security criteria
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
                 return render_template('auth/reset_password.html', form=form)
         except InvalidResetToken:
+            # Token has timed out(?) - We have two exceptions, not sure what the difference is.
             flash('This token is no longer valid.', category='warning')
             return login()
     return render_template('auth/reset_password.html', form=form)
