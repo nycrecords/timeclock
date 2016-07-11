@@ -168,7 +168,12 @@ def get_clocked_in_users():
     """
     :return: An array of all currently clocked in users.
     """
-    return User.query.filter_by(clocked_in=True).all()
+    events = Event.query.filter_by(type=True).all()
+    clocked_in_users = []
+    for event in events:
+        if User.query.get(event.user_id) not in clocked_in_users:
+            clocked_in_users.append(User.query.get(event.user_id))
+    return clocked_in_users
 
 
 def get_all_tags():
