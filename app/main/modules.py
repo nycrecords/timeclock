@@ -43,10 +43,15 @@ def is_clocked(user_id=None):
     checks if the user is clocked in
     :return: True if the user is clocked in, False if user is clocked out
     '''
+
     if user_id:
-        return Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first().type
+        event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
     else:
-        return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().type
+        event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
+    if event != None:
+        return event.type
+    else:
+        return None
 
 def get_last_clock():
     """
@@ -193,4 +198,8 @@ def get_all_tags():
     return Tag.query.all()
 
 def get_last_clock_type(user_id=None):
-    return Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first().type
+    event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
+    if event:
+        return event.type
+    else:
+        return None

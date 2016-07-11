@@ -66,7 +66,6 @@ class User(UserMixin, db.Model):
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
     login_attempts = db.Column(db.Integer, default=0)
-
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
