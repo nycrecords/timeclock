@@ -1,6 +1,6 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField
-from wtforms.validators import DataRequired, Optional, Length
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField
+from wtforms.validators import DataRequired, Optional, Length, Email
 from datetime import date
 from ..utils import tags, divisions
 
@@ -71,3 +71,10 @@ class UserFilterEventsForm(Form):
     this_week = SubmitField("This Week")
     # last_day = SubmitField("Yesterday")
     # this_day = SubmitField("Today")
+
+class CreatePayRateForm(Form):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    start_date = DateField("Start", default=date.today(), validators=[DataRequired()])
+    end_date = DateField("End", default=date.today(), validators=[DataRequired()])
+    rate = FloatField("Date", validators=[DataRequired()])
+    submit = SubmitField("Create Pay Rate")

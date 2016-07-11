@@ -26,7 +26,7 @@ from .modules import (
     get_all_tags
 )
 from ..decorators import admin_required
-from .forms import AdminFilterEventsForm, UserFilterEventsForm
+from .forms import AdminFilterEventsForm, UserFilterEventsForm, CreatePayRateForm
 from .pdf import (
     generate_header,
     generate_footer,
@@ -34,8 +34,10 @@ from .pdf import (
     generate_timetable,
     generate_signature_template
 )
-from datetime import datetime, date
+from datetime import datetime
 from flask import current_app
+from ..models import Pay, User
+from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
@@ -267,11 +269,30 @@ def user_clear():
     return redirect(url_for('main.history'))
 
 
+@main.route('/create_payrate', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def pay():
+    form = CreatePayRateForm()
+    if form.validate_on_submit():
+        u = User.query.filter_by(email=form.email.data).first()
+        if not u:
+            flash('No such user exists', category='warning')
+        else:
+            p = Pay(start=form.start_date.data, end=form.end_date.data, rate=form.rate.data, user=u)
+            db.session.add(p)
+            db.session.commit()
+            current_app.logger.info('Administrator {} created new pay rate for user {}'.format(current_user.email, u.email))
+            flash('Pay rate successfully created', category='success')
+    return render_template('create_payrate.html', form=form)
+
+
+
+
 # FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
 def create_dumb_data():
     current_app.logger.info('def create_dumb_date()')
-    from config import config
     from ..models import Role, Tag, User, Event
     Role.insert_roles()
     Tag.insert_tags()
