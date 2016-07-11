@@ -281,14 +281,18 @@ def password_reset(token):
             flash('Your password cannot be the same as the last 5 passwords', category='error')
             return render_template("auth/reset_password.html", form=form)
         try:
-            if user.reset_password(token, form.password.data) and 'reset_token' in session and session['reset_token']['valid']:
+            print ('VALID?', session['reset_token']['valid'])
+            if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
+                print('USED TOKEN WAS VALID')
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
                 session['reset_token']['valid'] = False
+                print('VALID?', session['reset_token']['valid'])
                 flash('Your password has been updated.', category='success')
                 return redirect(url_for('auth.login'))
             elif 'reset_token' in session and not session['reset_token']['valid']:
+                print('USED TOKEN WAS NOT VALID')
                 flash('You can only use a reset token once. Please generate a new reset token.', category='error')
                 return render_template('auth/reset_password.html', form=form)
             else:
