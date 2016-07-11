@@ -263,6 +263,21 @@ def password_reset(token):
         if user is None:
             current_app.logger.info('Requested password reset for invalid account.')
             return redirect(url_for('main.index'))
+        if (
+            check_password_hash(pwhash=user.password_list.p1,
+                                password=form.password.data) or
+            check_password_hash(pwhash=user.password_list.p2,
+                                password=form.password.data) or
+            check_password_hash(pwhash=user.password_list.p3,
+                                password=form.password.data) or
+            check_password_hash(pwhash=user.password_list.p4,
+                                password=form.password.data) or
+            check_password_hash(pwhash=user.password_list.p5,
+                                password=form.password.data)
+        ):
+            current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
+                user.email))
+            flash('Your password cannot be the same as the last 5 passwords', category='error')
         try:
             if user.reset_password(token, form.password.data):
                 user.login_attempts = 0
