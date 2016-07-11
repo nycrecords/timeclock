@@ -279,6 +279,7 @@ def password_reset(token):
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
+            return render_template("auth/change_password.html", form=form)
         try:
             if user.reset_password(token, form.password.data) and 'reset_token' in session and session['reset_token']['valid'] == True:
                 user.login_attempts = 0

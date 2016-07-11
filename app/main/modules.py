@@ -172,4 +172,8 @@ def get_clocked_in_users():
 
 
 def get_all_tags():
+    """
+    Returns all the tags
+    :return:
+    """
     return Tag.query.all()
