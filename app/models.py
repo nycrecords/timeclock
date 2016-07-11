@@ -105,7 +105,7 @@ class User(UserMixin, db.Model):
         :return: the token.
         """
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        session['reset_token'] = s
+        session['reset_token'] = {'token': s, 'valid': True}
         return s.dumps({'reset': self.id})
 
         # verifies the token and if valid, resets password
@@ -127,8 +127,6 @@ class User(UserMixin, db.Model):
         self.password = new_password
         self.password_list.update(self.password_hash)
         db.session.add(self)
-        # if 'reset_token' in session:
-        #     session['reset_token'].dumps({'reset': self.id})
         return True
 
     def verify_password(self, password):

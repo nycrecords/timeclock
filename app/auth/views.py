@@ -4,7 +4,7 @@
    :synopsis: Handles all authentication URL endpoints for the
    timeclock application
 """
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
@@ -279,12 +279,16 @@ def password_reset(token):
                 user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
         try:
-            if user.reset_password(token, form.password.data):
+            if user.reset_password(token, form.password.data) and 'reset_token' in session and session['reset_token']['valid'] == True:
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
+                session['reset_token']['valid'] = False
                 flash('Your password has been updated.', category='success')
                 return redirect(url_for('auth.login'))
+            if not session['reset_token']['valid']:
+                flash('You can only use a reset token once. Please generate a new reset token.', category='error')
+                return render_template('auth/reset_password.html', form=form)
             else:
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
