@@ -152,6 +152,13 @@ class User(UserMixin, db.Model):
         """
         return self.can(Permission.ADMINISTER)
 
+    def is_clocked(self):
+        '''
+        CHecks if the user is clocked in by querying the events table
+        :return:
+        '''
+
+
     def __repr__(self):
         return '<User %r>' % self.email
 

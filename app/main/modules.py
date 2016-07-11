@@ -31,12 +31,22 @@ def set_clock_form():
     For use in main/views.py: Determine the type of form to be rendered to index.html.
     :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
     """
-    if current_user.clocked_in:
+    # User.query.filter_by(user_id)
+    if is_clocked():
         form = ClockOutForm()
     else:
         form = ClockInForm()
     return form
 
+def is_clocked(user_id=None):
+    '''
+    checks if the user is clocked in
+    :return: True if the user is clocked in, False if user is clocked out
+    '''
+    if user_id:
+        return Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first().type
+    else:
+        return Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first().type
 
 def get_last_clock():
     """
@@ -168,11 +178,14 @@ def get_clocked_in_users():
     """
     :return: An array of all currently clocked in users.
     """
-    events = Event.query.filter_by(type=True).all()
-    clocked_in_users = []
-    for event in events:
-        if User.query.get(event.user_id) not in clocked_in_users:
-            clocked_in_users.append(User.query.get(event.user_id))
+    users = User.query.all()
+    clocked_in_users=[]
+    for user in users:
+        event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
+        if event is not None and event.type == True and user not in clocked_in_users:
+            clocked_in_users.append(user)
+        else:
+            continue
     return clocked_in_users
 
 
