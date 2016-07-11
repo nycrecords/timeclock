@@ -280,9 +280,6 @@ def password_reset(token):
                 user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
             return render_template("auth/reset_password.html", form=form)
-        if 'reset_token' in session and not session['reset_token']['valid']:
-            flash('You can only use a reset token once. Please generate a new reset token.', category='error')
-            return render_template('auth/reset_password.html', form=form)
         try:
             if user.reset_password(token, form.password.data) and 'reset_token' in session and session['reset_token']['valid']:
                 user.login_attempts = 0
@@ -291,6 +288,9 @@ def password_reset(token):
                 session['reset_token']['valid'] = False
                 flash('Your password has been updated.', category='success')
                 return redirect(url_for('auth.login'))
+            elif 'reset_token' in session and not session['reset_token']['valid']:
+                flash('You can only use a reset token once. Please generate a new reset token.', category='error')
+                return render_template('auth/reset_password.html', form=form)
             else:
                 flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
                       category='error')
