@@ -284,7 +284,7 @@ def pay():
             db.session.commit()
             current_app.logger.info('Administrator {} created new pay rate for user {}'.format(current_user.email, u.email))
             flash('Pay rate successfully created', category='success')
-    return render_template('create_payrate.html', form=form)
+    return render_template('create_payrate.html', form=form, pays=Pay.query.all())
 
 
 

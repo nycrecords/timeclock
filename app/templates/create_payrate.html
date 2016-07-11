@@ -13,4 +13,25 @@
     <div class="row">
        {{ wtf.quick_form(form) }}
     </div>
+
+    <div class="row">
+     <table class="table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Pay Start</th>
+                    <th>Pay End</th>
+                    <th>Rate</th>
+                </tr>
+            <tbody>
+                {% for pay in pays %}
+                <tr>
+                    <td>{{ pay.user.email }}</td>
+                    <td>{{ pay.start.strftime("%b %d, %Y") }}</td>
+                    <td>{{ pay.end.strftime("%b %d, %Y") }}</td>
+                    <td>{{ pay.rate }}
+                <tr>
+                {% endfor %}
+     </table>
+    </div>
 {% endblock %}

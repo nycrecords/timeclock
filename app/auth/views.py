@@ -192,6 +192,7 @@ def change_password():
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 current_user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
+            return render_template("auth/change_password.html", form=form)
         elif check_password_requirements(
                 current_user.email,
                 form.old_password.data,

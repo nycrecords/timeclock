@@ -72,9 +72,10 @@ class UserFilterEventsForm(Form):
     # last_day = SubmitField("Yesterday")
     # this_day = SubmitField("Today")
 
+
 class CreatePayRateForm(Form):
     email = StringField("Email", validators=[DataRequired(), Email()])
     start_date = DateField("Start", default=date.today(), validators=[DataRequired()])
     end_date = DateField("End", default=date.today(), validators=[DataRequired()])
-    rate = FloatField("Date", validators=[DataRequired()])
+    rate = FloatField("Rate", validators=[DataRequired()])
     submit = SubmitField("Create Pay Rate")
