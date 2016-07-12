@@ -23,7 +23,8 @@ from .modules import (
     get_clocked_in_users,
     get_time_period,
     process_time_periods,
-    get_all_tags
+    get_all_tags,
+    get_last_clock_type
 )
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm
@@ -62,7 +63,7 @@ def index():
         process_clock(form.note.data, ip)
         current_app.logger.info('%s clocked %s at %s' % (
             current_user.email,
-            'in' if current_user.clocked_in else 'out',
+            'in' if get_last_clock_type(current_user.id) else 'out',
             time)
         )
     else:
@@ -71,11 +72,12 @@ def index():
 
     form = set_clock_form()
     last_event = get_last_clock()
-
+    last_clock_event = get_last_clock_type(current_user.id)
     return render_template('index.html',
                            form=form,
                            last_event=last_event,
-                           clocked_in_users=get_clocked_in_users()
+                           clocked_in_users=get_clocked_in_users(),
+                           last_clock_event=last_clock_event
                            )
 
 

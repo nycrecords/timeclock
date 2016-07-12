@@ -63,11 +63,9 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    clocked_in = db.Column(db.Boolean, default=False)
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
     login_attempts = db.Column(db.Integer, default=0)
-
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
@@ -152,6 +150,13 @@ class User(UserMixin, db.Model):
         """
         return self.can(Permission.ADMINISTER)
 
+    def is_clocked(self):
+        '''
+        CHecks if the user is clocked in by querying the events table
+        :return:
+        '''
+
+
     def __repr__(self):
         return '<User %r>' % self.email
 
@@ -227,8 +232,8 @@ class Event(db.Model):
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
-            u.clocked_in = not u.clocked_in
-            e = Event(user=u, type=u.clocked_in,
+            # u.clocked_in = not u.clocked_in
+            e = Event(user=u,
                       time=datetime(
                           year=randint(2004, 2016),
                           month=randint(1, 6),

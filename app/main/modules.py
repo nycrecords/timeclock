@@ -15,11 +15,11 @@ def process_clock(note_data, ip=None):
         [string]
     :return: None
     """
-    event = Event(type=not current_user.clocked_in,
+
+    event = Event(type=not get_last_clock_type(user_id=current_user.id),
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
-    current_user.clocked_in = not current_user.clocked_in
     db.session.add(current_user)
     db.session.add(event)
     db.session.commit()
@@ -31,12 +31,27 @@ def set_clock_form():
     For use in main/views.py: Determine the type of form to be rendered to index.html.
     :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
     """
-    if current_user.clocked_in:
+    # User.query.filter_by(user_id)
+    if is_clocked():
         form = ClockOutForm()
     else:
         form = ClockInForm()
     return form
 
+def is_clocked(user_id=None):
+    '''
+    checks if the user is clocked in
+    :return: True if the user is clocked in, False if user is clocked out
+    '''
+
+    if user_id:
+        event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
+    else:
+        event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
+    if event != None:
+        return event.type
+    else:
+        return None
 
 def get_last_clock():
     """
@@ -168,8 +183,23 @@ def get_clocked_in_users():
     """
     :return: An array of all currently clocked in users.
     """
-    return User.query.filter_by(clocked_in=True).all()
+    users = User.query.all()
+    clocked_in_users=[]
+    for user in users:
+        event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
+        if event is not None and event.type == True and user not in clocked_in_users:
+            clocked_in_users.append(user)
+        else:
+            continue
+    return clocked_in_users
 
 
 def get_all_tags():
     return Tag.query.all()
+
+def get_last_clock_type(user_id=None):
+    event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
+    if event:
+        return event.type
+    else:
+        return None

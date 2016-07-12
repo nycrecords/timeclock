@@ -255,7 +255,7 @@ def password_reset(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except ValueError:
+        except:
             flash('This token is no longer valid.', category='warning')
             return redirect(url_for('auth.login'))
 
