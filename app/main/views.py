@@ -226,6 +226,8 @@ def download():
         for error in errors:
             flash(error, 'warning')
         last_page = (request.referrer).split('/')[3]
+        if last_page.find('?') != -1:
+            last_page = last_page[:last_page.find('?')]
         current_app.logger.error('Errors occurred while generating timesheet (end function download).'
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
