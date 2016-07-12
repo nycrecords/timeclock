@@ -225,9 +225,9 @@ def download():
     if errors:
         for error in errors:
             flash(error, 'warning')
-        last_page = request.referrer.split('/')[3]
-        current_app.logger.error('Errors occurred while generating timesheet (end function download().'
-                                 ' Redirecting to {}...'.format(last_page))
+        last_page = (request.referrer).split('/')[3]
+        current_app.logger.error('Errors occurred while generating timesheet (end function download).'
+                                 ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
     events = request.form.getlist('event')
