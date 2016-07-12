@@ -61,20 +61,21 @@ def index():
 
     form = set_clock_form()
     if form.validate_on_submit():
-        ip = request.environ['REMOTE_ADDR']
-        time = datetime.now()
-
-        # Stores the time and the ip clocked in form
-        process_clock(form.note.data, ip)
-        current_app.logger.info('%s clocked %s at %s' % (
-            current_user.email,
-            'in' if get_last_clock_type(current_user.id) else 'out',
-            time)
-        )
-    else:
         if form.note.data is not None and len(form.note.data) > 60:
             flash("Your note cannot exceed 60 characters", category='warning')
             current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
+
+        else:
+            ip = request.environ['REMOTE_ADDR']
+            time = datetime.now()
+
+            # Stores the time and the ip clocked in form
+            process_clock(form.note.data, ip)
+            current_app.logger.info('%s clocked %s at %s' % (
+                current_user.email,
+                'in' if get_last_clock_type(current_user.id) else 'out',
+                time)
+            )
 
     form = set_clock_form()
     last_event = get_last_clock()
