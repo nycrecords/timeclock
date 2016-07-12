@@ -170,8 +170,9 @@ def logout():
     :return: Index page.
     """
     current_app.logger.info('Start function logout() [VIEW]')
+    current_user_email = current_user.email
     logout_user()
-    current_app.logger.info('{} logged out'.format(current_user.email))
+    current_app.logger.info('{} logged out'.format(current_user_email))
     flash('You have been logged out.', category='success')
     current_app.logger.info('End function logout() [VIEW]')
     return redirect(url_for('auth.login'))
