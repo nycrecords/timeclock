@@ -27,7 +27,7 @@ from .modules import (
     get_last_clock_type
 )
 from ..decorators import admin_required
-from .forms import AdminFilterEventsForm, UserFilterEventsForm
+from .forms import AdminFilterEventsForm, UserFilterEventsForm, CreatePayRateForm
 from .pdf import (
     generate_header,
     generate_footer,
@@ -35,8 +35,10 @@ from .pdf import (
     generate_timetable,
     generate_signature_template
 )
-from datetime import datetime, date
+from datetime import datetime
 from flask import current_app
+from ..models import Pay, User
+from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
@@ -46,20 +48,23 @@ def index():
     View function for index page. Reroutes to login if user is not logged in.
     :return: index.html contents
     """
-    current_app.logger.info('def index()')
-    # current_app.logger.error('{} is still logged in. In main.index'.format(current_user.email))
+    current_app.logger.info('Start function index() [VIEW]')
     if not current_user.is_authenticated:  # Don't pass a form
-        # current_app.logger.error('{} is not logged in anymore'.format(current_user.email))
+        current_app.logger.error('Anonymous user visited index. Redirecting to /auth/login...')
         return redirect(url_for('auth.login'))
 
     if not current_user.validated:
-        from app.auth.views import change_password
-        return change_password()
+        current_app.logger.info('{} visited index but is not validated. Redirecting to /auth/change_password'.
+                                format(current_user.email))
+        current_app.logger.info('End function index')
+        return redirect(url_for('auth.change_password'))
 
     form = set_clock_form()
     if form.validate_on_submit():
         ip = request.environ['REMOTE_ADDR']
         time = datetime.now()
+
+        # Stores the time and the ip clocked in form
         process_clock(form.note.data, ip)
         current_app.logger.info('%s clocked %s at %s' % (
             current_user.email,
@@ -67,12 +72,15 @@ def index():
             time)
         )
     else:
-        if form.note.data is not None and len(form.note.data) > 120:
-            flash("Your note cannot exceed 120 characters", category='warning')
+        if form.note.data is not None and len(form.note.data) > 60:
+            flash("Your note cannot exceed 60 characters", category='warning')
+            current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
 
     form = set_clock_form()
     last_event = get_last_clock()
     last_clock_event = get_last_clock_type(current_user.id)
+
+    current_app.logger.info('End function index')
     return render_template('index.html',
                            form=form,
                            last_event=last_event,
@@ -91,18 +99,20 @@ def all_history():
     :return: All user history, sorted (if applicable) with a form for further
     filtering.
     """
-    current_app.logger.info('def all_history()')
+    current_app.logger.info('Start function all_history() [VIEW]')
     if 'first_date' not in session:
+        current_app.logger.info('\'first_date\' not found in session. Setting to defaults.')
         session['first_date'] = get_time_period('w')[0]
         session['last_date'] = get_time_period('w')[1]
     if 'email' not in session:
+        current_app.logger.info('\'email\' not found in session. Setting to defaults.')
         session['email'] = None
     if 'tag_input' not in session:
+        current_app.logger.info('\'tag_input\' not found in session. Setting to defaults.')
         session['tag_input'] = 0
 
-    print(session['first_date'], session['last_date'], session['email'], session['tag_input'])
-
     if request.referrer:
+        current_app.logger.info('User is visiting from another page. Setting session[\'email\'] to None')
         session['email'] = None
 
     form = AdminFilterEventsForm()
@@ -114,17 +124,23 @@ def all_history():
         session['last_date'] = time_period[1]
         session['email'] = form.email.data
         session['tag_input'] = form.tag.data
-        print('FORM TAG DATA', form.tag.data)
         page = 1
 
+    current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
+    current_app.logger.info('Finished querying')
 
     # Pagination code
     pagination = events_query.paginate(
         page, per_page=15,
         error_out=False)
     events = pagination.items
+
+    current_app.logger.info('Querying (calling get_all_tags)')
     tags = get_all_tags()
+    current_app.logger.info('Finished querying')
+
+    current_app.logger.info('End function all_history()')
     return render_template('all_history.html',
                            events=events,
                            form=form,
@@ -132,8 +148,6 @@ def all_history():
                            tags=tags,
                            generation_events=events_query.all()
                            )
-    # EVENTUALLY MUST SET GENERATION_EVENTS=EVENTS_QUERY.ALL(),
-    #  NOT DOING THAT RIGHT NOW TO AVOID OVERHEAD DURING DEVELOPMENT
 
 
 @main.route('/history', methods=['GET', 'POST'])    # User history
@@ -145,8 +159,10 @@ def history():
     :return: An html page that contains user history, sorted (if applicable)
     with a form for further filtering.
     """
-    current_app.logger.info('def history()')
+    current_app.logger.info('Start function all_history()')
     if not current_user.validated:
+        current_app.logger.info('{} is not validated. Redirecting to /auth/change_password...'
+                                .format(current_user.email))
         return redirect(url_for('auth.change_password'))
 
     session['email'] = current_user.email
@@ -162,13 +178,19 @@ def history():
         session['first_date'] = get_time_period('w')[0]
         session['last_date'] = get_time_period('w')[1]
 
+    current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
+    current_app.logger.info('Finished querying')
 
     pagination = events_query.paginate(
         page, per_page=15,
         error_out=False)
     events = pagination.items
+
+    current_app.logger.info('Querying (calling get_all_tags)')
     tags = get_all_tags()
+    current_app.logger.info('Finished querying')
+
     return render_template('history.html',
                            events=events,
                            form=form,
@@ -185,38 +207,38 @@ def download():
     :return: A directive to download a file timesheet.txt, which contains
     timesheet data
     """
-    current_app.logger.info('def download')
+    current_app.logger.info('Start function download()')
     errors = []
     if 'email' not in session or session['email'] is None or session['email'] == '':
         # This will only happen for admin searches, so we only need to
         # redirect to the admin page
-        current_app.logger.error('User %s tried to generate a timesheet but '
-                                 'did not specify a user' %
-                                 (current_user.email)
+        current_app.logger.error('User {} tried to generate a timesheet but '
+                                 'did not specify a user'
+                                 .format(current_user.email)
                                  )
         errors.append('You must specify a user.')
-    print(type(session['last_date']), session['last_date'])
-    print(session['last_date']-session['first_date'])
     if (session['last_date']-session['first_date']).days > 8:
-        current_app.logger.error('User %s tried to generate a timesheet but '
-                                 'exceeded maximum duration (one week)' %
-                                 (current_user.email)
+        current_app.logger.error('User {} tried to generate a timesheet but '
+                                 'exceeded maximum duration (one week)'
+                                 .format(current_user.email)
                                  )
         errors.append('Maximum timesheet duration is a week. '
                       'Please refine your filters')
-
     if errors:
         for error in errors:
             flash(error, 'warning')
-        return redirect(url_for('main.' + (request.referrer).split('/')[3]))
+        last_page = request.referrer.split('/')[3]
+        current_app.logger.error('Errors occurred while generating timesheet (end function download().'
+                                 ' Redirecting to {}...'.format(last_page))
+        return redirect(url_for('main.' + last_page))
 
     events = request.form.getlist('event')
     # ^gets event data - we can similarly pass in other data
-    # (i.e. time start, end)
-    # output = ""
+    # (i.e. time start, oend)
+
+    current_app.logger.info('Beginning to generate timesheet pdf...')
     import io
     output = io.BytesIO()
-
     c = canvas.Canvas(output, pagesize=letter)
     width, height = letter
 
@@ -229,6 +251,8 @@ def download():
     c.save()
     pdf_out = output.getvalue()
     output.close()
+    current_app.logger.info('Finished generating timesheet PDF')
+
     response = make_response(pdf_out)
     response.headers['Content-Disposition'] = \
         "attachment; filename='timesheet.pdf"
@@ -240,40 +264,69 @@ def download():
                              session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
                              )
                             )
+    current_app.logger.info('End function download')
     return response
 
 
 @login_required
 @main.route('/clear_filter', methods=['GET', 'POST'])
 def clear():
-    current_app.logger.info('def clear()')
+    current_app.logger.info('Start function clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
     current_app.logger.info('User %s cleared their admin history filter.' %
                             current_user.email)
+    current_app.logger.info('End function clear()')
     return redirect(url_for('main.all_history'))
 
 
 @login_required
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
 def user_clear():
-    current_app.logger.info('def user_clear()')
+    current_app.logger.info('Start function user_clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
     current_app.logger.info('User %s cleared their history filter.' %
                             current_user.email)
+    current_app.logger.info('End function user_clear()')
     return redirect(url_for('main.history'))
+
+
+@main.route('/create_payrate', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def pay():
+    current_app.logger.info('Start function pay()')
+    form = CreatePayRateForm()
+    if form.validate_on_submit():
+        current_app.logger.info('Querying for user with email {}'.format(form.email.data))
+        u = User.query.filter_by(email=form.email.data).first()
+        current_app.logger.info('Finished querying for user')
+        if not u:
+            current_app.logger.error('Tried creating pay for {}. A user with this email does not exist.'.
+                                     format(form.email.data))
+            flash('No such user exists', category='warning')
+        else:
+            p = Pay(start=form.start_date.data, end=form.end_date.data, rate=form.rate.data, user=u)
+            db.session.add(p)
+            db.session.commit()
+            current_app.logger.info('Administrator {} created new pay rate for user {}'
+                                    .format(current_user.email, u.email))
+            flash('Pay rate successfully created', category='success')
+    current_app.logger.info('End function pay')
+    return render_template('create_payrate.html', form=form, pays=Pay.query.all())
+
+
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
 def create_dumb_data():
     current_app.logger.info('def create_dumb_date()')
-    from config import config
     from ..models import Role, Tag, User, Event
     Role.insert_roles()
     Tag.insert_tags()
