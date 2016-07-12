@@ -102,9 +102,9 @@ def get_events_by_date():
     email_input = session['email']
 
     current_app.logger.info('Start function get_events_by_date with '
-                            'start: {}, end: {}, email: {}, tag: {}'
+                            'start: {}, end: {}, email: {},tag: {}'
                             .format(session['first_date'], session['last_date'],
-                                    session['email'], session['tag'])
+                                    session['email'], session['tag_input'])
                             )
     # What to do if form date fields are left blank
     # TODO: This is extraneous code. Ensure this is true during code review and then remove - Sarvar
@@ -154,7 +154,6 @@ def get_time_period(period='d'):
         lm (last month)
     :return: A two-element array containing a start and end date
     """
-    current_app.logger.info('Start function get_time_period({})'.format(period))
     today = date.today()
     first_of_month = today.replace(day=1)
     first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
@@ -180,7 +179,6 @@ def get_time_period(period='d'):
         interval = [first_of_last_month, end_of_last_month]
     else:
         interval = [today - timedelta(days=today.weekday()), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
-    current_app.logger.info('End function get_time_period')
     return interval
 
 

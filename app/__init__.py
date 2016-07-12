@@ -50,6 +50,15 @@ def create_app(config_name):  # App Factory
         load_db(db)
         store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
         kvsession = KVSessionExtension(store, app)
+        logfile_name = 'logfile_directory' + \
+                       "Timeclock" + \
+                       time.strftime("%Y%m%d-%H%M%S") + \
+                       ".log"
+        handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
+        handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
+                                       '[in %(pathname)s:%(lineno)d]'))
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
     login_manager.init_app(app)
 
     from .main import main as main_blueprint
@@ -63,16 +72,5 @@ def create_app(config_name):  # App Factory
     @app.before_request
     def func():
         session.modified = True
-
-    logfile_name = 'logfile_directory' + \
-                   "Timeclock" + \
-                   time.strftime("%Y%m%d-%H%M%S") + \
-                   ".log"
-
-    handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
-    handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
-                                   '[in %(pathname)s:%(lineno)d]'))
-    handler.setLevel(logging.INFO)
-    app.logger.addHandler(handler)
 
     return app
