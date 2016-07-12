@@ -64,7 +64,6 @@ def index():
         if form.note.data is not None and len(form.note.data) > 60:
             flash("Your note cannot exceed 60 characters", category='warning')
             current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
-
         else:
             ip = request.environ['REMOTE_ADDR']
             time = datetime.now()
@@ -76,17 +75,14 @@ def index():
                 'in' if get_last_clock_type(current_user.id) else 'out',
                 time)
             )
-
-    form = set_clock_form()
-    last_event = get_last_clock()
-    last_clock_event = get_last_clock_type(current_user.id)
+            return redirect(url_for('main.index'))
 
     current_app.logger.info('End function index')
     return render_template('index.html',
-                           form=form,
-                           last_event=last_event,
+                           form=set_clock_form(),
+                           last_event=get_last_clock(),
                            clocked_in_users=get_clocked_in_users(),
-                           last_clock_event=last_clock_event
+                           last_clock_event=get_last_clock_type(current_user.id)
                            )
 
 
