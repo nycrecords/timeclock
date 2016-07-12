@@ -252,6 +252,9 @@ class Pay(db.Model):
     end = db.Column(db.Date)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def __repr__(self):
+        return 'User: {} with rate {} from {} to {}'.format(self.user.email, self.rate, self.start, self.end)
+
 
 class Tag(db.Model):
     """
