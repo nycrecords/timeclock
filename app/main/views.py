@@ -75,6 +75,7 @@ def index():
                 'in' if get_last_clock_type(current_user.id) else 'out',
                 time)
             )
+            flash("Clock submission successfully processed", category='success')
             return redirect(url_for('main.index'))
 
     current_app.logger.info('End function index')
