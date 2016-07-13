@@ -173,7 +173,7 @@ def get_time_period(period='d'):
     first_of_last_month = first_of_month + dateutil.relativedelta.relativedelta(months=-1)
     end_of_last_month = (first_of_month + dateutil.relativedelta.relativedelta(days=-1))
     if period == 'd':
-        interval = [(today + dateutil.relativedelta.relativedelta(days=-1)), today]
+        interval = [today, today]
     elif period == 'w':
         dt = today
         start = dt - timedelta(days=dt.weekday())
