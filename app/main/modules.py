@@ -57,7 +57,7 @@ def is_clocked(user_id=None):
         event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
     else:
         event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event != None:
+    if event is not None:
         return event.type
     else:
         return None
@@ -91,10 +91,7 @@ def get_events_by_date():
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
-    :param email_input: username to search for
-    :param first_date: the start date to return queries from
-    :param last_date: the end date to query (must be after first date)
-    :param tag_input: tag to filter by
+
     :return: QUERY of Event objects from a given user between two given dates
     """
     current_app.logger.info('Start function get_events_by_date')
