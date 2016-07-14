@@ -109,9 +109,9 @@ def all_history():
         current_app.logger.info('\'tag_input\' not found in session. Setting to defaults.')
         session['tag_input'] = 0
 
-    if request.referrer:
-        current_app.logger.info('User is visiting from another page.')
-        # session['email'] = None
+    if request.referrer and 'all_history' not in request.referrer:
+        current_app.logger.info('User is visiting from another page. Setting session[\'email\'] to None')
+        session['email'] = None
 
     form = AdminFilterEventsForm()
     page = request.args.get('page', 1, type=int)
