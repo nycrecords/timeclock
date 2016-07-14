@@ -174,6 +174,7 @@ def history():
         page = 1
     else:
         # Checks if there is no first_date or last_date in the session in get_events_by_date() function
+        # and will set first_date and last_date
         pass
 
     current_app.logger.info('Querying (calling get_events_by_date)')
