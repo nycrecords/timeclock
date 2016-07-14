@@ -110,8 +110,8 @@ def all_history():
         session['tag_input'] = 0
 
     if request.referrer:
-        current_app.logger.info('User is visiting from another page. Setting session[\'email\'] to None')
-        session['email'] = None
+        current_app.logger.info('User is visiting from another page.')
+        # session['email'] = None
 
     form = AdminFilterEventsForm()
     page = request.args.get('page', 1, type=int)
