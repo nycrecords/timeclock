@@ -272,7 +272,7 @@ class Tag(db.Model):
 
     @staticmethod
     def insert_tags():
-        tags = ['Intern', 'Contractor', 'SYEP', 'Pencil', 'Employee', 'Volunteer', 'Other']
+        tags = ['Intern', 'Contractor', 'SYEP', 'PENCIL', 'Employee', 'Volunteer', 'Other']
         for t in tags:
             tag = Tag.query.filter_by(name=t).first()
             if tag is None:

@@ -29,7 +29,7 @@ tags = [
     (2, 'Contractor'),
     (3, 'SYEP'),
     (4, 'Employee'),
-    (5, 'Pencil'),
+    (5, 'PENCIL'),
     (6, 'Volunteer'),
     (7, 'Other')
 ]
