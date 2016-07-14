@@ -172,9 +172,9 @@ def history():
         session['first_date'] = time_period[0]
         session['last_date'] = time_period[1]
         page = 1
-    else:  # Set a default session['first_date'] and ['last_date']
-        session['first_date'] = get_time_period('w')[0]
-        session['last_date'] = get_time_period('w')[1]
+    else:
+        # Checks if there is no first_date or last_date in the session in get_events_by_date() function
+        pass
 
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
