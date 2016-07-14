@@ -1,11 +1,13 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin, AnonymousUserMixin
-from flask import current_app, session
-from . import login_manager
-from datetime import datetime
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import re
+from datetime import datetime
+
+from flask import current_app, session
+from flask_login import UserMixin, AnonymousUserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from . import db
+from . import login_manager
 from .utils import InvalidResetToken
 
 
@@ -150,13 +152,6 @@ class User(UserMixin, db.Model):
         """
         return self.can(Permission.ADMINISTER)
 
-    def is_clocked(self):
-        '''
-        CHecks if the user is clocked in by querying the events table
-        :return:
-        '''
-
-
     def __repr__(self):
         return '<User %r>' % self.email
 
@@ -194,9 +189,11 @@ class AnonymousUser(AnonymousUserMixin):
     An anonymous user class to simplify user processes in other code.
     """
 
+    @staticmethod
     def can(self, permissions):
         return False
 
+    @staticmethod
     def is_administrator(self):
         return False
 

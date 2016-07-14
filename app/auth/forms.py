@@ -6,7 +6,6 @@ from ..models import User
 from ..utils import tags, divisions, roles
 
 
-
 class LoginForm(Form):
     """Used for registered users to log into the system."""
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
