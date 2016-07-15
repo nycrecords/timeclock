@@ -38,8 +38,8 @@ def set_clock_form():
     """
     from .forms import ClockInForm, ClockOutForm
     current_app.logger.info('Start function get_clock_form()')
-    current_app.logger.info('Setting clock form to: clock out')
     if is_clocked():
+        current_app.logger.info('Setting clock form to: clock out')
         form = ClockOutForm()
     else:
         current_app.logger.info('Setting clock form to: clock in')

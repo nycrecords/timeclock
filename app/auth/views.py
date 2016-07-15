@@ -106,10 +106,11 @@ def login():
 
     :return: Login page.
     """
-    current_app.logger.info('Start function admin_register() [VIEW]')
+    current_app.logger.info('Start function login() [VIEW]')
     # Redirect to index if already logged in
     if current_user.is_authenticated:
         current_app.logger.info('{} is already authenticated: redirecting to index'.format(current_user.email))
+        current_app.logger.info('End function login() [VIEW]')
         return redirect(url_for('main.index'))
 
     form = LoginForm()
@@ -117,40 +118,41 @@ def login():
         user = User.query.filter_by(email=(form.email.data).lower()).first()
 
         if user and user.login_attempts >= 2:
-            # TODO: Add logging
+            # Too many invalid attempts
+            current_app.logger.info('{} has been locked out'.format(user.email))
             flash('You have too many invalid login attempts. You must reset your password.',
                   category='error')
+            current_app.logger.info('End function login() [VIEW]')
             return redirect(url_for('auth.password_reset_request'))
+
         if user is not None and user.verify_password(form.password.data):
+            # Credentials successfully sibmitted
             login_user(user)
             user.login_attempts = 0
             db.session.add(user)
             db.session.commit()
-            # current_app.logger.info('{} successfully logged in'.format(current_user.email))
-            # current_app.logger.error('{} is still logged in.'.format(current_user.email))
+            current_app.logger.info('{} successfully logged in'.format(current_user.email))
+
             # Check to ensure password isn't outdated
-            current_app.logger.info('TIMEOUT PASSWORD? {}'.format(
-                (datetime.today() - current_user.password_list.last_changed).days > 90
-            ))
-            # current_app.logger.error('{} is still logged in. - Checked password timeout'.format(current_user.email))
             if (datetime.today() - current_user.password_list.last_changed).days > 90:
+                # If user's password has expired (not update in 90 days)
+                current_app.logger.info('{}\'s password hasn\'t been updated in 90 days: account invalidated.'
+                                        .format(current_user.email))
                 current_user.validated = False
                 db.session.add(current_user)
                 db.session.commit()
                 flash('You haven\'t changed your password in 90 days. You must re-validate your account',
                       category='error')
-                return change_password()
-            # current_app.logger.error('{} is still logged in. Check days to change password'.format(current_user.email))
+                current_app.logger.info('End function login() [VIEW]')
+                return redirect(url_for('auth.change_password'))
 
             if (datetime.today() - current_user.password_list.last_changed).days > 75:
+                # If user's password is about to expire (not updated in 75 days)
                 days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
                 flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
-            # current_app.logger.error('{} is still logged in. Redirecting to main.index'.format(current_user.email))
-            # return redirect(request.args.get('next') or url_for('main.index'))
-            # current_app.logger.info('{}'.format(request.args.get('next')))
-            # if request.args.get('next') is not None:
-            #     return redirect(request.args.get('next'))
-            return redirect(url_for('main.index'))
+            current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
+            current_app.logger.info('End function login() [VIEW]')
+            return redirect(request.args.get('next') or url_for('main.index'))
 
         if user:
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
@@ -158,6 +160,7 @@ def login():
             db.session.add(user)
             db.session.commit()
         flash('Invalid username or password', category='error')
+    current_app.logger.info('End function login() [VIEW]')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
 
@@ -201,15 +204,18 @@ def change_password():
             check_password_hash(pwhash=current_user.password_list.p5,
                                 password=form.password.data)
         ):
+            # If the inputted password is one of the user's last five passwords
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
                 current_user.email))
             flash('Your password cannot be the same as the last 5 passwords', category='error')
             return render_template("auth/change_password.html", form=form)
+
         elif check_password_requirements(
                 current_user.email,
                 form.old_password.data,
                 form.password.data,
                 form.password2.data):
+            # If password security requirements are met
             current_user.password_list.update(current_user.password_hash)
             current_user.password = form.password.data
             current_user.validated = True
@@ -219,6 +225,7 @@ def change_password():
             flash('Your password has been updated.', category='success')
             current_app.logger.info('End function logout() [VIEW]')
             return redirect(url_for('main.index'))
+
     current_app.logger.info('End function logout() [VIEW]')
     return render_template("auth/change_password.html", form=form)
 
@@ -235,6 +242,7 @@ def password_reset_request():
         current_app.logger.info('Current user ({}) is already signed in. Redirecting to index...'.
                                 format(current_user.email))
         return redirect(url_for('main.index'))
+
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         current_app.logger.info('Tried to submit a password reset request with account email {}'.format(
@@ -277,6 +285,7 @@ def password_reset(token):
         current_app.logger.info('{} is already signed in. redirecting to /index...'.format(current_user.email))
         current_app.logger.info('End function password_reset')
         return redirect(url_for('main.index'))
+
     form = PasswordResetForm()
     if form.validate_on_submit():
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -292,12 +301,14 @@ def password_reset(token):
         current_app.logger.error('Querying for user that corresponds to given token')
         user = User.query.filter_by(id=data.get('reset')).first()
         current_app.logger.error('Finished querying for user')
+
         if user is None:
             # If the user associated with the token does not exist, log an error and redirect user to index
             current_app.logger.error('Requested password reset for invalid account.')
             current_app.logger.info('End function password_reset')
             return redirect(url_for('main.index'))
-        if (
+
+        elif (
             check_password_hash(pwhash=user.password_list.p1,
                                 password=form.password.data) or
             check_password_hash(pwhash=user.password_list.p2,
@@ -315,37 +326,42 @@ def password_reset(token):
             flash('Your password cannot be the same as the last 5 passwords', category='error')
             current_app.logger.info('End function password_reset')
             return render_template("auth/reset_password.html", form=form)
-        try:
-            if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
-                # If the token has not been used and the user submits a proper new password, reset users password
-                # and login attempts
-                user.login_attempts = 0
-                db.session.add(user)
-                db.session.commit()
-                session['reset_token']['valid'] = False  # Now that the token has been used, invalidate it
-                current_app.logger.error('Successfully changed password for {}'.format(user.email))
-                flash('Your password has been updated.', category='success')
-                current_app.logger.info('End function password_reset... redirecting to login')
-                return redirect(url_for('auth.login'))
-            elif 'reset_token' in session and not session['reset_token']['valid']:
-                # If the token has already been used, flash an error message
-                current_app.logger.error('Failed to change password for {}: token invalid (already used)'.format(user.email))
-                flash('You can only use a reset token once. Please generate a new reset token.', category='error')
+        else:
+            try:
+                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
+                    # If the token has not been used and the user submits a proper new password, reset users password
+                    # and login attempts
+                    user.login_attempts = 0
+                    db.session.add(user)
+                    db.session.commit()
+                    session['reset_token']['valid'] = False  # Now that the token has been used, invalidate it
+                    current_app.logger.error('Successfully changed password for {}'.format(user.email))
+                    flash('Your password has been updated.', category='success')
+                    current_app.logger.info('End function password_reset... redirecting to login')
+                    return redirect(url_for('auth.login'))
+
+                elif 'reset_token' in session and not session['reset_token']['valid']:
+                    # If the token has already been used, flash an error message
+                    current_app.logger.error('Failed to change password for {}: token invalid (already used)'
+                                             .format(user.email))
+                    flash('You can only use a reset token once. Please generate a new reset token.', category='error')
+                    current_app.logger.info('End function password_reset')
+                    return render_template('auth/reset_password.html', form=form)
+
+                else:
+                    # New password didn't meet minimum security criteria
+                    current_app.logger.error(
+                        'Entered invalid new password for {}'.format(user.email))
+                    flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
+                          category='error')
+                    current_app.logger.info('End function password_reset')
+                    return render_template('auth/reset_password.html', form=form)
+
+            except InvalidResetToken:
+                current_app.logger.error('EXCEPTION (InvalidResetToken): Token no longer valid')
+                flash('This token is no longer valid.', category='warning')
                 current_app.logger.info('End function password_reset')
-                return render_template('auth/reset_password.html', form=form)
-            else:
-                # New password didn't meet minimum security criteria
-                current_app.logger.error(
-                    'Entered invalid new password for {}'.format(user.email))
-                flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
-                      category='error')
-                current_app.logger.info('End function password_reset')
-                return render_template('auth/reset_password.html', form=form)
-        except InvalidResetToken:
-            # Token has timed out(?) - We have two exceptions, not sure what the difference is.
-            current_app.logger.error('EXCEPTION (InvalidResetToken): Token no longer valid')
-            flash('This token is no longer valid.', category='warning')
-            current_app.logger.info('End function password_reset')
-            return login()
+                return login()
+
     current_app.logger.info('End function password_reset')
     return render_template('auth/reset_password.html', form=form)
