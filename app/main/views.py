@@ -27,7 +27,7 @@ from .modules import (
     get_last_clock_type,
 )
 from .payments import (
-    calculate_hours
+    calculate_earnings
 )
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm, CreatePayRateForm
@@ -38,7 +38,7 @@ from .pdf import (
     generate_timetable,
     generate_signature_template
 )
-from datetime import datetime
+from datetime import datetime, date
 from flask import current_app
 from ..models import Pay, User
 from .. import db
@@ -306,12 +306,12 @@ def download_invoice():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
-    events = request.form.getlist('event')
-    calculate_hours(events)
-    return redirect(url_for('main.history'))
+    print('EARNINGS:', calculate_earnings('paytester@tests.com', date(2016, 7, 11), date(2016, 7, 17)))
 
+    events = request.form.getlist('event')
     # ^gets event data - we can similarly pass in other data
     # (i.e. time start, end)
+    return redirect(url_for('main.history'))
 
 
 

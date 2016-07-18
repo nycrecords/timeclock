@@ -149,7 +149,7 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
 
     # User processing
     if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
-        current_app.logger.info('Querying for events with given user: {}')
+        current_app.logger.info('Querying for events with given user: {}'.format(email_input))
         user_id = User.query.filter_by(email=email_input).first().id
         events_query = events_query.filter(Event.user_id == user_id)
         current_app.logger.info('Finished querying for events with given user.')
@@ -248,7 +248,7 @@ def get_clocked_in_users():
     current_app.logger.info('Querying for all clocked in users...')
     users = User.query.all()
     current_app.logger.info('Finished querying for all clocked in users...')
-    clocked_in_users=[]
+    clocked_in_users = []
     for user in users:
         event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
         if event is not None and event.type == True and user not in clocked_in_users:

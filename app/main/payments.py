@@ -25,7 +25,7 @@ def get_payrate_before_or_after(email_input, start, before_or_after):
             p = pay_query.filter(Pay.start <= start).order_by(sqlalchemy.desc(Pay.start)).first()
             # Get the first payment before the given date
         else:
-            p = pay_query.filter(Pay.start >= start).first()
+            p = pay_query.filter(Pay.start > start).first()
             # Get the first payment after the given date
         if not p:
             current_app.logger.error('No pay for user {} exists before date {}'
@@ -47,13 +47,14 @@ def calculate_hours_worked(email_input, start, end):
     :param start: The date
     :return: [FLOAT] The number of hours worked within the given period
     """
-    from .modules import get_events_by_date
-    events = get_events_by_date(email_input, start, end)
     current_app.logger.info('Start function calculate_hours()')
-    events = sorted(events)
+    from .modules import get_events_by_date
+    events = get_events_by_date(email_input, start, end).all()
     if len(events) % 2 != 0:
         events.pop(0)
-    events = sorted(events)
+
+    # Order from oldest to most recent
+    events.reverse()
 
     total_hours = 0
 
@@ -63,17 +64,15 @@ def calculate_hours_worked(email_input, start, end):
         event = events[x]
         print(event)
         next_event = events[x + 1]
-        time_in = event[:event.index('|') - 1]
-        time_out = next_event[:next_event.index('|') - 1]
-        time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
-        time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
-        hours_this_day = (time_out_datetime - time_in_datetime).seconds / 3600
-        print('HOURS ON {}: {}'.format(time_in_datetime, hours_this_day))
+        time_in = event.time
+        time_out = next_event.time
+        hours_this_day = (time_out - time_in).seconds / 3600
+        print('HOURS ON {}: {}'.format(time_in, hours_this_day))
         total_hours += hours_this_day
         print('TOTAL HOURS: {}'.format(total_hours))
 
-    return total_hours
     current_app.logger.info('End function calculate_hours')
+    return total_hours
 
 
 def calculate_earnings(email_input, first_date, last_date):
@@ -84,30 +83,43 @@ def calculate_earnings(email_input, first_date, last_date):
     :param last_date: End of pay period
     :return: [FLOAT] The amount an employee has earned within the period (USD)
     """
+    current_app.logger.info('Start function calculate_earnings()')
     total_earnings = 0
     # Set current payrate to first payrate before or on the beginning of the pay period
     current_pay_rate = get_payrate_before_or_after(email_input, first_date, True)
     done = False
-    while not done and current_pay_rate.start < last_date :
+    begin_date = first_date
+    while not done and current_pay_rate.start < last_date:
         # Set the next payrate to the first payrate after the end of the pay period
-        next_pay_rate = get_payrate_before_or_after(email_input, first_date, False)
+        next_pay_rate = get_payrate_before_or_after(email_input, current_pay_rate.start, False)
+        print('NEXT_PAY_RATE:', next_pay_rate)
         if next_pay_rate and next_pay_rate.start < last_date:
-            hours_worked = calculate_hours_worked(email_input, first_date, next_pay_rate.start)
+            # Multiple pay rates within the same period
 
-            # Add amount earned within first pay period
+            # So we calculate the hours between the start of the period and the start of the
+            # next pay rate:
+            hours_worked = calculate_hours_worked(email_input, begin_date, next_pay_rate.start)
+            print('HOURS WORKED:', hours_worked)
+
+            # Add amount earned within this time period
             total_earnings += current_pay_rate.rate * hours_worked
+            print('TOTAL EARNINGS:', total_earnings)
 
             # Set the current pay date to the next pay date within the pay period
             current_pay_rate = next_pay_rate
+            print('CURRENT PAY RATE:', current_pay_rate)
 
             # Set the first_date of the pay_period to the first date after the end of the last pay_period
-            first_date = next_pay_rate.start
+            begin_date = current_pay_rate.start
+            print('BEGIN DATE:', begin_date)
         else:
             # First pay rate applies to the entire period
             hours_worked = calculate_hours_worked(email_input, first_date, last_date)
             total_earnings += current_pay_rate.rate * hours_worked
             # Exit the loop
             done = True
+    current_app.logger.info('End function calculate_earnings')
+    return total_earnings
 
 
 
