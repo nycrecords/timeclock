@@ -40,7 +40,7 @@ def get_payrate_before_or_after(email_input, start, before_or_after):
     return p
 
 
-def calculate_hours(email_input, start, end):
+def calculate_hours_worked(email_input, start, end):
     """
     Calculates the hours worked by a user between two dates.
     :param email_input: Email of employee whose hours are to be calculated.
@@ -72,4 +72,43 @@ def calculate_hours(email_input, start, end):
         total_hours += hours_this_day
         print('TOTAL HOURS: {}'.format(total_hours))
 
+    return total_hours
     current_app.logger.info('End function calculate_hours')
+
+
+def calculate_earnings(email_input, first_date, last_date):
+    """
+    Calculates an employee's earnings over a given period.
+    :param email_input: email of the employee whose earnings to calculate
+    :param first_date: Beginning of pay period
+    :param last_date: End of pay period
+    :return: [FLOAT] The amount an employee has earned within the period (USD)
+    """
+    total_earnings = 0
+    # Set current payrate to first payrate before or on the beginning of the pay period
+    current_pay_rate = get_payrate_before_or_after(email_input, first_date, True)
+    done = False
+    while not done and current_pay_rate.start < last_date :
+        # Set the next payrate to the first payrate after the end of the pay period
+        next_pay_rate = get_payrate_before_or_after(email_input, first_date, False)
+        if next_pay_rate and next_pay_rate.start < last_date:
+            hours_worked = calculate_hours_worked(email_input, first_date, next_pay_rate.start)
+
+            # Add amount earned within first pay period
+            total_earnings += current_pay_rate.rate * hours_worked
+
+            # Set the current pay date to the next pay date within the pay period
+            current_pay_rate = next_pay_rate
+
+            # Set the first_date of the pay_period to the first date after the end of the last pay_period
+            first_date = next_pay_rate.start
+        else:
+            # First pay rate applies to the entire period
+            hours_worked = calculate_hours_worked(email_input, first_date, last_date)
+            total_earnings += current_pay_rate.rate * hours_worked
+            # Exit the loop
+            done = True
+
+
+
+
