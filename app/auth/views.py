@@ -361,7 +361,7 @@ def password_reset(token):
                 current_app.logger.error('EXCEPTION (InvalidResetToken): Token no longer valid')
                 flash('This token is no longer valid.', category='warning')
                 current_app.logger.info('End function password_reset')
-                return login()
+                return redirect(url_for('auth.login'))
 
     current_app.logger.info('End function password_reset')
     return render_template('auth/reset_password.html', form=form)

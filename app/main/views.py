@@ -24,7 +24,10 @@ from .modules import (
     get_time_period,
     process_time_periods,
     get_all_tags,
-    get_last_clock_type
+    get_last_clock_type,
+)
+from .payments import (
+    calculate_hours
 )
 from ..decorators import admin_required
 from .forms import AdminFilterEventsForm, UserFilterEventsForm, CreatePayRateForm
@@ -198,7 +201,7 @@ def history():
 @login_required
 def download():
     """
-    Created a link to download a timesheet containing the given filtered data.
+    Creates a link to download a timesheet containing the given filtered data.
     :return: A directive to download a file timesheet.txt, which contains
     timesheet data
     """
@@ -264,6 +267,53 @@ def download():
     current_app.logger.info('End function download')
     return response
 
+@main.route('/download_invoice', methods=['GET', 'POST'])
+@login_required
+def download_invoice():
+    """
+    Creates a link to download a timesheet containing the given filtered data.
+    :return: A directive to download a file timesheet.txt, which contains
+    timesheet data
+    """
+    current_app.logger.info('Start function download_invoice()')
+    errors = []
+
+    if 'email' not in session or session['email'] is None or session['email'] == '':
+        # If an admin does not specify the account for which the invoice should
+        # be generated, flash an error
+        current_app.logger.error('User {} tried to generate an invoice but '
+                                 'did not specify a user'
+                                 .format(current_user.email)
+                                 )
+        errors.append('You must specify a user.')
+
+    if (session['last_date']-session['first_date']).days > 8:
+        # If the time period is over a week, flash an error. We use days > 8
+        # because we use a < as opposed to a <= in our query in modules.py
+        current_app.logger.error('User {} tried to generate a timesheet but '
+                                 'exceeded maximum duration (one week)'
+                                 .format(current_user.email)
+                                 )
+        errors.append('Maximum timesheet duration is a week. '
+                      'Please refine your filters')
+    if errors:
+        for error in errors:
+            flash(error, 'warning')
+        last_page = (request.referrer).split('/')[3]
+        if last_page.find('?') != -1:
+            last_page = last_page[:last_page.find('?')]
+        current_app.logger.error('Errors occurred while generating invoice (end function download_invoice).'
+                                 ' Redirecting to main.{}...'.format(last_page))
+        return redirect(url_for('main.' + last_page))
+
+    events = request.form.getlist('event')
+    calculate_hours(events)
+    return redirect(url_for('main.history'))
+
+    # ^gets event data - we can similarly pass in other data
+    # (i.e. time start, end)
+
+
 
 @login_required
 @main.route('/clear_filter', methods=['GET', 'POST'])
@@ -316,8 +366,6 @@ def pay():
             flash('Pay rate successfully created', category='success')
     current_app.logger.info('End function pay')
     return render_template('create_payrate.html', form=form, pays=Pay.query.all())
-
-
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

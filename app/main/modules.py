@@ -87,7 +87,7 @@ def get_last_clock():
         return None
 
 
-def get_events_by_date():
+def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
@@ -111,6 +111,14 @@ def get_events_by_date():
         current_app.logger.info('Email not in session, setting to defaults')
         session['email'] = current_user.email
     email_input = session['email']
+
+    # For manual getting events (ignoring session variables)
+    if email:
+        email_input = email
+    if first_date_input:
+        first_date = first_date_input
+    if last_date_input:
+        last_date = last_date_input
 
     current_app.logger.info('Start function get_events_by_date with '
                             'start: {}, end: {}, email: {},tag: {}'
@@ -262,70 +270,6 @@ def get_all_tags():
     current_app.logger.info('Finished querying for all tags...')
     current_app.logger.info('End function get_all_tags()')
     return tags
-
-
-def get_pay_before(email_input, start):
-    """
-    Gets the pay
-    :param email_input: Email of the user whose pays to query through.
-    :param start: Start date - the query will search for the pay with a start date closest (but before)
-    to this date.
-    :return: An object from the pay table.
-    """
-    current_app.logger.info('Start function get_pay_before()')
-    current_app.logger.info('Querying for user with given e-mail: {}'.format(email_input))
-    user_id = User.query.filter_by(email=email_input).first().id
-    current_app.logger.info('Finished querying for user with given e-mail')
-    current_app.logger.info('Querying for most recent pay for user {}'.format(email_input))
-    pay_query = Pay.query.filter(Pay.user_id == user_id)
-    p = pay_query.filter(Pay.start<=start).order_by(sqlalchemy.desc(Pay.start)).first()
-    current_app.logger.info('Finished querying for most recent pay for user {}'.format(email_input))
-    current_app.logger.info('End function get_pay_before()')
-    return p
-
-
-def calculate_hours(email_input, first, last):
-    """
-    Calculates the hours worked by a user between two dates.
-    :param email_input: Email of the user whose hours to query through.
-    :param first: Start date
-    :param last: End date
-    :return: [FLOAT] The number of hours worked within the given period
-    """
-    current_app.logger.info('Start function calculate_hours({},{},{})'.
-                            format(email_input, first, last))
-    current_app.logger.info('End function calculate_hours')
-
-
-def calculate_pays(email_input, start, end):
-    """
-    Calculates the amount an employee has earned between two given dates.
-    :param email_input: Email of user whose earning are being calculated.
-    :param start: Start of the pay period
-    :param end: End of the pay period
-    :return: [Float] value of users earnings between start and end date.
-    """
-    current_app.logger.info('Start function calculate_pays({},{},{})'.
-                            format(email_input, start, end))
-    """
-    Here's the general idea (we'll be using a recursive function:
-        1) We keep track of a current_start date - that's the start of the most recent worked day we
-        haven't yet accounted for. Initially, this will be the parameter start.
-
-        2) We keep track of an current_end - that's the end of the pay rate corresponding to current_day. Once
-        this value is greater than or equal to the parameter end, we're good to go: all we have to do is get the hours
-        from current_start to end and add this to the hours we've already got.
-    """
-    total_pay = 0
-    pay = get_pay_before(email_input, start)
-    # Now get all hours worked within this pay date
-    if end <= pay.end:
-        # If the work period ends before the pay period, calculate the hours worked up to the end of the work period
-        pass
-    current_app.logger.info('End function calculate_pays')
-
-
-    return Tag.query.all()
 
 def get_last_clock_type(user_id=None):
     current_app.logger.info('Start function get_last_clock_type()')

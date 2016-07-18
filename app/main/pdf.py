@@ -71,7 +71,6 @@ def generate_timetable(canvas_field, events):
     total_hours = 0
 
     canvas_field.setFont('Courier-Bold', 10)
-    print(canvas_field.getAvailableFonts())
     canvas_field.drawString(55, timetable_top - 5, 'DATE')
     canvas_field.drawString(135, timetable_top - 5,  'TIME IN')
     canvas_field.drawString(222, timetable_top - 5, 'TIME OUT')
