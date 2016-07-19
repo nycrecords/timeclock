@@ -271,6 +271,7 @@ def get_all_tags():
     current_app.logger.info('End function get_all_tags()')
     return tags
 
+
 def get_last_clock_type(user_id=None):
     current_app.logger.info('Start function get_last_clock_type()')
     event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
@@ -280,3 +281,14 @@ def get_last_clock_type(user_id=None):
     else:
         current_app.logger.info('End function get_last_clock_type')
         return None
+
+
+def create_timepunch(time, note):
+    """
+    Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
+    that it may be approved or denied.
+    :param time:
+    :param note:
+    :return:
+    """
+    pass

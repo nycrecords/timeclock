@@ -1,7 +1,7 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField, FloatField
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, DateTimeField
 from wtforms.validators import DataRequired, Optional, Length, Email
-from datetime import date
+from datetime import date, datetime
 from ..utils import tags, divisions
 
 
@@ -26,6 +26,7 @@ class TimePunchForm(Form):
     Form for requesting a time punch.
     """
     punch_type = SelectField("Punch Type", validators=[DataRequired()], choices=[(0, 'In'), (1, 'Out')])
+    time = DateTimeField(default=datetime.today(), validators=[DataRequired()])
     note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=120)])
     submit = SubmitField("Submit Request")
 

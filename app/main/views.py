@@ -27,10 +27,15 @@ from .modules import (
     get_last_clock_type,
 )
 from .payments import (
-    calculate_earnings
+    calculate_hours_worked
 )
 from ..decorators import admin_required
-from .forms import AdminFilterEventsForm, UserFilterEventsForm, CreatePayRateForm
+from .forms import (
+    AdminFilterEventsForm,
+    UserFilterEventsForm,
+    CreatePayRateForm,
+    TimePunchForm
+)
 from .pdf import (
     generate_header,
     generate_footer,
@@ -306,12 +311,14 @@ def download_invoice():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
-    print('EARNINGS:', calculate_earnings('paytester@tests.com', date(2016, 7, 11), date(2016, 7, 17)))
+    if session['email'] is None or session['email'] == '':
+        u = User.query.filter_by(email=current_user.email).first()
+    else:
+        u = User.query.filter_by(email=session['email']).first()
 
-    events = request.form.getlist('event')
-    # ^gets event data - we can similarly pass in other data
-    # (i.e. time start, end)
-    return redirect(url_for('main.history'))
+    day_events_list = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
+    return render_template('payments/invoice.html', day_events_list=day_events_list,
+                           employee=u, time=datetime.now())
 
 
 
@@ -365,7 +372,19 @@ def pay():
                                     .format(current_user.email, u.email))
             flash('Pay rate successfully created', category='success')
     current_app.logger.info('End function pay')
-    return render_template('create_payrate.html', form=form, pays=Pay.query.all())
+    return render_template('payments/create_payrate.html', form=form, pays=Pay.query.all())
+
+@main.route('/request_timepunch')
+@login_required
+def request_timepunch():
+    """
+    Creates a form for users to be able to request a timepunch
+    :return: A page users can implement to request the addition of a clock event.
+    """
+    form = TimePunchForm()
+    if form.validate_on_submit():
+        e = Event()
+    pass
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

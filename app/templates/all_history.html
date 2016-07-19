@@ -56,6 +56,7 @@
                     <th>Tag</th>
                     <th>Time</th>
                 </tr>
+            </thead>
             <tbody>
                 {% for event in events %}
                 <tr>
@@ -82,6 +83,7 @@
                     <td>{{ event.time.strftime("%b %d, %Y %H:%M:%S") }}</td>
                 </tr>
                 {% endfor %}
+            </tbody>
         </table>
         <div class="col-md-8 col-md-offset-4">
             {{ macros.pagination_widget(pagination, '.all_history') }}
