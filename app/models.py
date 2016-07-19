@@ -76,8 +76,7 @@ class User(UserMixin, db.Model):
 
     # Supervisor
     supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    supervisor = db.relationship('Pay', backref='supervisor', lazy='dynamic')
-
+    supervisor = db.relationship('User', remote_side=[id])
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

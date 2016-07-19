@@ -1,0 +1,17 @@
+This is a notification to inform you that {{ user.first_name }} {{ user.last_name }} [email: {{ user.email }}has requested a change to their TimeClock Logs.
+
+Request information:
+Type: Clock
+    {% if type %}
+    IN
+    {% else %}
+    OUT
+    {% endif %}
+
+
+Time: {{ punch_time.strftime("%b %d, %Y %H:%M:%S") }}
+Reason: {{ note }}
+
+
+You can approve or reject this request here (TODO: INSERT LINK)
+Responses to this email are not monitored

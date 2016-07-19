@@ -88,7 +88,7 @@ def index():
             return redirect(url_for('main.index'))
 
     current_app.logger.info('End function index')
-    return render_template('index.html',
+    return render_template('main/index.html',
                            form=set_clock_form(),
                            last_event=get_last_clock(),
                            clocked_in_users=get_clocked_in_users(),
@@ -148,7 +148,7 @@ def all_history():
     current_app.logger.info('Finished querying')
 
     current_app.logger.info('End function all_history()')
-    return render_template('all_history.html',
+    return render_template('main/all_history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
@@ -322,9 +322,8 @@ def download_invoice():
                            employee=u, time=datetime.now())
 
 
-
-@login_required
 @main.route('/clear_filter', methods=['GET', 'POST'])
+@login_required
 def clear():
     current_app.logger.info('Start function clear()')
     session.pop('first_date', None)
@@ -337,8 +336,9 @@ def clear():
     return redirect(url_for('main.all_history'))
 
 
-@login_required
+
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
+@login_required
 def user_clear():
     current_app.logger.info('Start function user_clear()')
     session.pop('first_date', None)
@@ -375,6 +375,7 @@ def pay():
     current_app.logger.info('End function pay')
     return render_template('payments/create_payrate.html', form=form, pays=Pay.query.all())
 
+
 @main.route('/request_timepunch', methods=['GET', 'POST'])
 @login_required
 def request_timepunch():
@@ -384,12 +385,12 @@ def request_timepunch():
     """
     form = TimePunchForm()
     if form.validate_on_submit():
+        print('PUNCH TYPE', form.punch_type.data)
         create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
         flash('Your timepunch request has been successfully submitted and is pending renewal',
               category='success')
-        print('PUNCH TYPE', form.punch_type.data)
         return redirect(url_for('main.request_timepunch'))
-    return render_template('request_timepunch.html', form=form)
+    return render_template('main/request_timepunch.html', form=form)
     pass
 
 
