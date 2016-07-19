@@ -283,12 +283,17 @@ def get_last_clock_type(user_id=None):
         return None
 
 
-def create_timepunch(time, note):
+def create_timepunch(punch_time, reason):
     """
     Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
     that it may be approved or denied.
-    :param time:
-    :param note:
-    :return:
+
+    :param punch_time: [datetime] time of requested punch
+    :param reason: [string] reason for timepunch submission
+    :return: None
     """
+    # End parameters not available in db yet:
+    # Column timepunch [boolean] (not nullable)
+    # Column approved [boolean] (nullable)
+    e = Event(time=punch_time, note=reason, user=current_user, timepunch=True, approved=False)
     pass
