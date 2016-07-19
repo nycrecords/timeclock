@@ -214,7 +214,7 @@ class Event(db.Model):
     ip = db.Column(db.String(120))
 
     timepunch = db.Column(db.Boolean, default=False)  # True if this is a timepunch request, false otherwise
-    approved = db.Column(db.Boolean, nullable=True, default=None)
+    approved = db.Column(db.Boolean, default=True)
     # ^True if this is an approved timepunch request, false if
     # this is an unapproved timepunch request, Null otherwise
 

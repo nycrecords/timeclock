@@ -154,6 +154,9 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
         events_query = events_query.filter(Event.user_id == user_id)
         current_app.logger.info('Finished querying for events with given user.')
 
+    # Eliminate unapproved timepunches
+    events_query = events_query.filter_by(approved=True)
+
     current_app.logger.info('Sorting query results be time (desc)')
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
     current_app.logger.info('Finished sorting query results')
