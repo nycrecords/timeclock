@@ -25,6 +25,7 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
+    create_timepunch
 )
 from .payments import (
     calculate_hours_worked
@@ -374,7 +375,7 @@ def pay():
     current_app.logger.info('End function pay')
     return render_template('payments/create_payrate.html', form=form, pays=Pay.query.all())
 
-@main.route('/request_timepunch')
+@main.route('/request_timepunch', methods=['GET', 'POST'])
 @login_required
 def request_timepunch():
     """
@@ -383,7 +384,12 @@ def request_timepunch():
     """
     form = TimePunchForm()
     if form.validate_on_submit():
-        e = Event()
+        create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
+        flash('Your timepunch request has been successfully submitted and is pending renewal',
+              category='success')
+        print('PUNCH TYPE', form.punch_type.data)
+        return redirect(url_for('main.request_timepunch'))
+    return render_template('request_timepunch.html', form=form)
     pass
 
 

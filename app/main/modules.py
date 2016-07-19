@@ -283,17 +283,20 @@ def get_last_clock_type(user_id=None):
         return None
 
 
-def create_timepunch(punch_time, reason):
+def create_timepunch(punch_type, punch_time, reason):
     """
     Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
     that it may be approved or denied.
-
+    :param: punch_type: [String] type of requested punch (True for in, False for out)
     :param punch_time: [datetime] time of requested punch
     :param reason: [string] reason for timepunch submission
     :return: None
     """
     # End parameters not available in db yet:
-    # Column timepunch [boolean] (not nullable)
+    # Column timepunch [String] (not nullable)
     # Column approved [boolean] (nullable)
-    e = Event(time=punch_time, note=reason, user=current_user, timepunch=True, approved=False)
-    pass
+    punch_type = punch_type == 'True'  # must manually cast string to bool as
+    # wtforms does not support this functionality (assigns any non-empty string to True)
+    e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
+    db.session.add(e)
+    db.session.commit()
