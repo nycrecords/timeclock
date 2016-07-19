@@ -24,7 +24,7 @@ def process_clock(note_data, ip=None):
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_app.logger.info('Saving new event to database')
-    db.session.add(current_user)
+    db.session.add(current_user)  # TODO: do we still need this after eliminating clocked_in from db?
     db.session.add(event)
     db.session.commit()
     current_app.logger.info('Saved new event to database')
