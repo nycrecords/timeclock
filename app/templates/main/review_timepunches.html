@@ -45,12 +45,26 @@
                     {% if event.user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <form method=post action="/review_timepunches">
-                        <input type="hidden" value="{{ event }}" name="event">
-                        {% for field in form %}
-                           <td> {{ field }} </td>
-                        {% endfor %}
-                    </form>
+                    <td>
+                        <form method=post action="/review_timepunches">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" value="{{ event.id }}" name="event_id">
+                            {% for field in form %}
+                                {% if field.type == 'SubmitField' %}
+                                    <button type="submit" value="{{ field.name }}" > {{ field.name }} </button>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                {% if field.errors %}
+                                    <ul class=errors>
+                                    {% for error in field.errors %}
+                                      <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                    {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endfor %}
+                        </form>
+                     </td>
                 </tr>
                 {% endfor %}
             </tbody>

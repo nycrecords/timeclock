@@ -285,3 +285,6 @@ def get_last_clock_type(user_id=None):
         current_app.logger.info('End function get_last_clock_type')
         return None
 
+
+def get_event_by_id(event_id):
+    return Event.query.filter_by(id=event_id).first()

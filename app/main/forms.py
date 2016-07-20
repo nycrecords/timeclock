@@ -83,5 +83,6 @@ class CreatePayRateForm(Form):
 
 
 class ApproveOrDenyTimePunchForm(Form):
-    deny = SubmitField("")
     approve = SubmitField("")
+    deny = SubmitField("")
+

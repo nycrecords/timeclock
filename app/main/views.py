@@ -25,10 +25,12 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
+    get_event_by_id
 )
 from .timepunch import (
     create_timepunch,
-    get_timepunches_for_review
+    get_timepunches_for_review,
+    approve_or_deny
 )
 from .payments import (
     calculate_hours_worked
@@ -199,7 +201,7 @@ def history():
     tags = get_all_tags()
     current_app.logger.info('Finished querying')
 
-    return render_template('history.html',
+    return render_template('main/history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
@@ -402,9 +404,19 @@ def request_timepunch():
 def review_timepunch():
     # Use timepunch id in the div?
     timepunch_list = get_timepunches_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm()
+    form = ApproveOrDenyTimePunchForm(request.form)
+    if form.is_submitted():
+        print("submitted")
+    if form.validate():
+        print("valid")
+    print(form.errors)
     if form.validate_on_submit():
-        pass
+        if form.approve.data:
+            approve_or_deny(request.form.event_id, True)
+            flash('Timepunch successfully approved')
+        elif form.deny.data:
+            approve_or_deny(request.form.event_id, False)
+            flash('Timepunch successfully unapproved')
     return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form)
 
 

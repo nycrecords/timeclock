@@ -11,6 +11,7 @@ from flask_login import current_user
 from flask import current_app
 
 
+
 def create_timepunch(punch_type, punch_time, reason):
     """
     Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
@@ -21,7 +22,7 @@ def create_timepunch(punch_type, punch_time, reason):
     :return: None
     """
     current_app.logger.info('Start function create_timepunch()')
-    punch_type = punch_type == 'True'  # must manually cast string to bool because
+    punch_type = punch_type is 'True'  # must manually cast string to bool because
     print('PUNCH TYPE IN CREATE_TIMEPUNCH', punch_type)
     # wtforms does not support this functionality (assigns any non-empty string to True)
     e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
@@ -51,3 +52,16 @@ def get_timepunches_for_review(user_email):
 
     current_app.logger.info('End function get_timepunches_for_review')
     return timepunch_query.all()
+
+
+def approve_or_deny(event_id, approve=False):
+    current_app.logger.info('Start function approve_or_deny()')
+    from .modules import get_event_by_id
+    e = get_event_by_id(event_id)
+    if approve:
+        e.approved = True
+    else:
+        e.approved = False
+    db.session.add(e)
+    db.session.commit()
+    current_app.logger.info('End function approve_or_deny()')
