@@ -43,7 +43,6 @@ def get_timepunches_for_review(user_email):
     u = User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for timepunches submitted to {}'.format(user_email))
     timepunch_query = Event.query.join(User).filter_by(supervisor=u).filter(Event.timepunch == True)
-        #Event.query.filter(Event.user.supervisor.id == u.id).filter_by(timepunch=True)
     current_app.logger.info('Finished querying for timepunches')
 
     result = timepunch_query.all()

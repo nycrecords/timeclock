@@ -84,8 +84,8 @@ class User(UserMixin, db.Model):
             if self.email == current_app.config['ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
                 self.validated = True
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
+            else:
+                self.role = Role.query.filter_by(default=True).first()
         self.password_list = Password(p1='', p2='', p3='', p4='', p5='', last_changed=datetime.now())
 
     @property

@@ -38,7 +38,8 @@ from .forms import (
     AdminFilterEventsForm,
     UserFilterEventsForm,
     CreatePayRateForm,
-    TimePunchForm
+    TimePunchForm,
+    ApproveOrDenyTimePunchForm
 )
 from .pdf import (
     generate_header,
@@ -401,7 +402,10 @@ def request_timepunch():
 def review_timepunch():
     # Use timepunch id in the div?
     timepunch_list = get_timepunches_for_review(current_user.email)
-    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list)
+    form = ApproveOrDenyTimePunchForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database
