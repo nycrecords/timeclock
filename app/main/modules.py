@@ -1,6 +1,5 @@
 from .. import db
 from ..models import User, Event, Tag
-from ..email_notification import send_email
 from datetime import datetime, timedelta, date
 import dateutil.relativedelta
 from flask_login import current_user
@@ -286,26 +285,3 @@ def get_last_clock_type(user_id=None):
         current_app.logger.info('End function get_last_clock_type')
         return None
 
-
-def create_timepunch(punch_type, punch_time, reason):
-    """
-    Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
-    that it may be approved or denied.
-    :param: punch_type: [String] type of requested punch (True for in, False for out)
-    :param punch_time: [datetime] time of requested punch
-    :param reason: [string] reason for timepunch submission
-    :return: None
-    """
-    # End parameters not available in db yet:
-    # Column timepunch [String] (not nullable)
-    # Column approved [boolean] (nullable)
-    punch_type = punch_type == 'True'  # must manually cast string to bool because
-    print('PUNCH TYPE IN CREATE_TIMEPUNCH', punch_type)
-    # wtforms does not support this functionality (assigns any non-empty string to True)
-    e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
-    db.session.add(e)
-    db.session.commit()
-    send_email(current_user.supervisor.email,
-               'TimePunch Request from {} {}'.format(current_user.first_name, current_user.last_name),
-               '/main/email/request_timepunch',
-               user=current_user, punch_time=punch_time, type=punch_type, note=reason)

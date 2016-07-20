@@ -25,7 +25,10 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
-    create_timepunch
+)
+from .timepunch import (
+    create_timepunch,
+    get_timepunches_for_review
 )
 from .payments import (
     calculate_hours_worked
@@ -44,7 +47,7 @@ from .pdf import (
     generate_timetable,
     generate_signature_template
 )
-from datetime import datetime, date
+from datetime import datetime
 from flask import current_app
 from ..models import Pay, User
 from .. import db
@@ -391,7 +394,14 @@ def request_timepunch():
               category='success')
         return redirect(url_for('main.request_timepunch'))
     return render_template('main/request_timepunch.html', form=form)
-    pass
+
+
+@main.route('/review_timepunches', methods=['GET', 'POST'])
+@login_required
+def review_timepunch():
+    # Use timepunch id in the div?
+    timepunch_list = get_timepunches_for_review(current_user.email)
+    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database
