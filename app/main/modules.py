@@ -216,7 +216,7 @@ def process_time_periods(form):
                                 format(form.first_date.data, form.last_date.data))
         time_period = [form.first_date.data, form.last_date.data]
     if 'this_day' in form:
-        if form.this_day.data:
+        if form.this_dxay.data:
             current_app.logger.info('Time period is: today')
             time_period = get_time_period('d')
     if 'this_week' in form:
@@ -249,7 +249,7 @@ def get_clocked_in_users():
     """
     current_app.logger.info('Start function get_clocked_in_users()')
     current_app.logger.info('Querying for all clocked in users...')
-    users = User.query.all()
+    users = User.query.order_by(User.division).all()
     current_app.logger.info('Finished querying for all clocked in users...')
     clocked_in_users = []
     for user in users:

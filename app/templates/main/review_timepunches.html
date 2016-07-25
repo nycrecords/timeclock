@@ -47,7 +47,7 @@
                     {% endif %}
                     <td>
                         <form method=post action="/review_timepunches">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            {{ form.hidden_tag() }}
                             <input type="hidden" value="{{ event.id }}" name="event_id">
                             {% for field in form %}
                                 {% if field.type == 'SubmitField' %}

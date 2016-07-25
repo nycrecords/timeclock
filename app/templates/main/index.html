@@ -29,6 +29,7 @@
                 <table class="table" style="padding:4px">
                     <thead>
                         <tr>
+                            <th>Division</th>
                             <th>Email</th>
                             <th>First Name</th>
                             <th>Last Name</th>
@@ -37,6 +38,7 @@
                     <tbody>
                         {% for user in clocked_in_users %}
                         <tr>
+                            <td>{{ user.division }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.first_name }}</td>
                             <td>{{ user.last_name }}</td>
