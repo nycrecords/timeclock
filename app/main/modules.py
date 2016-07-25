@@ -216,7 +216,7 @@ def process_time_periods(form):
                                 format(form.first_date.data, form.last_date.data))
         time_period = [form.first_date.data, form.last_date.data]
     if 'this_day' in form:
-        if form.this_dxay.data:
+        if form.this_day.data:
             current_app.logger.info('Time period is: today')
             time_period = get_time_period('d')
     if 'this_week' in form:
@@ -254,7 +254,7 @@ def get_clocked_in_users():
     clocked_in_users = []
     for user in users:
         event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
-        if event is not None and event.type == True and user not in clocked_in_users:
+        if event is not None and event.type is True and user not in clocked_in_users:
             clocked_in_users.append(user)
         else:
             continue

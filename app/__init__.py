@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_kvsession import KVSessionExtension
+from flask_seasurf import SeaSurf
 from simplekv.db.sql import SQLAlchemyStore
 from config import config
 import os

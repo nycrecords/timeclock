@@ -17,11 +17,13 @@
                     <th>Reason</th>
                     <th>Division</th>
                     <th>Tag</th>
+                    <th>Status</th>
 
                 </tr>
             </thead>
 
             <tbody>
+                {{ form.hidden_tag() }}
                 {% for event in timepunch_list %}
                 <tr>
                     <td>{{ event.user.email }}</td>
@@ -45,13 +47,19 @@
                     {% if event.user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
+                    <td>{% if event.approved %}
+                        <span style="color:green">Approved</span>
+                        {% else %}
+                        <span style="color:orange">Unapproved</span>
+                        {% endif %}
+                    </td>
                     <td>
-                        <form method=post action="/review_timepunches">
-                            {{ form.hidden_tag() }}
+                        <form method="POST" action="/review_timepunches" name="form">
                             <input type="hidden" value="{{ event.id }}" name="event_id">
                             {% for field in form %}
                                 {% if field.type == 'SubmitField' %}
-                                    <button type="submit" value="{{ field.name }}" > {{ field.name }} </button>
+                                    <button type="submit" value="{{ field.name }}" name = "{{ field.name }}"
+                                    id="{{ field.name }}"> {{ field.name }} </button>
                                 {% else %}
                                     {{ field }}
                                 {% endif %}

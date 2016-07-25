@@ -410,12 +410,20 @@ def review_timepunch():
         print("valid")
     print(form.errors)
     if form.validate_on_submit():
+        print('this was validated on submit')
+        print('FORM.APPROVE', form.approve)
+        print(form.data['approve'])
         if form.approve.data:
-            approve_or_deny(request.form.event_id, True)
-            flash('Timepunch successfully approved')
+            print(request.form)
+            approve_or_deny(request.form['event_id'], True)
+            flash('Timepunch successfully approved', category='success')
+            # return redirect(url_for('main.review_timepunch'))
         elif form.deny.data:
-            approve_or_deny(request.form.event_id, False)
-            flash('Timepunch successfully unapproved')
+            approve_or_deny(request.form['event_id'], False)
+            flash('Timepunch successfully unapproved', category='success')
+            # return redirect(url_for('main.review_timepunch'))
+        else:
+            flash('FOR DEVS: THERE WAS SOME ERROR', category='error')
     return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form)
 
 
