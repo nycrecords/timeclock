@@ -25,7 +25,6 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
-    get_event_by_id
 )
 from .timepunch import (
     create_timepunch,

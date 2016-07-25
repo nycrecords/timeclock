@@ -80,7 +80,7 @@
                     {% if event.user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <td>{{ event.time.strftime("%b %d, %Y %H:%M:%S") }}</td>
+                    <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

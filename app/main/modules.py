@@ -73,7 +73,7 @@ def get_last_clock():
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=current_user.id).first() is not None:
             recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).\
-                first().time.strftime("%b %d, %Y | %H:%M:%S")
+                first().time.strftime("%b %d, %Y | %H:%M")
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
