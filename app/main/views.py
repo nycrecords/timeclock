@@ -41,7 +41,8 @@ from .forms import (
     CreatePayRateForm,
     TimePunchForm,
     ApproveOrDenyTimePunchForm,
-    FilterTimePunchForm
+    FilterTimePunchForm,
+    ClearTimePunchFilterForm
 )
 from .pdf import (
     generate_header,
@@ -406,16 +407,21 @@ def review_timepunch():
     timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form)
     filter = FilterTimePunchForm()
+    clear = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
 
-    if filter.validate_on_submit():
+    if filter.validate_on_submit and filter.filter.data:
         page = 1
         timepunch_query = get_timepunches_for_review(current_user.email, filter.email.data)
-        flash('Successfully filtered')
+        flash('Successfully filtered', category='success')
+
+    if clear.validate_on_submit() and clear.clear.data:
+        page = 1
+        timepunch_query = get_timepunches_for_review(current_user.email)
+        flash('Filter successfully cleared', category='success')
 
     if form.validate_on_submit():
         if form.approve.data:
-            # print(request.form)
             approve_or_deny(request.form['event_id'], True)
             flash('Timepunch successfully approved', category='success')
             # return redirect(url_for('main.review_timepunch'))
@@ -424,17 +430,20 @@ def review_timepunch():
             flash('Timepunch successfully unapproved', category='success')
             # return redirect(url_for('main.review_timepunch'))
         else:
-            # This just means the filter form was validated instead, ignore for now
+            # This just means the filter or clear form was validated instead, ignore for now
             pass
+
     pagination = timepunch_query.paginate(
             page, per_page=15,
             error_out=False)
+
     timepunch_list = pagination.items
     return render_template('main/review_timepunches.html',
                            timepunch_list=timepunch_list,
                            form=form,
                            pagination=pagination,
-                           filter=filter)
+                           filter=filter,
+                           clear=clear)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

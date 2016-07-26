@@ -88,5 +88,9 @@ class ApproveOrDenyTimePunchForm(Form):
 
 
 class FilterTimePunchForm(Form):
-    email = StringField(StringField("Email", validators=[DataRequired(), Email()]))
-    submit = SubmitField("Filter")
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    filter = SubmitField("Filter")
+
+
+class ClearTimePunchFilterForm(Form):
+    clear = SubmitField("Clear Filter")

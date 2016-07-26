@@ -6,7 +6,13 @@
 
 {% block page_content %}
     <div class="row">
-        {{  wtf.quick_form(filter) }}
+        <div class="col-lg-4" style="float: left">
+           {{ wtf.quick_form(filter) }}
+        </div>
+
+        <div style="float: right">
+           {{  wtf.quick_form(clear) }}
+        </div>
     </div>
 
     <div class="row">
