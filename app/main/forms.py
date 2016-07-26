@@ -57,21 +57,10 @@ class UserFilterEventsForm(Form):
     Form for users to filter their own clock events by date. Users can look
     at self-generated clock events between first_date and last_date.
     """
-    # first_date = DateField("From",
-    #                        default=date(2004, 1, 1),
-    #                        validators=[DataRequired()]
-    #                        )
-    # last_date = DateField("To",
-    #                       default=date.today(),
-    #                       validators=[DataRequired()]
-    #                       )
-    # submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")
     last_week = SubmitField("Last Week")
     this_week = SubmitField("This Week")
-    # last_day = SubmitField("Yesterday")
-    # this_day = SubmitField("Today")
 
 
 class CreatePayRateForm(Form):
@@ -88,7 +77,11 @@ class ApproveOrDenyTimePunchForm(Form):
 
 
 class FilterTimePunchForm(Form):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[Optional(), Email()])
+    status = SelectField(u'Status', validators=[Optional()], choices=[
+        ('All', 'All'),
+        ('Approved', 'Approved'),
+        ('Unapproved', 'Unapproved')])
     filter = SubmitField("Filter")
 
 

@@ -34,7 +34,7 @@ def create_timepunch(punch_type, punch_time, reason):
                user=current_user, punch_time=punch_time, type=punch_type, note=reason)
 
 
-def get_timepunches_for_review(user_email, filter_by_email=None):
+def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
@@ -47,6 +47,7 @@ def get_timepunches_for_review(user_email, filter_by_email=None):
     timepunch_query = Event.query.join(User).filter_by(supervisor=u).filter(Event.timepunch == True).order_by(Event.id)
     current_app.logger.info('Finished querying for timepunches')
 
+    # Filter by emails if user provides an email
     if filter_by_email and filter_by_email != '':
         u = User.query.filter_by(email=filter_by_email).first()
         if u:
@@ -54,6 +55,14 @@ def get_timepunches_for_review(user_email, filter_by_email=None):
         else:
             current_app.logger.error('Tried to filter timepunches from {} but no such account'
                                      'exists'.format(filter_by_email))
+
+    # Filter by status if user provides a status
+    if status:
+        if status == 'Approved':
+            timepunch_query = timepunch_query.filter(Event.approved == True)
+        elif status == 'Unapproved':
+            timepunch_query = timepunch_query.filter(Event.approved == False)
+        # else status == 'All', in which case we don't need to add anything to the filter
 
 
     # Check to make sure something is returned by the query

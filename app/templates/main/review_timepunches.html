@@ -6,12 +6,18 @@
 
 {% block page_content %}
     <div class="row">
-        <div class="col-lg-4" style="float: left">
-           {{ wtf.quick_form(filter) }}
-        </div>
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter Results</button>
 
         <div style="float: right">
            {{  wtf.quick_form(clear) }}
+        </div>
+    </div>
+
+    <div id="filter-form" class="collapse">
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(filter) }}
+            </div>
         </div>
     </div>
 
@@ -67,8 +73,13 @@
                             <input type="hidden" value="{{ event.id }}" name="event_id">
                             {% for field in form %}
                                 {% if field.type == 'SubmitField' %}
-                                    <button type="submit" value="{{ field.name }}" name = "{{ field.name }}"
-                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                    {% if field.name == 'approve' %}
+                                        <button type="submit" class="btn btn-success" value="{{ field.name }}" name = "{{ field.name }}"
+                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-danger" style="" value="{{ field.name }}" name = "{{ field.name }}"
+                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                    {% endif %}
                                 {% else %}
                                     {{ field }}
                                 {% endif %}

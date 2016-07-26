@@ -412,7 +412,12 @@ def review_timepunch():
 
     if filter.validate_on_submit and filter.filter.data:
         page = 1
-        timepunch_query = get_timepunches_for_review(current_user.email, filter.email.data)
+
+        # Filter through timepunches based on user selections
+        timepunch_query = get_timepunches_for_review(current_user.email,
+                                                     filter.email.data,
+                                                     filter.status.data)
+        print('FORM.STATUS.DATA', filter.status.data)
         flash('Successfully filtered', category='success')
 
     if clear.validate_on_submit() and clear.clear.data:
