@@ -40,7 +40,8 @@ from .forms import (
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
-    ApproveOrDenyTimePunchForm
+    ApproveOrDenyTimePunchForm,
+    FilterTimePunchForm
 )
 from .pdf import (
     generate_header,
@@ -404,17 +405,15 @@ def review_timepunch():
     # Use timepunch id in the div?
     timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form)
+    filter = FilterTimePunchForm()
     page = request.args.get('page', 1, type=int)
-    # if form.is_submitted():
-    #     print("submitted")
-    # if form.validate():
-    #     print("valid")
-    # print(form.errors)
-    if form.validate_on_submit():
-        # print('this was validated on submit')
-        # print('FORM.APPROVE', form.approve)
-        # print(form.data['approve'])
+
+    if filter.validate_on_submit():
         page = 1
+        timepunch_query = get_timepunches_for_review(current_user.email, filter.email.data)
+        flash('Successfully filtered')
+
+    if form.validate_on_submit():
         if form.approve.data:
             # print(request.form)
             approve_or_deny(request.form['event_id'], True)
@@ -425,12 +424,17 @@ def review_timepunch():
             flash('Timepunch successfully unapproved', category='success')
             # return redirect(url_for('main.review_timepunch'))
         else:
-            flash('FOR DEVS: THERE WAS SOME ERROR', category='error')
+            # This just means the filter form was validated instead, ignore for now
+            pass
     pagination = timepunch_query.paginate(
             page, per_page=15,
             error_out=False)
     timepunch_list = pagination.items
-    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form, pagination=pagination)
+    return render_template('main/review_timepunches.html',
+                           timepunch_list=timepunch_list,
+                           form=form,
+                           pagination=pagination,
+                           filter=filter)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

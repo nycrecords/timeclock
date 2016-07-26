@@ -34,10 +34,11 @@ def create_timepunch(punch_type, punch_time, reason):
                user=current_user, punch_time=punch_time, type=punch_type, note=reason)
 
 
-def get_timepunches_for_review(user_email):
+def get_timepunches_for_review(user_email, filter_by_email=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
+    :param filter_by_email: The email of a specific user for optional filters.
     :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
@@ -46,9 +47,22 @@ def get_timepunches_for_review(user_email):
     timepunch_query = Event.query.join(User).filter_by(supervisor=u).filter(Event.timepunch == True).order_by(Event.id)
     current_app.logger.info('Finished querying for timepunches')
 
+    if filter_by_email and filter_by_email != '':
+        u = User.query.filter_by(email=filter_by_email).first()
+        if u:
+            timepunch_query = timepunch_query.filter(Event.user_id == u.id)
+        else:
+            current_app.logger.error('Tried to filter timepunches from {} but no such account'
+                                     'exists'.format(filter_by_email))
+
+
+    # Check to make sure something is returned by the query
     result = timepunch_query.all()
     if not result:
-        current_app.logger.info('No timepunches found for user {}'.format(user_email))
+        current_app.logger.error('No timepunches found for user {}'.format(user_email))
+
+    # Last step: order timepunches by id
+    timepunch_query = timepunch_query.order_by(Event.id)
 
     current_app.logger.info('End function get_timepunches_for_review')
     return timepunch_query
