@@ -38,7 +38,7 @@ def get_timepunches_for_review(user_email):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
-    :return: A list of timepunch requests.
+    :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
     u = User.query.filter_by(email=user_email).first()
@@ -51,7 +51,7 @@ def get_timepunches_for_review(user_email):
         current_app.logger.info('No timepunches found for user {}'.format(user_email))
 
     current_app.logger.info('End function get_timepunches_for_review')
-    return timepunch_query.all()
+    return timepunch_query
 
 
 def approve_or_deny(event_id, approve=False):

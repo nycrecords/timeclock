@@ -402,19 +402,21 @@ def request_timepunch():
 @login_required
 def review_timepunch():
     # Use timepunch id in the div?
-    timepunch_list = get_timepunches_for_review(current_user.email)
+    timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form)
-    if form.is_submitted():
-        print("submitted")
-    if form.validate():
-        print("valid")
-    print(form.errors)
+    page = request.args.get('page', 1, type=int)
+    # if form.is_submitted():
+    #     print("submitted")
+    # if form.validate():
+    #     print("valid")
+    # print(form.errors)
     if form.validate_on_submit():
-        print('this was validated on submit')
-        print('FORM.APPROVE', form.approve)
-        print(form.data['approve'])
+        # print('this was validated on submit')
+        # print('FORM.APPROVE', form.approve)
+        # print(form.data['approve'])
+        page = 1
         if form.approve.data:
-            print(request.form)
+            # print(request.form)
             approve_or_deny(request.form['event_id'], True)
             flash('Timepunch successfully approved', category='success')
             # return redirect(url_for('main.review_timepunch'))
@@ -424,7 +426,11 @@ def review_timepunch():
             # return redirect(url_for('main.review_timepunch'))
         else:
             flash('FOR DEVS: THERE WAS SOME ERROR', category='error')
-    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form)
+    pagination = timepunch_query.paginate(
+            page, per_page=15,
+            error_out=False)
+    timepunch_list = pagination.items
+    return render_template('main/review_timepunches.html', timepunch_list=timepunch_list, form=form, pagination=pagination)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database
