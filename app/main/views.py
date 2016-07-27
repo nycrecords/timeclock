@@ -455,6 +455,20 @@ def review_timepunch():
                            filter=filter,
                            clear=clear)
 
+@main.route('/user/<username>')
+@login_required
+@admin_required
+def user_profile(username):
+    # Usernames are everything in the email before the @ symbol
+    # i.e. for sdhillon@records.nyc.gov, username is sdhillon
+    username = username + '@records.nyc.gov'
+    u = User.query.filter_by(email=username).first()
+    if not u:
+
+        return redirect(url_for('index.html'))
+    pass
+
+
 
 # FOR TESTING ONLY - creates dummy data to propagate database
 @main.route('/dummy_data')
