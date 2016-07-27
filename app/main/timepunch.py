@@ -22,9 +22,8 @@ def create_timepunch(punch_type, punch_time, reason):
     :return: None
     """
     current_app.logger.info('Start function create_timepunch()')
-    punch_type = punch_type is 'True'  # must manually cast string to bool because
-    print('PUNCH TYPE IN CREATE_TIMEPUNCH', punch_type)
-    # wtforms does not support this functionality (assigns any non-empty string to True)
+    print(punch_type)
+    punch_type = punch_type == 'In'  # must manually cast string to bool because
     e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
     db.session.add(e)
     db.session.commit()

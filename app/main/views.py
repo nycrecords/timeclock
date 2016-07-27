@@ -400,7 +400,7 @@ def request_timepunch():
     current_app.logger.info('Start function request_timepunch()')
     form = TimePunchForm()
     if form.validate_on_submit():
-        print('PUNCH TYPE', form.punch_type.data)
+        print('FROM FORM:', form.punch_type.data)
         create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
         flash('Your timepunch request has been successfully submitted and is pending renewal',
               category='success')
