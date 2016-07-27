@@ -75,6 +75,7 @@ class AdminRegistrationForm(Form):
     last_name = StringField("Last name")
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
+    supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
     role = SelectField('Role', choices=roles, validators=[DataRequired()])
 
     submit = SubmitField('Register')
@@ -111,6 +112,17 @@ class AdminRegistrationForm(Form):
         if not div_field.data or div_field.data == '':
             raise ValidationError('All users must belong to a division')
         return True
+
+    def validate_supervisor_email(self, email_field):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email_field:
+        :return:
+        """
+        user = User.query.filter_by(email=email_field.data).first()
+        if not user:
+            raise ValidationError('No account with email {} exists'.format(email_field))
 
 
 class ChangePasswordForm(Form):

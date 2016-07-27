@@ -466,17 +466,38 @@ def user_profile(username):
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
     form = ChangeUserDataForm()
+
     if not u:
-        flash('No user with username {} was found. Returning you to your own user page'.
-              format(username), category='error')
-        username = current_user.email[:current_user.email.index('@')]
-        u = current_user
+        flash('No user with username {} was found. You\'ve been redirected to '
+              'TimeClock Home'.format(username), category='error')
+        return redirect(url_for('main.index'))
+    elif u.role.name == 'Administrator' and u == current_user:
+        # If user is admin, redirect to index and flash a message,
+        # as admin should not be allowed to edit their own info through frontend.
+        # This also avoids the issue that comes with the fact that admins don't have
+        # a supervisor.
+        flash('Admins cannot edit their own information. You\'ve been redirected to '
+              'TimeClock Home.', category='error')
+        return redirect(url_for('main.index'))
 
     if form.validate_on_submit():
-        print('form validated')
-        update_user_information(u, form.first_name.data, form.last_name.data,
-                                form.division.data, form.tag.data, form.supervisor_email.data)
-        pass
+        if u.email == form.supervisor_email.data:
+            flash('A user cannot be their own supervisor. Please revise your supervisor '
+                  'field.', category='error')
+        else:
+            flash('User information has been updated', category='success')
+            update_user_information(u, form.first_name.data, form.last_name.data,
+                                    form.division.data, form.tag.data, form.supervisor_email.data,
+                                    form.role.data)
+            return redirect(url_for('main.user_profile', username=username))
+    else:
+        # Pre-populate the form with current values
+        form.first_name.data = u.first_name
+        form.last_name.data = u.last_name
+        form.division.data = u.division
+        form.tag.data = u.tag_id
+        form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
+        form.role.data = u.role.name
 
     return render_template('main/user_page.html', username=username, u=u, form=form)
 

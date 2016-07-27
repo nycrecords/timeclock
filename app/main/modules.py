@@ -1,5 +1,5 @@
 from .. import db
-from ..models import User, Event, Tag
+from ..models import User, Event, Tag, Role
 from datetime import datetime, timedelta, date
 import dateutil.relativedelta
 from flask_login import current_user
@@ -308,7 +308,8 @@ def update_user_information(user,
                             last_name_input,
                             division_input,
                             tag_input,
-                            supervisor_email):
+                            supervisor_email_input,
+                            role_input):
     """
     To be used in the user_profile view function to update a user's information in the database.
     :param user: The user whose information to update (must be a user object)
@@ -321,23 +322,24 @@ def update_user_information(user,
     """
     if first_name_input and first_name_input != '':
         user.first_name = first_name_input
-        pass
 
     if last_name_input and last_name_input != '':
         user.last_name = last_name_input
-        pass
 
     if division_input and division_input != '':
         user.division = division_input
-        pass
 
     # TODO: Have to do this one a little differently
     if tag_input:
-        pass
+        user.tag_id = tag_input
 
-    if supervisor_email and supervisor_email != '':
-        sup = User.query.filter_by(email=supervisor_email).first()
+    if supervisor_email_input and supervisor_email_input != '':
+        sup = User.query.filter_by(email=supervisor_email_input).first()
         user.supervisor = sup
+
+    if role_input:
+        user.role = Role.query.filter_by(name=role_input).first()
+        print('role input successful')
 
     db.session.add(user)
     db.session.commit()

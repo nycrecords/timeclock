@@ -46,7 +46,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         current_app.logger.info('Successfully registered user {}'.format(user.email))
-        flash('User successfully registered', category='success')
+        flash('User successfully registered.', category='success')
         current_app.logger.info('End function register() [VIEW]')
         return redirect(url_for('auth.login'))
     current_app.logger.info('End function register() [VIEW]')
@@ -76,7 +76,9 @@ def admin_register():
                     last_name=form.last_name.data,
                     division=form.division.data,
                     role=Role.query.filter_by(name=form.role.data).first(),
-                    tag_id=tag_id
+                    tag_id=tag_id,
+                    supervisor=User.query.filter_by(email=form.supervisor_email.data)
+                    .first()
                     )
         db.session.add(user)
         db.session.commit()
@@ -89,7 +91,7 @@ def admin_register():
                    temp_password=temp_password)
 
         current_app.logger.info('Sent login instructions to {}'.format(user.email))
-        flash('User successfully registered\nAn email with login instructions has been sent to {}'.format(user.email),
+        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(user.email),
               category='success')
 
         current_app.logger.info('End function admin_register() [VIEW]')
