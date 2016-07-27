@@ -25,6 +25,7 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
+    update_user_information
 )
 from .timepunch import (
     create_timepunch,
@@ -42,7 +43,8 @@ from .forms import (
     TimePunchForm,
     ApproveOrDenyTimePunchForm,
     FilterTimePunchForm,
-    ClearTimePunchFilterForm
+    ClearTimePunchFilterForm,
+    ChangeUserDataForm
 )
 from .pdf import (
     generate_header,
@@ -455,19 +457,28 @@ def review_timepunch():
                            filter=filter,
                            clear=clear)
 
-@main.route('/user/<username>')
+
+@main.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def user_profile(username):
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    username = username + '@records.nyc.gov'
-    u = User.query.filter_by(email=username).first()
+    u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    form = ChangeUserDataForm()
     if not u:
+        flash('No user with username {} was found. Returning you to your own user page'.
+              format(username), category='error')
+        username = current_user.email[:current_user.email.index('@')]
+        u = current_user
 
-        return redirect(url_for('index.html'))
-    pass
+    if form.validate_on_submit():
+        print('form validated')
+        update_user_information(u, form.first_name.data, form.last_name.data,
+                                form.division.data, form.tag.data, form.supervisor_email.data)
+        pass
 
+    return render_template('main/user_page.html', username=username, u=u, form=form)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

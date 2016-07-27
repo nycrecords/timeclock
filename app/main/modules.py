@@ -302,3 +302,42 @@ def get_last_clock_type(user_id=None):
 
 def get_event_by_id(event_id):
     return Event.query.filter_by(id=event_id).first()
+
+def update_user_information(user,
+                            first_name_input,
+                            last_name_input,
+                            division_input,
+                            tag_input,
+                            supervisor_email):
+    """
+    To be used in the user_profile view function to update a user's information in the database.
+    :param user: The user whose information to update (must be a user object)
+    :param first_name_input: New first name for user.
+    :param last_name_input: New last name for user.
+    :param division_input: New division for user.
+    :param tag_input: New tag for user.
+    :param supervisor_email: Email of the user's new supervisor.
+    :return: None
+    """
+    if first_name_input and first_name_input != '':
+        user.first_name = first_name_input
+        pass
+
+    if last_name_input and last_name_input != '':
+        user.last_name = last_name_input
+        pass
+
+    if division_input and division_input != '':
+        user.division = division_input
+        pass
+
+    # TODO: Have to do this one a little differently
+    if tag_input:
+        pass
+
+    if supervisor_email and supervisor_email != '':
+        sup = User.query.filter_by(email=supervisor_email).first()
+        user.supervisor = sup
+
+    db.session.add(user)
+    db.session.commit()

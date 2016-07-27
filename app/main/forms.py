@@ -1,8 +1,9 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, DateTimeField
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, DateTimeField, ValidationError
 from wtforms.validators import DataRequired, Optional, Length, Email
 from datetime import date, datetime
-from ..utils import tags, divisions
+from ..utils import tags, divisions, roles
+from ..models import User
 
 
 class ClockInForm(Form):
@@ -88,3 +89,25 @@ class FilterTimePunchForm(Form):
 
 class ClearTimePunchFilterForm(Form):
     clear = SubmitField("Clear Filter")
+
+
+class ChangeUserDataForm(Form):
+    first_name = StringField("First name")
+    last_name = StringField("Last name")
+    division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
+    tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
+    supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
+    role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
+    submit = SubmitField('Update')
+
+    def validate_supervisor_email(self, email_field):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email_field:
+        :return:
+        """
+        user = User.query.filter_by(email=email_field.data).first()
+        if not user:
+            raise ValidationError('No account with email {} exists'.format(email_field))
+
