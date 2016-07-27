@@ -100,26 +100,21 @@ def calculate_earnings(email_input, first_date, last_date):
     while not done and current_pay_rate.start < last_date:
         # Set the next payrate to the first payrate after the end of the pay period
         next_pay_rate = get_payrate_before_or_after(email_input, current_pay_rate.start, False)
-        print('NEXT_PAY_RATE:', next_pay_rate)
         if next_pay_rate and next_pay_rate.start < last_date:
             # Multiple pay rates within the same period
 
             # So we calculate the hours between the start of the period and the start of the
             # next pay rate:
             hours_worked = calculate_hours_worked(email_input, begin_date, next_pay_rate.start)['total_hours']
-            print('HOURS WORKED:', hours_worked)
 
             # Add amount earned within this time period
             total_earnings += current_pay_rate.rate * hours_worked
-            print('TOTAL EARNINGS:', total_earnings)
 
             # Set the current pay date to the next pay date within the pay period
             current_pay_rate = next_pay_rate
-            print('CURRENT PAY RATE:', current_pay_rate)
 
             # Set the first_date of the pay_period to the first date after the end of the last pay_period
             begin_date = current_pay_rate.start + timedelta(days=1)
-            print('BEGIN DATE:', begin_date)
         else:
             # First pay rate applies to the entire period
             hours_worked = calculate_hours_worked(email_input, begin_date, last_date)['total_hours']
@@ -127,6 +122,5 @@ def calculate_earnings(email_input, first_date, last_date):
             # Exit the loop
             done = True
     current_app.logger.info('End function calculate_earnings')
-    print('FINAL EARNINGS:', total_earnings)
     return total_earnings
 

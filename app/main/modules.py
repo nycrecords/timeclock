@@ -166,7 +166,6 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     events_query = events_query.filter_by(approved=True)
 
     if division:
-        print('division')
         current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
         events_query = events_query.join(User).filter_by(division=division)
         current_app.logger.info('Finished querying for events with users with given tag')
@@ -339,7 +338,6 @@ def update_user_information(user,
 
     if role_input:
         user.role = Role.query.filter_by(name=role_input).first()
-        print('role input successful')
 
     db.session.add(user)
     db.session.commit()
