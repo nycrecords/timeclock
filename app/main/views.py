@@ -124,6 +124,9 @@ def all_history():
     if 'tag_input' not in session:
         current_app.logger.info('\'tag_input\' not found in session. Setting to defaults.')
         session['tag_input'] = 0
+    if 'division' not in session:
+        current_app.logger.info('\'division\' not found in session. Setting to defaults.')
+        session['division'] = None
 
     if request.referrer and 'all_history' not in request.referrer:
         current_app.logger.info('User is visiting from another page. Setting session[\'email\'] to None')
@@ -138,6 +141,7 @@ def all_history():
         session['last_date'] = time_period[1]
         session['email'] = form.email.data
         session['tag_input'] = form.tag.data
+        session['division'] = form.division.data
         page = 1
 
     current_app.logger.info('Querying (calling get_events_by_date)')
@@ -337,6 +341,7 @@ def clear():
     session.pop('last_date', None)
     session.pop('email', None)
     session.pop('tag_input', None)
+    session.pop('division', None)
     current_app.logger.info('User %s cleared their admin history filter.' %
                             current_user.email)
     current_app.logger.info('End function clear()')

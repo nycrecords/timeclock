@@ -43,6 +43,7 @@ class AdminFilterEventsForm(Form):
     first_date = DateField("From", default=get_time_period('w')[0], validators=[Optional()])
     last_date = DateField("To", default=date.today(), validators=[Optional()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
+    division = SelectField("Division", choices=divisions, validators=[Optional()])
     submit = SubmitField("Filter")
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")

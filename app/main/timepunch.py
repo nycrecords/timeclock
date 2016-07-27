@@ -64,7 +64,6 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
             timepunch_query = timepunch_query.filter(Event.approved == False)
         # else status == 'All', in which case we don't need to add anything to the filter
 
-
     # Check to make sure something is returned by the query
     result = timepunch_query.all()
     if not result:

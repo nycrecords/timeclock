@@ -87,7 +87,7 @@ def get_last_clock():
         return None
 
 
-def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
+def get_events_by_date(email=None, first_date_input=None, last_date_input=None, division_input=None):
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
@@ -107,6 +107,11 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
         session['tag_input'] = 0
     tag_input = session['tag_input']
 
+    if 'division' not in session:
+        current_app.logger.info('Tag not in session, setting to defaults')
+        session['division'] = None
+    division = session['division']
+
     if 'email' not in session:
         current_app.logger.info('Email not in session, setting to defaults')
         session['email'] = current_user.email
@@ -119,11 +124,14 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
         first_date = first_date_input
     if last_date_input:
         last_date = last_date_input
+    if division_input:
+        division = division_input
+
 
     current_app.logger.info('Start function get_events_by_date with '
                             'start: {}, end: {}, email: {},tag: {}'
                             .format(session['first_date'], session['last_date'],
-                                    session['email'], session['tag_input'])
+                                    session['email'], session['tag_input'], session['division'])
                             )
     # What to do if form date fields are left blank
     # TODO: This is extraneous code. Ensure this is true during code review and then remove - Sarvar
@@ -156,6 +164,12 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None):
 
     # Eliminate unapproved timepunches
     events_query = events_query.filter_by(approved=True)
+
+    if division:
+        print('division')
+        current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
+        events_query = events_query.join(User).filter_by(division=division)
+        current_app.logger.info('Finished querying for events with users with given tag')
 
     current_app.logger.info('Sorting query results be time (desc)')
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
