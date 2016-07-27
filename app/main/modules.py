@@ -117,6 +117,10 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
         session['email'] = current_user.email
     email_input = session['email']
 
+    if email_input and email_input.find('@') == -1:
+        # If the email input by the user does not contain the @records.nyc.gov portion, add it in
+        email_input += '@records.nyc.gov'
+
     # For manual getting events (ignoring session variables)
     if email:
         email_input = email
