@@ -397,19 +397,23 @@ def request_timepunch():
     Creates a form for users to be able to request a timepunch
     :return: A page users can implement to request the addition of a clock event.
     """
+    current_app.logger.info('Start function request_timepunch()')
     form = TimePunchForm()
     if form.validate_on_submit():
         print('PUNCH TYPE', form.punch_type.data)
         create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
         flash('Your timepunch request has been successfully submitted and is pending renewal',
               category='success')
+        current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
+    current_app.logger.info('End function request_timepunch')
     return render_template('main/request_timepunch.html', form=form)
 
 
 @main.route('/review_timepunches', methods=['GET', 'POST'])
 @login_required
 def review_timepunch():
+    current_app.logger.info('Start function review_timepunch()')
     # Use timepunch id in the div?
     timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form)
@@ -424,7 +428,6 @@ def review_timepunch():
         timepunch_query = get_timepunches_for_review(current_user.email,
                                                      filter.email.data,
                                                      filter.status.data)
-        print('FORM.STATUS.DATA', filter.status.data)
         flash('Successfully filtered', category='success')
 
     if clear.validate_on_submit() and clear.clear.data:
@@ -436,20 +439,20 @@ def review_timepunch():
         if form.approve.data:
             approve_or_deny(request.form['event_id'], True)
             flash('Timepunch successfully approved', category='success')
-            # return redirect(url_for('main.review_timepunch'))
+            current_app.logger.info('{} approved timepunch with event_id {}'
+                                    .format(current_user.email, request.form['event_id']))
         elif form.deny.data:
             approve_or_deny(request.form['event_id'], False)
             flash('Timepunch successfully unapproved', category='success')
-            # return redirect(url_for('main.review_timepunch'))
-        else:
-            # This just means the filter or clear form was validated instead, ignore for now
-            pass
+            current_app.logger.info('{} denied timepunch with event_id {}'
+                                    .format(current_user.email, request.form['event_id']))
 
     pagination = timepunch_query.paginate(
             page, per_page=15,
             error_out=False)
 
     timepunch_list = pagination.items
+    current_app.logger.info('End function review_timepunch')
     return render_template('main/review_timepunches.html',
                            timepunch_list=timepunch_list,
                            form=form,
@@ -462,6 +465,12 @@ def review_timepunch():
 @login_required
 @admin_required
 def user_profile(username):
+    """
+    Generates an editable user profile page for admins.
+    :param username: The username of the user whose page is viewed/edited.
+    :return: HTML page containing user information and a form to edit it.
+    """
+    current_app.logger.info('Start function user_profile() for user {}'.format(username))
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
@@ -478,6 +487,7 @@ def user_profile(username):
         # a supervisor.
         flash('Admins cannot edit their own information. You\'ve been redirected to '
               'TimeClock Home.', category='error')
+        current_app.logger.info('End function user_profile')
         return redirect(url_for('main.index'))
 
     if form.validate_on_submit():
@@ -489,6 +499,8 @@ def user_profile(username):
             update_user_information(u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
                                     form.role.data)
+            current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
+            current_app.logger.info('End function user_profile')
             return redirect(url_for('main.user_profile', username=username))
     else:
         # Pre-populate the form with current values
@@ -499,6 +511,7 @@ def user_profile(username):
         form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
         form.role.data = u.role.name
 
+    current_app.logger.info('End function user_profile')
     return render_template('main/user_page.html', username=username, u=u, form=form)
 
 

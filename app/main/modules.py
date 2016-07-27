@@ -320,6 +320,7 @@ def update_user_information(user,
     :param supervisor_email: Email of the user's new supervisor.
     :return: None
     """
+    current_app.logger.info('Start function update_user_information for {}'.format(user.email))
     if first_name_input and first_name_input != '':
         user.first_name = first_name_input
 
@@ -329,7 +330,6 @@ def update_user_information(user,
     if division_input and division_input != '':
         user.division = division_input
 
-    # TODO: Have to do this one a little differently
     if tag_input:
         user.tag_id = tag_input
 
@@ -343,3 +343,4 @@ def update_user_information(user,
 
     db.session.add(user)
     db.session.commit()
+    current_app.logger.info('End function update_user_information')
