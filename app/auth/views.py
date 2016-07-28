@@ -80,6 +80,7 @@ def admin_register():
                     supervisor=User.query.filter_by(email=form.supervisor_email.data)
                     .first()
                     )
+        user.password_list.update(user.password_hash)
         db.session.add(user)
         db.session.commit()
         current_app.logger.info('{} successfully registered user with email {}'.format(current_user.email, user.email))
@@ -260,6 +261,7 @@ def password_reset_request():
                        user=user,
                        token=token,
                        next=request.args.get('next'))
+
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
             flash('An email with instructions to reset your password has been sent to you.', category='success')
         else:
