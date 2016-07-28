@@ -96,4 +96,7 @@ type="image/x-icon">
 {% block scripts %} <!-- Include any JS scripts here -->
     {{ super() }}
     {{ moment.include_moment() }}
+    <script>
+        window.onload = function() { window.print(); }
+    </script>
 {% endblock %}
