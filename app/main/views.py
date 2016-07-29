@@ -473,7 +473,7 @@ def user_list_page():
     tags = get_all_tags()
     list_of_users = User.query.all()
     for user in list_of_users:
-        if user.division==None:
+        if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
     #pass in separate lis of users with and without divisions
