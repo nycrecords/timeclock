@@ -476,6 +476,7 @@ def user_list_page():
         if user.division==None:
             list_of_users.remove(user)
             nondivision_users.append(user)
+    #pass in separate lis of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users,tags=tags,
                            nondivision_users=nondivision_users)
 
