@@ -72,7 +72,7 @@ def calculate_hours_worked(email_input, start, end):
             'date': time_in.strftime('%a %b %d, %Y'),
             'time_in': time_in.strftime('%H:%M'),
             'time_out': time_out.strftime('%H:%M'),
-            'hours': hours_this_day,
+            'hours': "{0:.2f}".format(hours_this_day),
             'rate': "{0:.2f}".format(payrate_this_day.rate),
             'earnings': "{0:.2f}".format(hours_this_day * payrate_this_day.rate)
         }

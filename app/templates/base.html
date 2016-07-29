@@ -8,14 +8,10 @@
 type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
 type="image/x-icon">
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="/resources/demos/style.css">
 {#    Hard Code CSS Because normal inherited css isn't working #}
 {#    TODO: FIGURE OUT WHY AND FIX THIS#}
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="screen">
 {% endblock %}
-{% block custom_head %}
-{% endblock custom_head %}
 
 {% block navbar %}  <!-- Navigation base HTML will go here -->
     <div class="navbar navbar-default" role="navigation" style="border-radius: 0; font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased;
@@ -28,10 +24,57 @@ type="image/x-icon">
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                     {% if current_user.is_administrator() %}
-                         <li><a href="{{ url_for('auth.admin_register') }}" style="color:white">Register User</a></li>
-                        <li><a href="{{ url_for('main.all_history') }}" style="color:white">All History</a></li>
-                    {% endif %}
+                        <li>
+                            <div class="dropdown">
+                              <button class="btn btn-default dropdown-toggle" type="button"
+                                      id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                      aria-expanded="true" style="margin-top:9px; color:white; background-color:inherit;
+                                      border: 0">
+                                Users
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                <li><a href="{{ url_for('auth.admin_register') }}">Register User</a></li>
+                                <li><a href="{{ url_for('main.user_profile', username='s') }}">Edit User Information</a></li>
+                              </ul>
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="dropdown">
+                              <button class="btn btn-default dropdown-toggle" type="button"
+                                      id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                      aria-expanded="true" style="margin-top:9px; color:white; background-color:inherit;
+                                      border: 0">
+                                History
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                <li><a href="{{ url_for('main.history') }}">My History</a></li>
+                                <li><a href="{{ url_for('main.all_history') }}">All History</a></li>
+                              </ul>
+                            </div>
+                        </li>
+
+                    {% else %}
                         <li><a href="{{ url_for('main.history') }}" style="color:white">History</a></li>
+                    {% endif %}
+                        <li>
+                            <div class="dropdown">
+                              <button class="btn btn-default dropdown-toggle" type="button"
+                                      id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                      aria-expanded="true" style="margin-top:9px; color:white; background-color:inherit;
+                                      border: 0">
+                                TimePunch
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                <li><a href="{{ url_for('main.request_timepunch') }}">Request Timepunch</a></li>
+                                <li><a href="{{ url_for('main.review_timepunch') }}">Review Timepunches</a></li>
+                              </ul>
+                            </div>
+                        </li>
+
                     <li><a href="{{ url_for('auth.change_password') }}" style="color:white">Change Password</a></li>
                         <li><a href="{{ url_for('auth.logout') }}" style="color:white">Sign Out</a></li>
                 {% else %}
@@ -66,17 +109,4 @@ type="image/x-icon">
 {% block scripts %} <!-- Include any JS scripts here -->
     {{ super() }}
     {{ moment.include_moment() }}
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
-    <script>
-    $( function() {
-    $( "#first_date" ).datepicker({
-        dateFormat: 'yy-mm-dd'
-    });
-    $("#last_date").datepicker({
-        dateFormat: 'yy-mm-dd'
-    })
-    });
-    </script>
 {% endblock %}
-
