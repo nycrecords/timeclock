@@ -5,11 +5,13 @@
 {% block title %}TimeClock - History{% endblock %}
 
 <!-- TODO: IMPLEMENT FILTER GUI [WTF] -->
+{% block custom_head %}
 
+{% endblock %}
 <!-- TODO: IMPLEMENT CALENDAR VIEW, CLICKABLE DATE EVENTS -->
 
 {% block page_content %}
-
+    <p>Date: <input type="text" id="datepicker"></p>
     <div class="row">
         <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter Results</button>
         <form action="/clear_filter" method="POST" style="float:left; margin-left: 5px">
@@ -91,4 +93,7 @@
     </div>
 
 
+{% endblock %}
+
+{% block custom_scripts %}
 {% endblock %}
