@@ -1,0 +1,19 @@
+<!-- This is not meant to be a standalone page, and will instead be an element included on
+the index page so users can submit timepunches when necessary. For now, it is implemented as
+a standalone page for testing purposes. -->
+
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TimeClock - Request TimePunch{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+       {{ wtf.quick_form(form) }}
+    </div>
+{%  endblock %}
+
+
+
+

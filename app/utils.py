@@ -1,7 +1,7 @@
 """
 .. module:: utils.
 
-   :synopsis: Utiltiy functions used throughout the application.
+   :synopsis: Utility functions used throughout the application.
 """
 
 divisions = [

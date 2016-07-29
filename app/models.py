@@ -74,14 +74,18 @@ class User(UserMixin, db.Model):
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
+    # Supervisor
+    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    supervisor = db.relationship('User', remote_side=[id])
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
             if self.email == current_app.config['ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
                 self.validated = True
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
+            else:
+                self.role = Role.query.filter_by(default=True).first()
         self.password_list = Password(p1='', p2='', p3='', p4='', p5='', last_changed=datetime.now())
 
     @property
@@ -207,6 +211,12 @@ class Event(db.Model):
     time = db.Column(db.DateTime)  # Time of clock in/out event
     note = db.Column(db.String(120))
     ip = db.Column(db.String(120))
+
+    timepunch = db.Column(db.Boolean, default=False)  # True if this is a timepunch request, false otherwise
+    approved = db.Column(db.Boolean, default=True)
+    # ^True if this is an approved timepunch request, false if
+    # this is an unapproved timepunch request, Null otherwise
+
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):

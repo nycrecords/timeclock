@@ -46,7 +46,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         current_app.logger.info('Successfully registered user {}'.format(user.email))
-        flash('User successfully registered', category='success')
+        flash('User successfully registered.', category='success')
         current_app.logger.info('End function register() [VIEW]')
         return redirect(url_for('auth.login'))
     current_app.logger.info('End function register() [VIEW]')
@@ -76,8 +76,11 @@ def admin_register():
                     last_name=form.last_name.data,
                     division=form.division.data,
                     role=Role.query.filter_by(name=form.role.data).first(),
-                    tag_id=tag_id
+                    tag_id=tag_id,
+                    supervisor=User.query.filter_by(email=form.supervisor_email.data)
+                    .first()
                     )
+        user.password_list.update(user.password_hash)
         db.session.add(user)
         db.session.commit()
         current_app.logger.info('{} successfully registered user with email {}'.format(current_user.email, user.email))
@@ -89,7 +92,7 @@ def admin_register():
                    temp_password=temp_password)
 
         current_app.logger.info('Sent login instructions to {}'.format(user.email))
-        flash('User successfully registered\nAn email with login instructions has been sent to {}'.format(user.email),
+        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(user.email),
               category='success')
 
         current_app.logger.info('End function admin_register() [VIEW]')
@@ -258,6 +261,7 @@ def password_reset_request():
                        user=user,
                        token=token,
                        next=request.args.get('next'))
+
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
             flash('An email with instructions to reset your password has been sent to you.', category='success')
         else:
@@ -361,7 +365,7 @@ def password_reset(token):
                 current_app.logger.error('EXCEPTION (InvalidResetToken): Token no longer valid')
                 flash('This token is no longer valid.', category='warning')
                 current_app.logger.info('End function password_reset')
-                return login()
+                return redirect(url_for('auth.login'))
 
     current_app.logger.info('End function password_reset')
     return render_template('auth/reset_password.html', form=form)

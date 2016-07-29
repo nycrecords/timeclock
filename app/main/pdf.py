@@ -71,7 +71,6 @@ def generate_timetable(canvas_field, events):
     total_hours = 0
 
     canvas_field.setFont('Courier-Bold', 10)
-    print(canvas_field.getAvailableFonts())
     canvas_field.drawString(55, timetable_top - 5, 'DATE')
     canvas_field.drawString(135, timetable_top - 5,  'TIME IN')
     canvas_field.drawString(222, timetable_top - 5, 'TIME OUT')
@@ -89,10 +88,8 @@ def generate_timetable(canvas_field, events):
     for x in range(0, len(events), 2):
         event = events[x]
         next_event = events[x + 1]
-        print(event)
         canvas_field.setFont('Courier', 8)
         time_in = event[:event.index('|') - 1]
-        print(time_in)
         event = event[(event.index('|') + 2):]
         event = event[(event.index('|') + 2):]
         note_in = event[(event.index('|') + 2):]
@@ -121,9 +118,6 @@ def generate_timetable(canvas_field, events):
         total_hours += hours_this_day
 
         next_line -= padding
-        # print('padding', padding)
-        # print('NEXT LINE', next_line)
-        # print('MAX NOTE LENGTH', max_note_length)
         # Begin drawing here
         canvas_field.drawString(30, next_line, date)
         canvas_field.drawString(130, next_line, time_in_datetime.strftime('%H:%M:%S'))

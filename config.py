@@ -12,6 +12,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SUBJECT_PREFIX = '[TimeClock]'
     MAIL_SENDER = 'Records Timeclock <RTimeclock@records.nyc.gov>'
+    WTF_CSRF_ENABLED = True
     ADMIN = os.environ.get('ADMIN') or 'admin@records.nyc.gov'
 
     @staticmethod
