@@ -404,7 +404,7 @@ def request_timepunch():
             flash("Your note cannot exceed 60 characters", category='warning')
             current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
         if not current_user.supervisor:
-            flash("You must have a supervisor to request a timepunch. If you believe a supervisor"
+            flash("You must have a supervisor to request a timepunch. If you believe a supervisor "
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
