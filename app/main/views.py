@@ -380,7 +380,7 @@ def pay():
                                      format(form.email.data))
             flash('No such user exists', category='warning')
         else:
-            p = Pay(start=form.start_date.data, end=form.end_date.data, rate=form.rate.data, user=u)
+            p = Pay(start=form.start_date.data, end=form.start_date.data, rate=form.rate.data, user=u)
             db.session.add(p)
             db.session.commit()
             current_app.logger.info('Administrator {} created new pay rate for user {}'
