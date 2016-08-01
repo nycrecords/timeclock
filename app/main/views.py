@@ -460,24 +460,25 @@ def review_timepunch():
                            filter=filter,
                            clear=clear)
 
+
 @main.route('/edit_user_list', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def user_list_page():
-    '''
+    """
     Renders a page with the list of users on it and related data on them. Also includes edit button to direct to
     edit user page
     :return: user_list.html which lists all the users in the application
-    '''
-    nondivision_users=[]
+    """
+    nondivision_users = []
     tags = get_all_tags()
     list_of_users = User.query.all()
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
-    #pass in separate lis of users with and without divisions
-    return render_template('main/user_list.html', list_of_users=list_of_users,tags=tags,
+    #pass in separate list of users with and without divisions
+    return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users)
 
 @main.route('/user/<username>', methods=['GET', 'POST'])

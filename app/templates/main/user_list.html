@@ -33,7 +33,7 @@
                     {% if user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <td><a href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></td>
+                    <td><button><a class="btn btn-success" href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></button></td>
                 </tr>
                 {% endfor %}
 {#followed by users who do have division, sorted by their divison#}
@@ -52,7 +52,7 @@
                     {% if user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <td><a href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></td>
+                    <td><a class="btn btn-success" href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
