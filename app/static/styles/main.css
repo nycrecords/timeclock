@@ -1,0 +1,7 @@
+@font-face{
+    font-family: "Sofia Pro Soft";
+    src: url('../Sofia Pro Soft Regular.otf');
+    font-weight: bold;
+}
+
+body {font-family: "Sofia Pro Soft";}
