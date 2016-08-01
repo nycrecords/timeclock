@@ -400,10 +400,16 @@ def request_timepunch():
     current_app.logger.info('Start function request_timepunch()')
     form = TimePunchForm()
     if form.validate_on_submit():
-        print('FROM FORM:', form.punch_type.data)
-        create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
-        flash('Your timepunch request has been successfully submitted and is pending renewal',
-              category='success')
+        if form.note.data is not None and len(form.note.data) > 60:
+            flash("Your note cannot exceed 60 characters", category='warning')
+            current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
+        if not current_user.supervisor:
+            flash("You must have a supervisor to request a timepunch. If you believe a supervisor"
+                  "should be assigned to you, please contact the system administrator.", category='error')
+            current_app.logger.error('Does not have a supervisor'.format(current_user.email))
+        else:
+            create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
+            flash('Your timepunch request has been successfully submitted and is pending renewal', category='success')
         current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
     current_app.logger.info('End function request_timepunch')

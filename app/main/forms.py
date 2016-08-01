@@ -28,7 +28,7 @@ class TimePunchForm(Form):
     """
     punch_type = SelectField(u'Punch Type', validators=[DataRequired()], choices=[('In', 'In'), ('Out', 'Out')])
     punch_time = DateTimeField(default=datetime.today(), validators=[DataRequired()])
-    note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=120)])
+    note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=60)])
     submit = SubmitField("Submit Request")
 
 
