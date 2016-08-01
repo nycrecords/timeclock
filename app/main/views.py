@@ -481,6 +481,7 @@ def user_list_page():
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users)
 
+
 @main.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -493,25 +494,23 @@ def user_profile(username):
     current_app.logger.info('Start function user_profile() for user {}'.format(username))
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    if '@records.nyc.gov' in username:
-        u = User.query.filter_by(email=(username)).first()
-    else:
-        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    # if '@records.nyc.gov' in username:
+    #     u = User.query.filter_by(email=(username)).first()
+    # else:
+    u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
     form = ChangeUserDataForm()
 
     if not u:
-        flash('No user with username {} was found. You\'ve been redirected to '
-              'TimeClock Home'.format(username), category='error')
-        return redirect(url_for('main.index'))
+        flash('No user with username {} was found'.format(username), category='error')
+        return redirect(url_for('main.user_list_page'))
     elif u.role.name == 'Administrator' and u == current_user:
         # If user is admin, redirect to index and flash a message,
         # as admin should not be allowed to edit their own info through frontend.
         # This also avoids the issue that comes with the fact that admins don't have
         # a supervisor.
-        flash('Admins cannot edit their own information. You\'ve been redirected to '
-              'TimeClock Home.', category='error')
+        flash('Admins cannot edit their own information.', category='error')
         current_app.logger.info('End function user_profile')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.user_list_page'))
 
     if form.validate_on_submit():
         if u.email == form.supervisor_email.data:
