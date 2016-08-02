@@ -97,7 +97,7 @@ def generate_timetable(canvas_field, events):
         time_out = next_event[:next_event.index('|') - 1]
         next_event = next_event[(next_event.index('|') + 2):]
         next_event = next_event[(next_event.index('|') + 2):]
-        note_out = next_event[(event.index('|') + 2):]
+        note_out = next_event[(event.index('|') + 1):]
 
         if note_in or note_out:
             if len(note_in) > len(note_out):
