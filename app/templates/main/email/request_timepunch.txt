@@ -13,5 +13,8 @@ Time: {{ punch_time.strftime("%b %d, %Y %H:%M:%S") }}
 Reason: {{ note }}
 
 
-You can approve or reject this request here (TODO: INSERT LINK)
-Responses to this email are not monitored
+You can approve or reject this request <a href="{{ url_for('main.review_timepunch', _external=True)"">here.</a>  }}
+
+Alternatively, you can copy and paste this url into your browser: {{ url_for('main.review_timepunch', _external=True).
+
+Responses to this email are not monitored.

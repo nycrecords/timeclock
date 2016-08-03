@@ -16,8 +16,10 @@ class LoginForm(Form):
 class RegistrationForm(Form):
     """Used to register new users into the system."""
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
-    first_name = StringField("First name")
-    last_name = StringField("Last name")
+    first_name = StringField("First name", validators=[DataRequired()])
+    last_name = StringField("Last name", validators=[DataRequired()])
+    division = SelectField('Division', choices=divisions, validators=[DataRequired()])
+    tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
     password = PasswordField('Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords must match')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
@@ -30,15 +32,31 @@ class RegistrationForm(Form):
         :param email_field:
         :return:
         """
-        user = User.query.filter_by(email=email_field.data).first()
-        if user:
-            if user.email:
-                current_app.logger.error('{} tried to register user with email {} but user already exists.'.format(
-                    user.email, email_field.data))
-            else:
-                current_app.logger.error('Anonymous user tried to register user with email {} but user already exists.'.
-                                         format(email_field.data))
+        if User.query.filter_by(email=email_field.data).first():
             raise ValidationError('An account with this email address already exists')
+        return True
+
+    def validate_tag(self, tag_field):
+        """
+        Verify that the tag is valid.
+
+        :param tag_field: Field passed in to validate (Tag)
+        :return: Nothing if check passes; Raise validation error if invalid entry in field.
+        """
+        if not tag_field.data or tag_field.data == '':
+            raise ValidationError('All users must be tagged')
+        return True
+
+    def validate_division(self, div_field):
+        """
+        Verify that the division is valid.
+
+        :param div_field: Field passed in to validate (Division)
+        :return: Nothing if check passes; Raise validation error if invalid entry in field.
+        """
+        if not div_field.data or div_field.data == '':
+            raise ValidationError('All users must belong to a division')
+        return True
 
     def validate_password(self, password_field):
         """

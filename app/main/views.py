@@ -409,7 +409,7 @@ def request_timepunch():
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
             create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
-            flash('Your timepunch request has been successfully submitted and is pending renewal', category='success')
+            flash('Your timepunch request has been successfully submitted and is pending approval', category='success')
         current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
     current_app.logger.info('End function request_timepunch')
@@ -500,10 +500,10 @@ def user_profile(username):
     current_app.logger.info('Start function user_profile() for user {}'.format(username))
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    # if '@records.nyc.gov' in username:
-    #     u = User.query.filter_by(email=(username)).first()
-    # else:
-    u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    if '@records.nyc.gov' in username:
+        u = User.query.filter_by(email=(username)).first()
+    else:
+        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
     form = ChangeUserDataForm()
 
     if not u:

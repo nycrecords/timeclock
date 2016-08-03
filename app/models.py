@@ -310,6 +310,18 @@ class Password(db.Model):
         self.last_changed = datetime.now()
 
 
+class ChangeLog(db.Model):
+    """
+    A model that contains a list of changes made to a user account.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    changer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    timestamp = db.Column(db.DateTime)
+    old = db.Column(db.String(128))
+    new = db.Column(db.String(128))
+    category = db.Column(db.String(128))
+
 login_manager.anonymous_user = AnonymousUser
 
 

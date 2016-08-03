@@ -38,10 +38,15 @@ def register():
     current_app.logger.info('Start function register() [VIEW]')
     form = RegistrationForm()
     if form.validate_on_submit():
+        tag_id = 6
+        if 'tag' in form:
+            tag_id = form.tag.data
         user = User(email=(form.email.data).lower(),
                     password=form.password.data,
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
+                    division=form.division.data,
+                    tag_id=tag_id,
                     validated=True)
         db.session.add(user)
         db.session.commit()
