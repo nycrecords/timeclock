@@ -25,7 +25,8 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
-    update_user_information
+    update_user_information,
+    get_changelog_by_user_id
 )
 from .timepunch import (
     create_timepunch,
@@ -55,10 +56,11 @@ from .pdf import (
 )
 from datetime import datetime
 from flask import current_app
-from ..models import Pay, User
+from ..models import Pay, User, ChangeLog
 from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+import sqlalchemy
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -409,6 +411,7 @@ def request_timepunch():
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
             create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
+            flash('Your timepunch request has been successfully submitted and is pending approval', category='success')
             flash('Your timepunch request has been successfully submitted and is pending renewal', category='success')
 
         # Combine date and time fields
@@ -554,7 +557,17 @@ def user_profile(username):
         form.role.data = u.role.name
 
     current_app.logger.info('End function user_profile')
-    return render_template('main/user_page.html', username=username, u=u, form=form)
+
+    # For ChangeLog Table
+    changes = get_changelog_by_user_id(u.id)
+
+    page = request.args.get('page', 1, type=int)
+    pagination = changes.paginate(
+        page, per_page=10,
+        error_out=False)
+    changes = pagination.items
+
+    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes, pagination=pagination)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

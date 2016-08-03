@@ -1,5 +1,6 @@
 from .. import db
-from ..models import User, Event, Tag, Role
+from ..models import User, Event, Tag, Role, ChangeLog
+from ..utils import tags
 from datetime import datetime, timedelta, date
 import dateutil.relativedelta
 from flask_login import current_user
@@ -324,25 +325,87 @@ def update_user_information(user,
     :return: None
     """
     current_app.logger.info('Start function update_user_information for {}'.format(user.email))
-    if first_name_input and first_name_input != '':
+    if first_name_input and first_name_input != '' and (user.first_name != first_name_input):
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='FIRST NAME',
+                           old=user.first_name,
+                           new=first_name_input)
+        db.session.add(change)
+        db.session.commit()
         user.first_name = first_name_input
 
-    if last_name_input and last_name_input != '':
+    if last_name_input and last_name_input != '' and (user.last_name != last_name_input):
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='LAST NAME',
+                           old=user.last_name,
+                           new=last_name_input)
+        db.session.add(change)
+        db.session.commit()
         user.last_name = last_name_input
 
-    if division_input and division_input != '':
+    if division_input and division_input != '' and (user.division != division_input):
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='DIVISION',
+                           old=user.division,
+                           new=division_input)
+        db.session.add(change)
+        db.session.commit()
         user.division = division_input
 
-    if tag_input:
+    if tag_input and user.tag_id != tag_input:
+        if user.tag_id:
+            old_tag = tags[user.tag_id][1]
+        else:
+            old_tag = 'None'
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='TAG_INPUT',
+                           old=old_tag,
+                           new=tags[tag_input][1])
+        db.session.add(change)
+        db.session.commit()
         user.tag_id = tag_input
 
-    if supervisor_email_input and supervisor_email_input != '':
+    if supervisor_email_input and supervisor_email_input != '' and user.supervisor.email != supervisor_email_input:
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='SUPERVISOR',
+                           old=user.supervisor.email,
+                           new=supervisor_email_input)
+        db.session.add(change)
+        db.session.commit()
         sup = User.query.filter_by(email=supervisor_email_input).first()
         user.supervisor = sup
 
     if role_input:
-        user.role = Role.query.filter_by(name=role_input).first()
+        new_role = Role.query.filter_by(name=role_input).first()
+        if user.role != new_role:
+            change = ChangeLog(changer_id=current_user.id,
+                               user_id=user.id,
+                               timestamp=datetime.now(),
+                               category='ROLE',
+                               old=user.role.name,
+                               new=role_input)
+            db.session.add(change)
+            db.session.commit()
+            user.role = Role.query.filter_by(name=role_input).first()
 
     db.session.add(user)
     db.session.commit()
     current_app.logger.info('End function update_user_information')
+
+
+def get_changelog_by_user_id(id):
+    current_app.logger.info('Start function get_changelog_by_user_id()')
+    current_app.logger.info('Querying for changes made to user with id {}'.format(id))
+    changes = ChangeLog.query.filter_by(user_id=id).order_by(sqlalchemy.desc(ChangeLog.timestamp))
+    current_app.logger.info('End function get_changelog_by_user_id()')
+    return changes
