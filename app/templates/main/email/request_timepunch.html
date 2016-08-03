@@ -14,5 +14,5 @@
 <p>Reason: {{ note }}</p>
 
 
-<p>You can approve or reject this request <a href="">here</a> (TODO: INSERT LINK) </p>
+<p>You can approve or reject this request <a href="{{ url_for('main.review_timepunch', _external=True)}}">here</a> </p>
 <p>Responses to this email are not monitored</p>

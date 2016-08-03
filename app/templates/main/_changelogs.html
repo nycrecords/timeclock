@@ -16,7 +16,7 @@
     <tbody>
         {% for change in changes %}
         <tr>
-            <td>{{ change.timestamp.strftime("%b %d, %Y %H:%M") }}</td>
+            <td>{{ change.timestamp.strftime("%b %d, %Y %H:%M:%S") }}</td>
             <td>{{ change.changer.email }}</td>
             <td>{{ change.category }}</td>
             <td>{{ change.old }}</td>
