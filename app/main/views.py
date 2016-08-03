@@ -55,7 +55,7 @@ from .pdf import (
 )
 from datetime import datetime
 from flask import current_app
-from ..models import Pay, User
+from ..models import Pay, User, ChangeLog
 from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -540,7 +540,10 @@ def user_profile(username):
         form.role.data = u.role.name
 
     current_app.logger.info('End function user_profile')
-    return render_template('main/user_page.html', username=username, u=u, form=form)
+
+    # For ChangeLog Table
+    changes = ChangeLog.query.filter_by(user_id=u.id)
+    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database

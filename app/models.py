@@ -72,6 +72,7 @@ class User(UserMixin, db.Model):
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
+    # changelogs = db.relationship('ChangeLog', backref='changer', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
     # Supervisor
@@ -317,6 +318,8 @@ class ChangeLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     changer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', foreign_keys=[user_id])
+    changer = db.relationship('User', foreign_keys=[changer_id])
     timestamp = db.Column(db.DateTime)
     old = db.Column(db.String(128))
     new = db.Column(db.String(128))
