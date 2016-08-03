@@ -410,6 +410,20 @@ def request_timepunch():
         else:
             create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
             flash('Your timepunch request has been successfully submitted and is pending renewal', category='success')
+
+        # Combine date and time fields
+        date_string = form.punch_date.data.strftime('%m/%d/%Y ')
+        time_string = form.punch_time.data
+        datetime_str = date_string + time_string
+        try:
+            datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
+        except ValueError:
+            flash('Please make sure your time input is in the format HH:MM', category='error')
+            return redirect(url_for('main.request_timepunch'))
+
+        create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
+        flash('Your timepunch request has been successfully submitted and is pending renewal',
+              category='success')
         current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
     current_app.logger.info('End function request_timepunch')
@@ -500,10 +514,10 @@ def user_profile(username):
     current_app.logger.info('Start function user_profile() for user {}'.format(username))
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    # if '@records.nyc.gov' in username:
-    #     u = User.query.filter_by(email=(username)).first()
-    # else:
-    u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    if '@records.nyc.gov' in username:
+        u = User.query.filter_by(email=(username)).first()
+    else:
+        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
     form = ChangeUserDataForm()
 
     if not u:
