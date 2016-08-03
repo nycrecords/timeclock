@@ -401,3 +401,11 @@ def update_user_information(user,
     db.session.add(user)
     db.session.commit()
     current_app.logger.info('End function update_user_information')
+
+
+def get_changelog_by_user_id(id):
+    current_app.logger.info('Start function get_changelog_by_user_id()')
+    current_app.logger.info('Querying for changes made to user with id {}'.format(id))
+    changes = ChangeLog.query.filter_by(user_id=id).order_by(sqlalchemy.desc(ChangeLog.timestamp))
+    current_app.logger.info('End function get_changelog_by_user_id()')
+    return changes

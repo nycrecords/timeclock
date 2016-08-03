@@ -11,14 +11,17 @@
         </h1>
     </div>
 
-    <div class="row" style="margin-bottom: 15px">
-        <div class="col-md-4">
+    <div class="row" style="margin-bottom: 15px;">
+        <div class="col-md-4" style="float:left">
             {{ wtf.quick_form(form) }}
+        </div>
+        <div class="col-md-8" style="float:right">
+                    {% include 'main/_changelogs.html' %}
         </div>
     </div>
 
     <div class="row">
-        {% include '_changelogs.html' %}
+
     </div>
 
 {% endblock %}

@@ -25,7 +25,8 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
-    update_user_information
+    update_user_information,
+    get_changelog_by_user_id
 )
 from .timepunch import (
     create_timepunch,
@@ -59,6 +60,7 @@ from ..models import Pay, User, ChangeLog
 from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+import sqlalchemy
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -542,8 +544,17 @@ def user_profile(username):
     current_app.logger.info('End function user_profile')
 
     # For ChangeLog Table
-    changes = ChangeLog.query.filter_by(user_id=u.id)
-    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes)
+    changes = ChangeLog.query.filter_by(user_id=u.id).order_by(sqlalchemy.desc(ChangeLog.timestamp))
+    print(u.id)
+    changes = get_changelog_by_user_id(u.id)
+
+    page = request.args.get('page', 1, type=int)
+    pagination = changes.paginate(
+        page, per_page=10,
+        error_out=False)
+    changes = pagination.items
+
+    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes, pagination=pagination)
 
 
 # FOR TESTING ONLY - creates dummy data to propagate database
