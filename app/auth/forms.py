@@ -122,7 +122,7 @@ class AdminRegistrationForm(Form):
         """
         user = User.query.filter_by(email=email_field.data).first()
         if not user:
-            raise ValidationError('No account with email {} exists'.format(email_field))
+            raise ValidationError('No account with that email exists')
 
 
 class ChangePasswordForm(Form):

@@ -14,6 +14,7 @@
                     <th>Last Name</th>
                     <th>Division</th>
                     <th>Tag</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -23,7 +24,7 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.first_name }}</td>
                     <td>{{ user.last_name }}</td>
-                    <td>{{ user.division }}</td>
+                    <td> None </td>
 {#                    Use tag_id to find corresponding name in tag table #}
                     {% for tag in tags %}
                         {% if tag.id==user.tag_id %}
@@ -33,7 +34,7 @@
                     {% if user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <td><a href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></td>
+                    <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('main.user_profile', username=user) }}">Edit</a></td>
                 </tr>
                 {% endfor %}
 {#followed by users who do have division, sorted by their divison#}
@@ -52,7 +53,7 @@
                     {% if user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
-                    <td><a href="{{ url_for('main.user_profile', username=user.email) }}">Edit</a></td>
+                    <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('main.user_profile', username=user.email[:user.email.find('@')]) }}">Edit</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

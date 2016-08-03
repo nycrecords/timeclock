@@ -28,7 +28,7 @@ class TimePunchForm(Form):
     """
     punch_type = SelectField(u'Punch Type', validators=[DataRequired()], choices=[('In', 'In'), ('Out', 'Out')])
     punch_time = DateTimeField(default=datetime.today(), validators=[DataRequired()])
-    note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=120)])
+    note = StringField("Note: ", validators=[DataRequired(), Length(min=0, max=60)])
     submit = SubmitField("Submit Request")
 
 
@@ -68,7 +68,6 @@ class UserFilterEventsForm(Form):
 class CreatePayRateForm(Form):
     email = StringField("Email", validators=[DataRequired(), Email()])
     start_date = DateField("Start", default=date.today(), validators=[DataRequired()])
-    end_date = DateField("End", default=date.today(), validators=[DataRequired()])
     rate = FloatField("Rate", validators=[DataRequired()])
     submit = SubmitField("Create Pay Rate")
 

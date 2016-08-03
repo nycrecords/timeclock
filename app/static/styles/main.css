@@ -1,0 +1,14 @@
+@font-face {
+    font-family: "Sofia Pro Soft";
+    src: url('../Sofia Pro Soft Regular.otf');
+    font-weight: bold;
+}
+
+.navbar-inner {
+    /*For IE Compatibility*/
+    filter:none;
+}
+
+body {
+    font-family: "Sofia Pro Soft";
+}
