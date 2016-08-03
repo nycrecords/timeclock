@@ -400,8 +400,18 @@ def request_timepunch():
     current_app.logger.info('Start function request_timepunch()')
     form = TimePunchForm()
     if form.validate_on_submit():
-        print('FROM FORM:', form.punch_type.data)
-        create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
+
+        # Combine date and time fields
+        date_string = form.punch_date.data.strftime('%m/%d/%Y ')
+        time_string = form.punch_time.data
+        datetime_str = date_string + time_string
+        try:
+            datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
+        except ValueError:
+            flash('Please make sure your time input is in the format HH:MM', category='error')
+            return redirect(url_for('main.request_timepunch'))
+
+        create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
         flash('Your timepunch request has been successfully submitted and is pending renewal',
               category='success')
         current_app.logger.info('End function request_timepunch')
