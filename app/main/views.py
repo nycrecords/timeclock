@@ -434,7 +434,7 @@ def request_timepunch():
                 return redirect(url_for('main.request_timepunch'))
 
             create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
-            flash('Your timepunch request has been successfully submitted and is pending renewal',
+            flash('Your timepunch request has been successfully submitted and is pending approval',
                   category='success')
             current_app.logger.info('End function request_timepunch')
             return redirect(url_for('main.request_timepunch'))
