@@ -19,7 +19,6 @@ divisions = [
 
 roles = [
     ('User', 'User'),
-    # ('Moderator', 'Moderator'),
     ('Administrator', 'Administrator')
 ]
 
