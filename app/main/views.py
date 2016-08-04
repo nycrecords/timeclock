@@ -410,25 +410,23 @@ def request_timepunch():
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
-            create_timepunch(form.punch_type.data, form.punch_time.data, form.note.data)
-            flash('Your timepunch request has been successfully submitted and is pending approval', category='success')
-            flash('Your timepunch request has been successfully submitted and is pending renewal', category='success')
+            # Combine date and time fields
+            date_string = form.punch_date.data.strftime('%m/%d/%Y ')
+            time_string = form.punch_time.data
+            datetime_str = date_string + time_string
+            try:
+                datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
+                print(datetime_obj)
+            except ValueError:
+                flash('Please make sure your time input is in the format HH:MM', category='error')
+                return redirect(url_for('main.request_timepunch'))
 
-        # Combine date and time fields
-        date_string = form.punch_date.data.strftime('%m/%d/%Y ')
-        time_string = form.punch_time.data
-        datetime_str = date_string + time_string
-        try:
-            datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
-        except ValueError:
-            flash('Please make sure your time input is in the format HH:MM', category='error')
+            create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
+            flash('Your timepunch request has been successfully submitted and is pending renewal',
+                  category='success')
+            current_app.logger.info('End function request_timepunch')
             return redirect(url_for('main.request_timepunch'))
 
-        create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
-        flash('Your timepunch request has been successfully submitted and is pending renewal',
-              category='success')
-        current_app.logger.info('End function request_timepunch')
-        return redirect(url_for('main.request_timepunch'))
     current_app.logger.info('End function request_timepunch')
     return render_template('main/request_timepunch.html', form=form)
 
