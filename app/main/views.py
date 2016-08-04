@@ -34,6 +34,7 @@ from .timepunch import (
     approve_or_deny
 )
 from .payments import (
+    get_payrate_before_or_after,
     calculate_hours_worked
 )
 from ..decorators import admin_required
@@ -299,6 +300,11 @@ def download_invoice():
     current_app.logger.info('Start function download_invoice()')
     errors = []
 
+    # Get the page the user downloaded an invoice from
+    last_page = (request.referrer).split('/')[3]
+    if last_page.find('?') != -1:
+        last_page = last_page[:last_page.find('?')]
+
     if 'email' not in session or session['email'] is None or session['email'] == '':
         # If an admin does not specify the account for which the invoice should
         # be generated, flash an error
@@ -320,9 +326,6 @@ def download_invoice():
     if errors:
         for error in errors:
             flash(error, 'warning')
-        last_page = (request.referrer).split('/')[3]
-        if last_page.find('?') != -1:
-            last_page = last_page[:last_page.find('?')]
         current_app.logger.error('Errors occurred while generating invoice (end function download_invoice).'
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
@@ -331,6 +334,13 @@ def download_invoice():
         u = User.query.filter_by(email=current_user.email).first()
     else:
         u = User.query.filter_by(email=session['email']).first()
+
+    # Check for payrate
+    if get_payrate_before_or_after(session['email'], session['first_date'], True) is None:
+        flash('User {} does not have a payrate. Maybe you meant to generate a timesheet instead.'
+              .format(session['email']), category='error')
+        flash('If you believe this is an error, please contact a TimeClock administrator.', category='warning')
+        return redirect(url_for('main.' + last_page))
 
     day_events_list = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
     return render_template('payments/invoice.html', day_events_list=day_events_list,
