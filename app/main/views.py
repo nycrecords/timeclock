@@ -336,6 +336,8 @@ def download_invoice():
         u = User.query.filter_by(email=session['email']).first()
 
     # Check for payrate
+    print(get_payrate_before_or_after(session['email'], session['first_date'], True))
+    print(session['first_date'])
     if get_payrate_before_or_after(session['email'], session['first_date'], True) is None:
         flash('User {} does not have a payrate. Maybe you meant to generate a timesheet instead.'
               .format(session['email']), category='error')
