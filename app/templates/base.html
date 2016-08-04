@@ -13,7 +13,13 @@ type="image/x-icon">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='styles/main.css')}}"/>
+    <link href="jkwla;;jkas">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" rel="stylesheet" media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css" rel="stylesheet" media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css.map" rel="stylesheet" media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js">
 {% endblock %}
 
 {% block navbar %}  <!-- Navigation base HTML will go here -->
@@ -115,9 +121,15 @@ type="image/x-icon">
     {{ moment.include_moment() }}
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
     <script>
-    $( function() {
 
+    $( function() {
+        $('#punch_time').timepicker({
+             'timeFormat': 'H:i',
+                'step': 1
+        });
         $("#first_date" ).datepicker({
             dateFormat: 'yy-mm-dd'
         });
@@ -133,7 +145,6 @@ type="image/x-icon">
         $( "#start_date" ).datepicker({
             dateFormat: 'yy-mm-dd'
         });
-
     });
     </script>
 {% endblock %}
