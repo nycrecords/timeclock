@@ -57,11 +57,11 @@ from .pdf import (
 )
 from datetime import datetime
 from flask import current_app
-from ..models import Pay, User, ChangeLog
+from ..models import Pay, User
 from .. import db
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-import sqlalchemy
+
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -134,6 +134,7 @@ def all_history():
         session['division'] = None
 
     if request.referrer and 'all_history' not in request.referrer:
+        # If the user is visiting from another page, reset the session email variable
         current_app.logger.info('User is visiting from another page. Setting session[\'email\'] to None')
         session['email'] = None
 
@@ -153,7 +154,7 @@ def all_history():
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
 
-    # Pagination code
+    # Pagination
     pagination = events_query.paginate(
         page, per_page=15,
         error_out=False)
@@ -188,6 +189,8 @@ def history():
                                 .format(current_user.email))
         return redirect(url_for('auth.change_password'))
 
+    # Explicitly set email session variable to current user's email, as users on the history page
+    # should only be able to view their own information
     session['email'] = current_user.email
 
     form = UserFilterEventsForm()
@@ -254,15 +257,13 @@ def download():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
-    events = request.form.getlist('event')
-    # ^gets event data - we can similarly pass in other data
-    # (i.e. time start, oend)
+    events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
 
+    # Begin generation of the actual PDF here
     current_app.logger.info('Beginning to generate timesheet pdf...')
     import io
     output = io.BytesIO()
     c = canvas.Canvas(output, pagesize=letter)
-    width, height = letter
 
     generate_header(c)
     generate_employee_info(c)
@@ -288,6 +289,7 @@ def download():
                             )
     current_app.logger.info('End function download')
     return response
+
 
 @main.route('/download_invoice', methods=['GET', 'POST'])
 @login_required
@@ -336,8 +338,6 @@ def download_invoice():
         u = User.query.filter_by(email=session['email']).first()
 
     # Check for payrate
-    print(get_payrate_before_or_after(session['email'], session['first_date'], True))
-    print(session['first_date'])
     if get_payrate_before_or_after(session['email'], session['first_date'], True) is None:
         flash('User {} does not have a payrate. Maybe you meant to generate a timesheet instead.'
               .format(session['email']), category='error')
@@ -352,6 +352,10 @@ def download_invoice():
 @main.route('/clear_filter', methods=['GET', 'POST'])
 @login_required
 def clear():
+    """
+    Clear the admin's all_history filter.
+    :return: A redirect to the all_history page.
+    """
     current_app.logger.info('Start function clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
@@ -368,6 +372,10 @@ def clear():
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
 @login_required
 def user_clear():
+    """
+    Clear a user's personal history filter.
+    :return: A redirect to the history page.
+    """
     current_app.logger.info('Start function user_clear()')
     session.pop('first_date', None)
     session.pop('last_date', None)
@@ -383,6 +391,10 @@ def user_clear():
 @login_required
 @admin_required
 def pay():
+    """
+    View function used to render HTML to create a payrate.
+    :return: HTML template to create payrates.
+    """
     current_app.logger.info('Start function pay()')
     form = CreatePayRateForm()
     if form.validate_on_submit():
@@ -408,7 +420,7 @@ def pay():
 @login_required
 def request_timepunch():
     """
-    Creates a form for users to be able to request a timepunch
+    Creates a form for users to be able to request a timepunch.
     :return: A page users can implement to request the addition of a clock event.
     """
     current_app.logger.info('Start function request_timepunch()')
@@ -428,7 +440,6 @@ def request_timepunch():
             datetime_str = date_string + time_string
             try:
                 datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
-                print(datetime_obj)
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
@@ -446,29 +457,35 @@ def request_timepunch():
 @main.route('/review_timepunches', methods=['GET', 'POST'])
 @login_required
 def review_timepunch():
+    """
+    Creates a page supervisors can use to approve or deny timepunches.
+    :return: An HTML page in which supervisors can manage and filter timepunches.
+    """
     current_app.logger.info('Start function review_timepunch()')
-    # Use timepunch id in the div?
     timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form)
-    filter = FilterTimePunchForm()
-    clear = ClearTimePunchFilterForm()
+    filter_form = FilterTimePunchForm()
+    clear_form = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
 
-    if filter.validate_on_submit and filter.filter.data:
+    if filter_form.validate_on_submit and filter_form.filter.data:
+        # User submits a filter
         page = 1
 
         # Filter through timepunches based on user selections
         timepunch_query = get_timepunches_for_review(current_user.email,
-                                                     filter.email.data,
-                                                     filter.status.data)
+                                                     filter_form.email.data,
+                                                     filter_form.status.data)
         flash('Successfully filtered', category='success')
 
-    if clear.validate_on_submit() and clear.clear.data:
+    if clear_form.validate_on_submit() and clear_form.clear.data:
+        # User submits the clear form
         page = 1
         timepunch_query = get_timepunches_for_review(current_user.email)
         flash('Filter successfully cleared', category='success')
 
     if form.validate_on_submit():
+        # User submits an approve or deny request
         if form.approve.data:
             approve_or_deny(request.form['event_id'], True)
             flash('Timepunch successfully approved', category='success')
@@ -510,7 +527,7 @@ def user_list_page():
         if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
-    #pass in separate list of users with and without divisions
+    # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users)
 
@@ -578,16 +595,3 @@ def user_profile(username):
     changes = pagination.items
 
     return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes, pagination=pagination)
-
-
-# FOR TESTING ONLY - creates dummy data to propagate database
-@main.route('/dummy_data')
-def create_dumb_data():
-    current_app.logger.info('def create_dumb_date()')
-    from ..models import Role, Tag, User, Event
-    Role.insert_roles()
-    Tag.insert_tags()
-    User.generate_fake(20)
-    Event.generate_fake(500)
-    current_app.logger.info('Someone generated dummy data.')
-    return redirect(url_for('main.index'))

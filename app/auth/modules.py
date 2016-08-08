@@ -5,7 +5,6 @@
    timeclock application
 """
 
-from datetime import datetime
 from werkzeug.security import check_password_hash
 from ..models import User
 from flask import flash, current_app
@@ -37,16 +36,20 @@ def check_password_requirements(email, old_password, password, password_confirma
         flash('Your passwords do not match', category='warning')
         return False
 
+    # Use a score based system to ensure that users match password requirements
     score = 0
     if re.search('\d+', password):
+        # If the password contains a digit, increment score
         score += 1
     if re.search('[a-z]', password) and re.search('[A-Z]', password):
+        # If the password contains lowercase and uppercase letters, increment score
         score += 1
     if score < 2:
         current_app.logger.info(current_user.email +
                                 'tried to change their password but failed: new password missing uppercase letter '
                                 'or number ')
-        flash('Your new password must contain eight characters and at least one uppercase letter and one number', category='warning')
+        flash('Your new password must contain eight characters and at least one uppercase letter and one number',
+              category='warning')
         return False
 
     return True

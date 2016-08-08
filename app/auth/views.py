@@ -38,8 +38,10 @@ def register():
     current_app.logger.info('Start function register() [VIEW]')
     form = RegistrationForm()
     if form.validate_on_submit():
+        # Set default tag value to 6 ("Other")
         tag_id = 6
         if 'tag' in form:
+            # If a tag is specified in the form, change the user's tag_id
             tag_id = form.tag.data
         user = User(email=(form.email.data).lower(),
                     password=form.password.data,
@@ -71,9 +73,10 @@ def admin_register():
     if form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
 
-        # Default tag set to 6: Other
+        # Set default tag value to 6 ("Other")
         tag_id = 6
         if 'tag' in form:
+            # If a tag is specified in the form, change the user's tag_id
             tag_id = form.tag.data
         user = User(email=(form.email.data).lower(),
                     password=temp_password,
@@ -115,6 +118,7 @@ def login():
     :return: Login page.
     """
     current_app.logger.info('Start function login() [VIEW]')
+
     # Redirect to index if already logged in
     if current_user.is_authenticated:
         current_app.logger.info('{} is already authenticated: redirecting to index'.format(current_user.email))
@@ -125,7 +129,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=(form.email.data).lower()).first()
 
-        if user and user.login_attempts >= 2:
+        if user and user.login_attempts > 2:
             # Too many invalid attempts
             current_app.logger.info('{} has been locked out'.format(user.email))
             flash('You have too many invalid login attempts. You must reset your password.',
@@ -134,7 +138,7 @@ def login():
             return redirect(url_for('auth.password_reset_request'))
 
         if user is not None and user.verify_password(form.password.data):
-            # Credentials successfully sibmitted
+            # Credentials successfully submitted: log the user in and set their login_attempts to 0
             login_user(user)
             user.login_attempts = 0
             db.session.add(user)
@@ -163,6 +167,7 @@ def login():
             return redirect(request.args.get('next') or url_for('main.index'))
 
         if user:
+            # If the user exists in the database but entered incorrect information
             current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
             user.login_attempts += 1
             db.session.add(user)
@@ -247,6 +252,7 @@ def password_reset_request():
     """
     current_app.logger.info('Start function password_reset_request() [VIEW]')
     if not current_user.is_anonymous:
+        # If the current user is signed in, redirect them to TimeClock home.
         current_app.logger.info('Current user ({}) is already signed in. Redirecting to index...'.
                                 format(current_user.email))
         return redirect(url_for('main.index'))
@@ -259,6 +265,8 @@ def password_reset_request():
         user = User.query.filter_by(email=(form.email.data).lower()).first()
         current_app.logger.info('Finished querying for user with given email')
         if user:
+            # If the user exists, generate a reset token and send an email containing a link to reset the user's
+            # password
             token = user.generate_reset_token()
             send_email(user.email,
                        'Reset Your Password',
@@ -270,6 +278,7 @@ def password_reset_request():
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
             flash('An email with instructions to reset your password has been sent to you.', category='success')
         else:
+            # If the user doesn't exist in the database
             current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
                                     form.email.data)
             flash('An account with this email was not found in the system.', category='error')

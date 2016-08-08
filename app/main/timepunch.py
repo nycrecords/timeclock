@@ -11,18 +11,17 @@ from flask_login import current_user
 from flask import current_app
 
 
-
 def create_timepunch(punch_type, punch_time, reason):
     """
     Creates a timepunch, adds it to the database, and sends an email to the appropriate user so
     that it may be approved or denied.
-    :param: punch_type: [String] type of requested punch (True for in, False for out)
+    :param punch_type: [String] type of requested punch (True for in, False for out)
     :param punch_time: [datetime] time of requested punch
     :param reason: [string] reason for timepunch submission
     :return: None
     """
     current_app.logger.info('Start function create_timepunch()')
-    punch_type = punch_type == 'In'  # must manually cast string to bool because
+    punch_type = punch_type == 'In'  # Must manually cast string to bool because wtf doesn't support coerce bool
     e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
     db.session.add(e)
     db.session.commit()
@@ -37,6 +36,7 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
     :param filter_by_email: The email of a specific user for optional filters.
+    :param status: [String] Approved, Unapproved, All. Used for more precise filtering.
     :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
@@ -75,6 +75,12 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
 
 
 def approve_or_deny(event_id, approve=False):
+    """
+    Approve or deny an event.
+    :param event_id: [int] Id of the event to be marked as approved or unapproved.
+    :param approve: [bool] True to approve the event, False to unapprove
+    :return: Nothing.
+    """
     current_app.logger.info('Start function approve_or_deny()')
     from .modules import get_event_by_id
     e = get_event_by_id(event_id)

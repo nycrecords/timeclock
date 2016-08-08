@@ -25,7 +25,6 @@ def process_clock(note_data, ip=None):
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_app.logger.info('Saving new event to database')
-    db.session.add(current_user)  # TODO: do we still need this after eliminating clocked_in from db?
     db.session.add(event)
     db.session.commit()
     current_app.logger.info('Saved new event to database')
@@ -48,11 +47,13 @@ def set_clock_form():
     current_app.logger.info('End function get_clock_form()')
     return form
 
+
 def is_clocked(user_id=None):
-    '''
-    checks if the user is clocked in
+    """
+    Checks if the user with given user_id is clocked in.
+    :param user_id: id of the user to check for.
     :return: True if the user is clocked in, False if user is clocked out
-    '''
+    """
 
     if user_id:
         event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
@@ -62,6 +63,7 @@ def is_clocked(user_id=None):
         return event.type
     else:
         return None
+
 
 def get_last_clock():
     """
@@ -73,16 +75,17 @@ def get_last_clock():
     try:
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=current_user.id).first() is not None:
+            # If the user has clock events (at least one), find the most recent clock event.
             recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).\
                 first().time.strftime("%b %d, %Y | %H:%M")
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
         else:
+            # Because the user has no clock events, we can't search for the most recent one.
             current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
                                     'any clock events yet'.format(current_user.email))
             current_app.logger.info('End function get_last_clock()')
-
     except:
         current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
         return None
@@ -96,6 +99,8 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     :return: QUERY of Event objects from a given user between two given dates
     """
     current_app.logger.info('Start function get_events_by_date')
+
+    # Ensure session variables exist
     if 'first_date' not in session:
         current_app.logger.info('First date not in session, setting to defaults')
         session['first_date'] = get_time_period('w')[0]
@@ -122,7 +127,8 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
         # If the email input by the user does not contain the @records.nyc.gov portion, add it in
         email_input += '@records.nyc.gov'
 
-    # For manual getting events (ignoring session variables)
+    # Insert parameters into this function to manually search for events, disregarding session variables
+    # This is used when querying for timepunches for supervisor review
     if email:
         email_input = email
     if first_date_input:
@@ -138,12 +144,6 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
                             .format(session['first_date'], session['last_date'],
                                     session['email'], session['tag_input'], session['division'])
                             )
-    # What to do if form date fields are left blank
-    # TODO: This is extraneous code. Ensure this is true during code review and then remove - Sarvar
-    if first_date is None:
-        first_date = get_time_period('w')[0]   # First possible clock-in date
-    if last_date is None:
-        last_date = get_time_period('w')[1]          # Last possible clock-in date
 
     current_app.logger.info('Querying for all events between provided dates ({},{})'.
                             format(session['first_date'], session['last_date']))
@@ -167,9 +167,11 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
         events_query = events_query.filter(Event.user_id == user_id)
         current_app.logger.info('Finished querying for events with given user.')
 
-    # Eliminate unapproved timepunches
+    # Eliminate unapproved timepunches to avoid showing them in the history pages and rendering them in Timesheets
+    # and invoices
     events_query = events_query.filter_by(approved=True)
 
+    # Division processing
     if division:
         current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
         events_query = events_query.join(User).filter_by(division=division)
@@ -218,6 +220,7 @@ def get_time_period(period='d'):
     elif period == 'lm':
         interval = [first_of_last_month, end_of_last_month]
     else:
+        # Set the default interval to this week
         interval = [today - timedelta(days=today.weekday()), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
     return interval
 
@@ -263,6 +266,7 @@ def process_time_periods(form):
 
 def get_clocked_in_users():
     """
+    Obtains a list of clocked in users.
     :return: An array of all currently clocked in users.
     """
     current_app.logger.info('Start function get_clocked_in_users()')
@@ -274,16 +278,14 @@ def get_clocked_in_users():
         event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
         if event is not None and event.type is True and user not in clocked_in_users:
             clocked_in_users.append(user)
-        else:
-            continue
     current_app.logger.info('End function get_clocked_in_users()')
     return clocked_in_users
 
 
 def get_all_tags():
     """
-    Returns all the tags
-    :return:
+    Fetches all the tags in the database.
+    :return: A list of all tags.
     """
     current_app.logger.info('Start function get_all_tags()')
     current_app.logger.info('Querying for all tags...')
@@ -294,6 +296,11 @@ def get_all_tags():
 
 
 def get_last_clock_type(user_id=None):
+    """
+    Obtains the type of a user's last clock.
+    :param user_id: The id of the user whose clocks are being queried.
+    :return: [Boolean] Type of user's last clock (True for IN, False for OUT)
+    """
     current_app.logger.info('Start function get_last_clock_type()')
     event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
     if event:
@@ -305,7 +312,13 @@ def get_last_clock_type(user_id=None):
 
 
 def get_event_by_id(event_id):
+    """
+    Obtains an event by its id.
+    :param event_id: The id of the event to fetch.
+    :return: [Event] An Event object.
+    """
     return Event.query.filter_by(id=event_id).first()
+
 
 def update_user_information(user,
                             first_name_input,
@@ -404,6 +417,11 @@ def update_user_information(user,
 
 
 def get_changelog_by_user_id(id):
+    """
+    Obtains a changelog based on a user's id.
+    :param id: The id of the user whose changelog is being queried for.
+    :return: [BaseQuery] A ChangeLog query. We return a query to leverage the pagination macro.
+    """
     current_app.logger.info('Start function get_changelog_by_user_id()')
     current_app.logger.info('Querying for changes made to user with id {}'.format(id))
     changes = ChangeLog.query.filter_by(user_id=id).order_by(sqlalchemy.desc(ChangeLog.timestamp))

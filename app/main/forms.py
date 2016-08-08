@@ -67,6 +67,9 @@ class UserFilterEventsForm(Form):
 
 
 class CreatePayRateForm(Form):
+    """
+    Form for creating payrates. Should only be usable by admins.
+    """
     email = StringField("Email", validators=[DataRequired(), Email()])
     start_date = DateField("Start", default=date.today(), validators=[DataRequired()])
     rate = FloatField("Rate", validators=[DataRequired()])
@@ -74,11 +77,17 @@ class CreatePayRateForm(Form):
 
 
 class ApproveOrDenyTimePunchForm(Form):
+    """
+    Form administrators use to approve or deny a TimePunch. Implemented in review_timepunches.html.
+    """
     approve = SubmitField("")
     deny = SubmitField("")
 
 
 class FilterTimePunchForm(Form):
+    """
+    Form administrators use to filter through TimePunches.
+    """
     email = StringField("Email", validators=[Optional(), Email()])
     status = SelectField(u'Status', validators=[Optional()], choices=[
         ('All', 'All'),
@@ -88,10 +97,16 @@ class FilterTimePunchForm(Form):
 
 
 class ClearTimePunchFilterForm(Form):
+    """
+    Form administrators use to clear their TimePunch filter.
+    """
     clear = SubmitField("Clear Filter")
 
 
 class ChangeUserDataForm(Form):
+    """
+    Form administrators use to change a User's information.
+    """
     first_name = StringField("First name")
     last_name = StringField("Last name")
     division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])

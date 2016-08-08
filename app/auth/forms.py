@@ -70,6 +70,7 @@ class RegistrationForm(Form):
 
         has_num = False
         has_capital = False
+
         for i in password_field.data:
             if i.isdigit():
                 has_num = True
@@ -161,8 +162,6 @@ class PasswordResetRequestForm(Form):
 
 class PasswordResetForm(Form):
     """Password reset form after email confirmation"""
-    # email = StringField('Email', validators=[DataRequired(), Length(1, 100),
-    #                                          Email()])
     password = PasswordField('New Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords must match')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])

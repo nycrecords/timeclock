@@ -1,12 +1,14 @@
 """
 For generating timesheet pdf with appropriate styling.
 """
-from flask import session, url_for, current_app
+from flask import session, current_app
 from flask_login import current_user
-from datetime import datetime, timedelta
+from datetime import datetime
 from ..models import User
 
 from reportlab.lib.pagesizes import letter
+
+# Global: Set width and length to values corresponding to normal paper size
 width, length = letter
 
 
@@ -107,8 +109,8 @@ def generate_timetable(canvas_field, events):
         else:
             max_note_length = 20
 
+        # Dynamically adjust padding (space provided for the row) according to note length
         padding = 25 + max_note_length/7
-        #  TODO: FIX padding TO ADJUST TO TEXT LENGTH
 
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
@@ -118,11 +120,14 @@ def generate_timetable(canvas_field, events):
         total_hours += hours_this_day
 
         next_line -= padding
+
         # Begin drawing here
         canvas_field.drawString(30, next_line, date)
         canvas_field.drawString(130, next_line, time_in_datetime.strftime('%H:%M:%S'))
         canvas_field.drawString(220, next_line, time_out_datetime.strftime('%H:%M:%S'))
         canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
+
+        # Provide 7 pixels of space between note lines: (10, 3, -4, -11, etc.)
         canvas_field.drawString(370, next_line + max_note_length/padding + 10, note_in[0:20])
         canvas_field.drawString(370, next_line + max_note_length/padding + 3, note_in[20:40])
         canvas_field.drawString(370, next_line + max_note_length/padding - 4, note_in[40:60])
