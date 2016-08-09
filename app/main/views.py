@@ -332,6 +332,10 @@ def download_invoice():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
+    # Append @records.nyc.gov if not already in user email field
+    if '@records.nyc.gov' not in session['email']:
+        session['email'] += '@records.nyc.gov'
+
     if session['email'] is None or session['email'] == '':
         u = User.query.filter_by(email=current_user.email).first()
     else:
