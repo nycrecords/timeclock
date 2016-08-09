@@ -342,6 +342,7 @@ def download_invoice():
         flash('User {} does not have a payrate. Maybe you meant to generate a timesheet instead.'
               .format(session['email']), category='error')
         flash('If you believe this is an error, please contact a TimeClock administrator.', category='warning')
+        flash('This is a test message: {}'.format(session['first_date']), category='error')
         return redirect(url_for('main.' + last_page))
 
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
