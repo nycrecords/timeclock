@@ -69,7 +69,7 @@ def calculate_hours_worked(email_input, start, end):
         time_in = event.time
         time_out = next_event.time
         payrate_this_day = get_payrate_before_or_after(email_input, time_in.date(), True)
-        hours_this_day = (time_out - time_in).seconds / 3600
+        hours_this_day = (time_out - time_in).seconds / float(3600)
         day_dict = {
             'date': time_in.strftime('%a %b %d, %Y'),
             'time_in': time_in.strftime('%H:%M'),
