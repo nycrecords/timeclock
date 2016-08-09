@@ -75,13 +75,13 @@ def calculate_hours_worked(email_input, start, end):
             'date': time_in.strftime('%a %b %d, %Y'),
             'time_in': time_in.strftime('%H:%M'),
             'time_out': time_out.strftime('%H:%M'),
-            'hours': "{0:.2f}".format(hours_this_day),
-            'rate': "{0:.2f}".format(payrate_this_day.rate),
-            'earnings': "{0:.2f}".format(hours_this_day * payrate_this_day.rate)
+            'hours': hours_this_day,
+            'rate': payrate_this_day.rate,
+            'earnings': hours_this_day * payrate_this_day.rate
         }
         all_info['days_list'].append(day_dict)
-        all_info['total_hours'] += float(day_dict['hours'])
-        all_info['total_earnings'] += float(day_dict['earnings'])
+        all_info['total_hours'] += day_dict['hours']
+        all_info['total_earnings'] += day_dict['earnings']
 
     current_app.logger.info('End function calculate_hours')
     return all_info

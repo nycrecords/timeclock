@@ -42,17 +42,17 @@ type="image/x-icon">
                         <td>{{ day_event['date'] }}</td>
                         <td>{{ day_event['time_in'] }}</td>
                         <td>{{ day_event['time_out'] }}</td>
-                        <td>{{ day_event['hours'] }}</td>
+                        <td>{{ "{0:.2f}".format(day_event['hours']) }}</td>
                         <td>${{ day_event['rate'] }}</td>
-                        <td>${{ day_event['earnings'] }}</td>
+                        <td>${{ "{0:.2f}".format(day_event['earnings']) }}</td>
                     </tr>
                         </tbody>
                     {% endfor %}
             </table>
         </div>
-        Total Hours: {{ total_hours }}
+        Total Hours: {{ "{0:.2f}".format(total_hours) }}
         <br>
-        Total Earnings: {{ total_earnings }}
+        Total Earnings: ${{ "{0:.2f}".format(total_earnings) }}
         <br>
         <br>
 
