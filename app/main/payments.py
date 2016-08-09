@@ -64,10 +64,9 @@ def calculate_hours_worked(email_input, start, end):
 
     # Looping through events array to get hours between neighboring events
     for x in range(0, len(events), 2):
-
         event = events[x]
         next_event = events[x + 1]
-        time_in = event.time
+        time_in = event.time.date()
         time_out = next_event.time
         payrate_this_day = get_payrate_before_or_after(email_input, time_in, True)
         hours_this_day = (time_out - time_in).seconds / 3600
