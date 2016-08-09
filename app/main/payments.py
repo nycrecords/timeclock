@@ -56,7 +56,11 @@ def calculate_hours_worked(email_input, start, end):
     events.reverse()
 
     # List of dictionaries of day info to return
-    days_list = []
+    all_info = {
+        'days_list': [],
+        'total_hours': 0,
+        'total_earnings': 0
+    }
 
     # Looping through events array to get hours between neighboring events
     for x in range(0, len(events), 2):
@@ -75,7 +79,9 @@ def calculate_hours_worked(email_input, start, end):
             'rate': "{0:.2f}".format(payrate_this_day.rate),
             'earnings': "{0:.2f}".format(hours_this_day * payrate_this_day.rate)
         }
-        days_list.append(day_dict)
+        all_info['days_list'].append(day_dict)
+        all_info['total_hours'] += float(day_dict['hours'])
+        all_info['total_earnings'] += float(day_dict['earnings'])
 
     current_app.logger.info('End function calculate_hours')
-    return days_list
+    return all_info

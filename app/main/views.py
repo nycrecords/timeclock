@@ -344,9 +344,13 @@ def download_invoice():
         flash('If you believe this is an error, please contact a TimeClock administrator.', category='warning')
         return redirect(url_for('main.' + last_page))
 
-    day_events_list = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
+    all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
+    day_events_list = all_info['days_list']
+    total_hours = all_info['total_hours']
+    total_earnings = all_info['total_earnings']
     return render_template('payments/invoice.html', day_events_list=day_events_list,
-                           employee=u, time=datetime.now())
+                           employee=u, total_hours=total_hours, total_earnings=total_earnings,
+                           time=datetime.now())
 
 
 @main.route('/clear_filter', methods=['GET', 'POST'])
