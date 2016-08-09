@@ -43,7 +43,7 @@ type="image/x-icon">
                         <td>{{ day_event['time_in'] }}</td>
                         <td>{{ day_event['time_out'] }}</td>
                         <td>{{ "{0:.2f}".format(day_event['hours']) }}</td>
-                        <td>${{ day_event['rate'] }}</td>
+                        <td>${{ "{0:.2f}".format(day_event['rate']) }}</td>
                         <td>${{ "{0:.2f}".format(day_event['earnings']) }}</td>
                     </tr>
                         </tbody>
