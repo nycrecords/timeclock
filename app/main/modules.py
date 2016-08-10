@@ -161,11 +161,16 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
         current_app.logger.info('Finished querying for events with users with given tag')
 
     # User processing
-    if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
-        current_app.logger.info('Querying for events with given user: {}'.format(email_input))
-        user_id = User.query.filter_by(email=email_input).first().id
-        events_query = events_query.filter(Event.user_id == user_id)
-        current_app.logger.info('Finished querying for events with given user.')
+    if email_input is not None:
+        if User.query.filter_by(email=email_input).first() is not None:
+            current_app.logger.info('Querying for events with given user: {}'.format(email_input))
+            user_id = User.query.filter_by(email=email_input).first().id
+            events_query = events_query.filter(Event.user_id == user_id)
+            current_app.logger.info('Finished querying for events with given user.')
+        elif email_input != '':
+            # The user doesn't exist, so set events_query to something we know
+            # will return an empty query.
+            events_query = events_query.filter(Event.user_id == -1)
 
     # Eliminate unapproved timepunches to avoid showing them in the history pages and rendering them in Timesheets
     # and invoices

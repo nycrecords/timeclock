@@ -164,13 +164,16 @@ def all_history():
     tags = get_all_tags()
     current_app.logger.info('Finished querying')
 
+    query_has_results = True if events_query.first() else False
+
     current_app.logger.info('End function all_history()')
     return render_template('main/all_history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
                            tags=tags,
-                           generation_events=events_query.all()
+                           generation_events=events_query.all(),
+                           query_has_results=query_has_results
                            )
 
 
@@ -214,12 +217,15 @@ def history():
     tags = get_all_tags()
     current_app.logger.info('Finished querying')
 
+    query_has_results = True if events_query.first() else False
+
     return render_template('main/history.html',
                            events=events,
                            form=form,
                            pagination=pagination,
                            generation_events=events_query.all(),
-                           tags=tags)
+                           tags=tags,
+                           query_has_results=query_has_results)
 
 
 @main.route('/download_timesheet', methods=['GET', 'POST'])
@@ -509,6 +515,8 @@ def review_timepunch():
             page, per_page=15,
             error_out=False)
 
+    query_has_results = True if timepunch_query.first() else False
+
     timepunch_list = pagination.items
     current_app.logger.info('End function review_timepunch')
     return render_template('main/review_timepunches.html',
@@ -516,7 +524,8 @@ def review_timepunch():
                            form=form,
                            pagination=pagination,
                            filter=filter_form,
-                           clear=clear_form)
+                           clear=clear_form,
+                           query_has_results=query_has_results)
 
 
 @main.route('/edit_user_list', methods=['GET', 'POST'])

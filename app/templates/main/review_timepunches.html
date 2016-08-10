@@ -21,6 +21,7 @@
         </div>
     </div>
 
+    {% if query_has_results %}
     <div class="row">
          <table class="table">
             <thead>
@@ -102,4 +103,12 @@
      <div class="col-md-8 col-md-offset-4">
          {{ macros.pagination_widget(pagination, '.review_timepunch') }}
      </div>
+
+    {% else %}
+        <div class="row">
+            {% include 'includes/empty_query.html' %}
+        </div>
+    {% endif %}
+
+
 {%  endblock %}

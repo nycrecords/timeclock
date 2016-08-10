@@ -43,6 +43,7 @@
 
 
      <div class="row">
+        {% if query_has_results %}
         <table class="table">
             <thead>
                 <tr>
@@ -86,6 +87,10 @@
         <div class="col-md-8 col-md-offset-4">
             {{ macros.pagination_widget(pagination, '.all_history') }}
         </div>
+        {% else %}
+            {% include 'includes/empty_query.html' %}
+        {% endif %}
+
     </div>
 
 
