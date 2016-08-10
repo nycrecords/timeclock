@@ -74,13 +74,11 @@ def calculate_hours_worked(email_input, start, end):
             'date': time_in.strftime('%a %b %d, %Y'),
             'time_in': time_in.strftime('%H:%M'),
             'time_out': time_out.strftime('%H:%M'),
-            'hours': hours_this_day,
+            # If a user has been clocked in for over five hours, automatically subtract an hour for lunch
+            'hours': hours_this_day - 1 if hours_this_day >= 5 else hours_this_day,
             'rate': payrate_this_day.rate,
             'earnings': hours_this_day * payrate_this_day.rate
         }
-
-        # If a user has been clocked in for over five hours, automatically subtract an hour for lunch
-        day_dict['hours'] = (day_dict['hours'] - 1) if (day_dict['hours'] >= 5) else day_dict['hours']
 
         all_info['days_list'].append(day_dict)
         all_info['total_hours'] += day_dict['hours']
