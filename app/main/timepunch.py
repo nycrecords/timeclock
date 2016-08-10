@@ -99,6 +99,6 @@ def approve_or_deny(event_id, approve=False):
     else:
         event.approved = False
     event.pending = False
-    db.session.add(e)
+    db.session.add(event)
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')

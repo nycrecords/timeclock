@@ -3,23 +3,22 @@
 {% block title %}TimeClock{% endblock %}  <!-- title block inherited from bootstrap/base.html -->
 
 {% block head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
-type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
-type="image/x-icon">
-{#    Hard Code CSS Because normal inherited css isn't working #}
-{#    TODO: FIGURE OUT WHY AND FIX THIS#}
+    {{ super() }}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
+    type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
+    type="image/x-icon">
+    {#    Hard Code CSS Because normal inherited css isn't working #}
+    {#    TODO: FIGURE OUT WHY AND FIX THIS#}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='styles/main.css')}}"/>
-    <link href="jkwla;;jkas">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" rel="stylesheet" media="screen">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css" rel="stylesheet" media="screen">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css.map" rel="stylesheet" media="screen">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js">
+    <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='styles/main.css')}}"/>
 {% endblock %}
 
 {% block navbar %}  <!-- Navigation base HTML will go here -->
