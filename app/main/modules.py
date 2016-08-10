@@ -23,6 +23,8 @@ def process_clock(note_data, ip=None):
     # Send email if employee has worked for over seven hours
     if get_last_clock_type(current_user.id):
         # If the last clock is an IN
+        # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
+        # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
         if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds/float(3600) >= 8:
             send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
                        '/main/email/employee_overtime', email=current_user.email)
