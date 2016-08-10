@@ -23,9 +23,9 @@ def process_clock(note_data, ip=None):
     # Send email if employee has worked for over seven hours
     if get_last_clock_type(current_user.id):
         # If the last clock is an IN
-        if (datetime.now() - get_last_clock()).seconds/float(3600) >= 8:
+        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds/float(3600) >= 8:
             send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
-                       '/main/email/employee_overtime.txt', email=current_user.email)
+                       '/main/email/employee_overtime', email=current_user.email)
 
 
     # Create clock event
