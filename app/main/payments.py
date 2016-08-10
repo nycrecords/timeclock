@@ -70,12 +70,13 @@ def calculate_hours_worked(email_input, start, end):
         time_out = next_event.time
         payrate_this_day = get_payrate_before_or_after(email_input, time_in.date(), True)
         hours_this_day = (time_out - time_in).seconds / float(3600)
+        hours_this_day = hours_this_day - 1 if hours_this_day >= 5 else hours_this_day,
         day_dict = {
             'date': time_in.strftime('%a %b %d, %Y'),
             'time_in': time_in.strftime('%H:%M'),
             'time_out': time_out.strftime('%H:%M'),
             # If a user has been clocked in for over five hours, automatically subtract an hour for lunch
-            'hours': hours_this_day - 1 if hours_this_day >= 5 else hours_this_day,
+            'hours': hours_this_day,
             'rate': payrate_this_day.rate,
             'earnings': hours_this_day * payrate_this_day.rate
         }
