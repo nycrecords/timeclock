@@ -23,9 +23,9 @@ def create_timepunch(punch_type, punch_time, reason):
     """
     current_app.logger.info('Start function create_timepunch()')
     punch_type = punch_type == 'In'  # Must manually cast string to bool because wtf doesn't support coerce bool
-    e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False,
+    event = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False,
               pending=True)
-    db.session.add(e)
+    db.session.add(event)
     db.session.commit()
     send_email(current_user.supervisor.email,
                'TimePunch Request from {} {}'.format(current_user.first_name, current_user.last_name),
@@ -93,12 +93,12 @@ def approve_or_deny(event_id, approve=False):
     """
     current_app.logger.info('Start function approve_or_deny()')
     from .modules import get_event_by_id
-    e = get_event_by_id(event_id)
+    event = get_event_by_id(event_id)
     if approve:
-        e.approved = True
+        event.approved = True
     else:
-        e.approved = False
-    e.pending = False
+        event.approved = False
+    event.pending = False
     db.session.add(e)
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')
