@@ -116,7 +116,7 @@ def generate_timetable(canvas_field, events):
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
 
         date = time_in_datetime.strftime('%a %b %d, %Y')
-        hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
+        hours_this_day = (time_out_datetime - time_in_datetime).seconds/float(3600)
         total_hours += hours_this_day
 
         next_line -= padding
