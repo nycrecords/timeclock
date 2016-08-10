@@ -212,10 +212,15 @@ class Event(db.Model):
     note = db.Column(db.String(120))
     ip = db.Column(db.String(120))
 
-    timepunch = db.Column(db.Boolean, default=False)  # True if this is a timepunch request, false otherwise
+    timepunch = db.Column(db.Boolean, default=False)
+    # True if this is a timepunch request, false otherwise
+
     approved = db.Column(db.Boolean, default=True)
     # ^True if this is an approved timepunch request, false if
     # this is an unapproved timepunch request, Null otherwise
+
+    pending = db.Column(db.Boolean, default=False)
+    # True if this is a timepunch request that hasn't been approved or denied yet
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 

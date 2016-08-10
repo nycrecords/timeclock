@@ -67,6 +67,10 @@
                         {% else %}
                         <span style="color:orange">Unapproved</span>
                         {% endif %}
+                        <br>
+                        {% if event.pending %}
+                        <span style="color: #8b0000;">Pending</span>
+                        {% endif %}
                     </td>
                     <td>
                         <form method="POST" action="/review_timepunches" name="form">

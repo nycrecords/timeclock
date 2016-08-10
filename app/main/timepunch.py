@@ -9,6 +9,7 @@ from ..models import User, Event
 from ..email_notification import send_email
 from flask_login import current_user
 from flask import current_app
+import sqlalchemy
 
 
 def create_timepunch(punch_type, punch_time, reason):
@@ -22,7 +23,8 @@ def create_timepunch(punch_type, punch_time, reason):
     """
     current_app.logger.info('Start function create_timepunch()')
     punch_type = punch_type == 'In'  # Must manually cast string to bool because wtf doesn't support coerce bool
-    e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False)
+    e = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False,
+              pending=True)
     db.session.add(e)
     db.session.commit()
     send_email(current_user.supervisor.email,
@@ -31,12 +33,13 @@ def create_timepunch(punch_type, punch_time, reason):
                user=current_user, punch_time=punch_time, type=punch_type, note=reason)
 
 
-def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
+def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
     :param filter_by_email: The email of a specific user for optional filters.
-    :param status: [String] Approved, Unapproved, All. Used for more precise filtering.
+    :param approved: [String] Approved, Unapproved, All. Used for more precise filtering.
+    :param status: [String] Pending, Processed, All. Used for more precise filtering.
     :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
@@ -55,11 +58,18 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
                                      'exists'.format(filter_by_email))
 
     # Filter by status if user provides a status
-    if status:
-        if status == 'Approved':
+    if approved:
+        if approved == 'Approved':
             timepunch_query = timepunch_query.filter(Event.approved == True)
-        elif status == 'Unapproved':
+        elif approved == 'Unapproved':
             timepunch_query = timepunch_query.filter(Event.approved == False)
+        # else approved == 'All', in which case we don't need to add anything to the filter
+
+    if status:
+        if status == 'Pending':
+            timepunch_query = timepunch_query.filter(Event.pending == True)
+        elif status == 'Processed':
+            timepunch_query = timepunch_query.filter(Event.pending == False)
         # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
@@ -68,7 +78,7 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
         current_app.logger.error('No timepunches found for user {}'.format(user_email))
 
     # Last step: order timepunches by id
-    timepunch_query = timepunch_query.order_by(Event.id)
+    timepunch_query = timepunch_query.order_by(sqlalchemy.desc(Event.id))
 
     current_app.logger.info('End function get_timepunches_for_review')
     return timepunch_query
@@ -88,6 +98,7 @@ def approve_or_deny(event_id, approve=False):
         e.approved = True
     else:
         e.approved = False
+    e.pending = False
     db.session.add(e)
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')

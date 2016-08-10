@@ -89,10 +89,14 @@ class FilterTimePunchForm(Form):
     Form administrators use to filter through TimePunches.
     """
     email = StringField("Email", validators=[Optional(), Email()])
-    status = SelectField(u'Status', validators=[Optional()], choices=[
+    approved = SelectField(u'Approval Status', validators=[Optional()], choices=[
         ('All', 'All'),
         ('Approved', 'Approved'),
         ('Unapproved', 'Unapproved')])
+    status = SelectField(u'Status', validators=[Optional()], choices=[
+        ('All', 'All'),
+        ('Pending', 'Pending'),
+        ('Processed', 'Processed')])
     filter = SubmitField("Filter")
 
 
