@@ -6,7 +6,7 @@ import dateutil.relativedelta
 from flask_login import current_user
 import sqlalchemy
 from flask import session, current_app
-
+from ..email_notification import send_email
 
 def process_clock(note_data, ip=None):
     """
@@ -20,6 +20,17 @@ def process_clock(note_data, ip=None):
     current_app.logger.info('Start function process_clock({},{})'.format(note_data, ip))
     current_app.logger.info('Creating new clock event for {}'.format(current_user.email))
 
+    # Send email if employee has worked for over seven hours
+    if get_last_clock_type(current_user.id):
+        # If the last clock is an IN
+        # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
+        # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
+        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds/float(3600) >= 8:
+            send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
+                       '/main/email/employee_overtime', email=current_user.email)
+
+
+    # Create clock event
     event = Event(type=not get_last_clock_type(user_id=current_user.id),
                   time=datetime.now(),
                   user_id=current_user.id,
