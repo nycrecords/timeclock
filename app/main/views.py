@@ -26,7 +26,8 @@ from .modules import (
     get_all_tags,
     get_last_clock_type,
     update_user_information,
-    get_changelog_by_user_id
+    get_changelog_by_user_id,
+    check_total_clock_count
 )
 from .timepunch import (
     create_timepunch,
@@ -253,6 +254,14 @@ def download():
                                  )
         errors.append('Maximum timesheet duration is a week. '
                       'Please refine your filters')
+
+
+    events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
+
+    if not(check_total_clock_count(events)):
+        current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
+        errors.append('Each clock in must have corresponding clock out to generate a timesheet. '
+                      'Please submit a timepunch for missing times.', category='error')
     if errors:
         for error in errors:
             flash(error, 'warning')
@@ -263,7 +272,6 @@ def download():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
-    events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
 
     # Begin generation of the actual PDF here
     current_app.logger.info('Beginning to generate timesheet pdf...')
@@ -358,6 +366,11 @@ def download_invoice():
     day_events_list = all_info['days_list']
     total_hours = all_info['total_hours']
     total_earnings = all_info['total_earnings']
+    if not(check_total_clock_count(day_events_list)):
+        current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
+        flash('Each clock in must have corresponding clock out to generate a invoice. '
+                      'Please submit a timepunch for missing times.', category='error')
+        return redirect(url_for('main.' + last_page))
     return render_template('payments/invoice.html', day_events_list=day_events_list,
                            employee=u, total_hours=total_hours, total_earnings=total_earnings,
                            time=datetime.now())

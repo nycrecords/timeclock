@@ -443,3 +443,26 @@ def get_changelog_by_user_id(id):
     changes = ChangeLog.query.filter_by(user_id=id).order_by(sqlalchemy.desc(ChangeLog.timestamp))
     current_app.logger.info('End function get_changelog_by_user_id()')
     return changes
+
+def check_total_clock_count(events):
+    """
+    Calculates the amount of clock-ins and clock-outs from a list of clock events and makes sure that each clock in
+    has a matching clock out
+    :param events: list containing clock-ins and clock-outs events
+    :return: True if there are matching clock outs for each clock in, otherwise False
+    """
+    current_app.logger.info('Start function check_total_clock_count()')
+    clock_in_list = []
+    clock_out_list = []
+    #loop through all events and count the number of clock-ins and clock-outs in separate lists
+    for event in events:
+        if 'OUT' in event:
+            clock_out_list.append(event)
+        elif 'IN' in event:
+            clock_in_list.append(event)
+        else:
+            continue
+    if len(clock_out_list)==len(clock_in_list):
+        return True
+    else:
+        return False
