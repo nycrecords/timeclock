@@ -7,7 +7,7 @@
 
 import os
 from app import create_app, db
-from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog
+from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog, Budget, Object
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -18,7 +18,7 @@ migrate = Migrate(app, db)
 
 def make_shell_context():
     return dict(app=app, db=db, User=User, Role=Role, Event=Event, Pay=Pay, Tag=Tag, Password=Password,
-                ChangeLog=ChangeLog)
+                ChangeLog=ChangeLog, Budget=Budget)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
@@ -30,6 +30,20 @@ def test():  # Grinberg's unit tests, we can del if need be  - Sarvar
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
+@manager.command
+def db_setup():
+    """Set up the database"""
+    Role.insert_roles()
+    Object.insert_objects()
+    Budget.insert_budgets()
+    Tag.insert_tags()
+
+@manager.command
+def reset_db():
+    """Empties the database and generates it again with db_setup"""
+    db.drop_all()
+    db.create_all()
+    db_setup()
 
 if __name__ == '__main__':
     manager.run()

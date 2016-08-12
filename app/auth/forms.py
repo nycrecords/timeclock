@@ -23,6 +23,7 @@ class RegistrationForm(Form):
     password = PasswordField('Password', validators=[
         DataRequired(), EqualTo('password2', message='Passwords must match')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
+    budget_code = StringField('Budget Code', validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def validate_email(self, email_field):
@@ -96,6 +97,9 @@ class AdminRegistrationForm(Form):
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
     supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
     role = SelectField('Role', choices=roles, validators=[DataRequired()])
+    # object_name = StringField("Object Name")
+    budget_code = StringField('Budget Code', validators=[DataRequired()])
+
 
     submit = SubmitField('Register')
 
