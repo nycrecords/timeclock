@@ -25,6 +25,7 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
+
     update_user_information,
     get_changelog_by_user_id,
     check_total_clock_count
@@ -602,7 +603,7 @@ def user_profile(username):
             flash('User information has been updated', category='success')
             update_user_information(u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
-                                    form.role.data, form.budget_code.data)
+                                    form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
             return redirect(url_for('main.user_profile', username=username))
@@ -615,6 +616,8 @@ def user_profile(username):
         form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
         form.role.data = u.role.name
         form.budget_code.data = u.budget_code
+        form.object_code.data = u.object_code
+        form.object_name.data = u.object_name
 
     current_app.logger.info('End function user_profile')
 

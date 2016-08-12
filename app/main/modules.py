@@ -433,7 +433,7 @@ def update_user_information(user,
         change = ChangeLog(changer_id=current_user.id,
                            user_id=user.id,
                            timestamp=datetime.now(),
-                           category='BUDGET CODE',
+                           category='OBJECT CODE',
                            old=user.object_code,
                            new=object_code_input)
         db.session.add(change)
@@ -444,7 +444,7 @@ def update_user_information(user,
         change = ChangeLog(changer_id=current_user.id,
                            user_id=user.id,
                            timestamp=datetime.now(),
-                           category='BUDGET CODE',
+                           category='OBJECT NAME',
                            old=user.object_name,
                            new=object_name_input)
         db.session.add(change)
