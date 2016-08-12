@@ -261,7 +261,7 @@ def download():
     if not(check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
         errors.append('Each clock in must have corresponding clock out to generate a timesheet. '
-                      'Please submit a timepunch for missing times.', category='error')
+                      'Please submit a timepunch for missing times.')
     if errors:
         for error in errors:
             flash(error, 'warning')
