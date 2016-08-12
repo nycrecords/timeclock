@@ -53,65 +53,47 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role %r>' % self.name
 
-class Budget(db.Model):
-    """
-    Specifies the budget code and the corresponding budget name
-    """
-    __tablename__ = 'budget'
-    id = db.Column(db.Integer, primary_key=True)
-    budget_code = db.Column(db.Integer, default=0)
-    object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
-
-    @staticmethod
-    def insert_budgets():
-        """
-        Inserts budgets to database
-        Call from manage.py with Budget.insert_budgets()
-        """
-        budgets = [
-            1000,
-            1401
-        ]
-
-        for budget_code in budgets:
-            budge = Budget()
-            budge.budget_code = budget_code
-            budge.object_id = 1
-            db.session.add(budge)
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Budget %r' % self.budget_code
-
-class Object(db.Model):
-    """
-    Object codes and names for users
-    """
-    __tablename__ = 'object'
-    id = db.Column(db.Integer, primary_key=True)
-    object_name = db.Column(db.String(64))
-    object_code = db.Column(db.Integer, default=0)
-
-
-    @staticmethod
-    def insert_objects():
-        """
-        Inserts object codes/names into database
-        Call from manage.py with Object.insert_objects()
-        """
-        object_name = {
-            'Contract Services' : 600
-        }
-        for obj in object_name:
-            o = Object(object_name=obj)
-            o.object_code=object_name[obj]
-            db.session.add(o)
-        db.session.commit()
-
-
-
-    def __repr__(self):
-        return '<Object %r>' % self.object_name
+# class Budget(db.Model):
+#     """
+#     Specifies the budget code and the corresponding budget name
+#     """
+#     __tablename__ = 'budget'
+#     id = db.Column(db.Integer, primary_key=True)
+#     budget_code = db.Column(db.Integer, default=0)
+#     object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
+#
+#     def __repr__(self):
+#         return '<Budget %r' % self.budget_code
+#
+# class Object(db.Model):
+#     """
+#     Object codes and names for users
+#     """
+#     __tablename__ = 'object'
+#     id = db.Column(db.Integer, primary_key=True)
+#     object_name = db.Column(db.String(64))
+#     object_code = db.Column(db.Integer, default=0)
+#
+#
+#     @staticmethod
+#     def insert_objects():
+#         """
+#         Inserts object codes/names into database
+#         Call from manage.py with Object.insert_objects()
+#         """
+#         object_name = {
+#             'Contract Services' : 600
+#         }
+#         for obj in object_name:
+#             o = Object(object_name=obj)
+#             o.object_code=object_name[obj]
+#             db.session.add(o)
+#         db.session.commit()
+#
+#
+#
+#     def __repr__(self):
+#         return '<Object %r>' % self.object_name
 
 
 class User(UserMixin, db.Model):
@@ -130,7 +112,6 @@ class User(UserMixin, db.Model):
     login_attempts = db.Column(db.Integer, default=0)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
-    budget_id = db.Column(db.Integer, db.ForeignKey('budget.id'))
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
@@ -138,6 +119,11 @@ class User(UserMixin, db.Model):
     # Supervisor
     supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     supervisor = db.relationship('User', remote_side=[id])
+
+    # Budget/Object Codes
+    budget_code = db.Column(db.String)
+    object_code = db.Column(db.String)
+    object_name = db.Column(db.String)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

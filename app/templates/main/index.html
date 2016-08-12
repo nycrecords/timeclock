@@ -13,10 +13,12 @@
                     {{ wtf.quick_form(form) }}
                 </div>
                 <div style="position: absolute; bottom:0">
-                {% if last_clock_event==True %}
-                    <p><b>You last clocked in</b> at {{ last_event }}</p>
-                {% else %}
-                    <p><b>You last clocked out</b> at {{ last_event }}</p>
+                {% if last_clock_event!=None %}
+                    {% if last_clock_event==True %}
+                        <p><b>You last clocked in</b> at {{ last_event }}</p>
+                    {% else %}
+                        <p><b>You last clocked out</b> at {{ last_event }}</p>
+                    {% endif %}
                 {% endif %}
                 </div>
 

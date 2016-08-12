@@ -7,7 +7,7 @@
 
 import os
 from app import create_app, db
-from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog, Budget, Object
+from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -34,8 +34,6 @@ def test():  # Grinberg's unit tests, we can del if need be  - Sarvar
 def db_setup():
     """Set up the database"""
     Role.insert_roles()
-    Object.insert_objects()
-    Budget.insert_budgets()
     Tag.insert_tags()
 
 @manager.command

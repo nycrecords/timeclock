@@ -49,6 +49,9 @@ def register():
                     last_name=form.last_name.data,
                     division=form.division.data,
                     tag_id=tag_id,
+                    budget_code=form.budget_code.data,
+                    object_code=form.object_code.data,
+                    object_name=form.object_name.data,
                     validated=True)
         db.session.add(user)
         db.session.commit()
@@ -86,7 +89,8 @@ def admin_register():
                     role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id,
                     supervisor=User.query.filter_by(email=form.supervisor_email.data)
-                    .first()
+                    .first(),
+                    budget_code=form.budget_code.data
                     )
         user.password_list.update(user.password_hash)
         db.session.add(user)

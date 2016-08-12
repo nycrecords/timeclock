@@ -602,7 +602,7 @@ def user_profile(username):
             flash('User information has been updated', category='success')
             update_user_information(u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
-                                    form.role.data)
+                                    form.role.data, form.budget_code.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
             return redirect(url_for('main.user_profile', username=username))
@@ -614,6 +614,7 @@ def user_profile(username):
         form.tag.data = u.tag_id
         form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
         form.role.data = u.role.name
+        form.budget_code.data = u.budget_code
 
     current_app.logger.info('End function user_profile')
 

@@ -342,7 +342,11 @@ def update_user_information(user,
                             division_input,
                             tag_input,
                             supervisor_email_input,
-                            role_input):
+                            role_input,
+                            budget_code_input,
+                            object_code_input,
+                            object_name_input
+                            ):
     """
     To be used in the user_profile view function to update a user's information in the database.
     :param user: The user whose information to update (must be a user object)
@@ -413,6 +417,39 @@ def update_user_information(user,
         db.session.commit()
         sup = User.query.filter_by(email=supervisor_email_input).first()
         user.supervisor = sup
+
+    if budget_code_input and budget_code_input != '' and user.budget_code != budget_code_input:
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='BUDGET CODE',
+                           old=user.budget_code,
+                           new=budget_code_input)
+        db.session.add(change)
+        db.session.commit()
+        user.budget_code=budget_code_input
+
+    if object_code_input and object_code_input != '' and user.object_code != object_code_input:
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='BUDGET CODE',
+                           old=user.object_code,
+                           new=object_code_input)
+        db.session.add(change)
+        db.session.commit()
+        user.object_code = object_code_input
+
+    if object_name_input and object_name_input != '' and user.object_name != object_name_input:
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='BUDGET CODE',
+                           old=user.object_name,
+                           new=object_name_input)
+        db.session.add(change)
+        db.session.commit()
+        user.object_name = object_name_input
 
     if role_input:
         new_role = Role.query.filter_by(name=role_input).first()

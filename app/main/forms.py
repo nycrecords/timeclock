@@ -117,6 +117,9 @@ class ChangeUserDataForm(Form):
     tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
     supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
     role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
+    budget_code = StringField('Budget Code')
+    object_code = StringField('Object Code')
+    object_name = StringField('Object Name')
     submit = SubmitField('Update')
 
     def validate_supervisor_email(self, email_field):
