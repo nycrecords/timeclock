@@ -1,6 +1,10 @@
 from ..models import User, Pay
 import sqlalchemy
 from flask import current_app
+from .modules import (
+    check_total_clock_count,
+    get_events_by_date
+)
 
 
 def get_payrate_before_or_after(email_input, start, before_or_after):
@@ -47,10 +51,12 @@ def calculate_hours_worked(email_input, start, end):
     :return: [FLOAT] The number of hours worked within the given period
     """
     current_app.logger.info('Start function calculate_hours()')
-    from .modules import get_events_by_date
     events = get_events_by_date(email_input, start, end).all()
+    # To be implemented properly later
+    # if check_total_clock_count(events) is False:
+    #     return False
     if len(events) % 2 != 0:
-        events.pop(0)
+        return False
 
     # Order from oldest to most recent
     events.reverse()

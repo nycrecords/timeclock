@@ -260,8 +260,9 @@ def download():
 
     if not(check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
-        errors.append('Each clock in must have corresponding clock out to generate a timesheet. '
-                      'Please submit a timepunch for missing times.')
+        flash('Each clock in must have corresponding clock out to generate a invoice. '
+              'Please submit a timepunch for missing times.', category='error')
+        return redirect(url_for('main.' + (request.referrer).split('/')[3]))
     if errors:
         for error in errors:
             flash(error, 'warning')
@@ -363,14 +364,14 @@ def download_invoice():
         return redirect(url_for('main.' + last_page))
 
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
+    if all_info is False:
+        current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
+        flash('Each clock in must have corresponding clock out to generate a invoice. '
+              'Please submit a timepunch for missing times.', category='error')
+        return redirect(url_for('main.' + last_page))
     day_events_list = all_info['days_list']
     total_hours = all_info['total_hours']
     total_earnings = all_info['total_earnings']
-    if not(check_total_clock_count(day_events_list)):
-        current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
-                      'Please submit a timepunch for missing times.', category='error')
-        return redirect(url_for('main.' + last_page))
     return render_template('payments/invoice.html', day_events_list=day_events_list,
                            employee=u, total_hours=total_hours, total_earnings=total_earnings,
                            time=datetime.now())
