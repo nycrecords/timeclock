@@ -184,7 +184,7 @@ def all_history():
 def history():
     """
     Shows a user their own history.
-    TODO: Make filterable by date.
+    TODO: Make filterable by date
     :return: An html page that contains user history, sorted (if applicable)
     with a form for further filtering.
     """
