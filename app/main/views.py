@@ -365,7 +365,7 @@ def download_invoice():
         return redirect(url_for('main.' + last_page))
 
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
-    if all_info is False:
+    if all_info is False: # TODO: why don't we just say if not all_info hee?
         current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
         flash('Each clock in must have corresponding clock out to generate a invoice. '
               'Please submit a timepunch for missing times.', category='error')
@@ -375,7 +375,8 @@ def download_invoice():
     total_earnings = all_info['total_earnings']
     return render_template('payments/invoice.html', day_events_list=day_events_list,
                            employee=u, total_hours=total_hours, total_earnings=total_earnings,
-                           time=datetime.now())
+                           time=datetime.now(), budget_code = u.budget_code, object_code = u.object_code,
+                           object_name=u.object_name)
 
 
 @main.route('/clear_filter', methods=['GET', 'POST'])

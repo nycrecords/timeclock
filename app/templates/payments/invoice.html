@@ -19,9 +19,24 @@ type="image/x-icon">
             <span style="font-size: 16px; float:left">Employee Name: {{ employee.first_name }} {{ employee.last_name }}</span>
             <span style="float:right">Position: {{ employee.tag.name }}</span>
             <span style="float:right; margin-right: 10px">Division: {{ employee.division }}</span>
-            <br>
-            <hr>
         </div>
+        {% if object_name == None and object_code == None and budget_code == None%}
+        <div class="row">
+            {% if object_name != None %}
+                <span style="font-size: 16px; float:left; margin-right: 10px">Object Name: {{ object_name }} </span>
+            {% endif %}
+
+            {% if object_code != None %}
+            <span style="font-size: 16px; float:left; margin-right: 10px">Object Code: {{ object_code }} </span>
+            {% endif %}
+
+            {% if budget_code != None %}
+            <span style="font-size: 16px; float:left; margin-right: 10px">Budget Code: {{ budget_code }} </span>
+            {% endif %}
+        </div>
+            <br>
+        {% endif %}
+        <hr>
 
         <div class="row">
              <table class="table">
