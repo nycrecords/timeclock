@@ -10,4 +10,45 @@
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
 </div>
+
+{#    <meta name="csrf-token" content="{{ csrf_token() }}">#}
+
+
+    <script>
+
+{#    var csrftoken = $('meta[name=csrf-token]').attr('content')#}
+{##}
+{#    $.ajaxSetup({#}
+{#        beforeSend: function(xhr, settings) {#}
+{#            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {#}
+{#                xhr.setRequestHeader("X-CSRFToken", csrftoken)#}
+{#            }#}
+{#        }#}
+{#    });#}
+
+    $("#division").change(function() {
+        $.ajax({
+            url: "/auth/parse_division",
+            type: "GET",
+            data: {
+                division: $("#division").val()
+            },
+            success: function(data) {
+                var sel = $("#supervisor_email");
+                sel.empty();
+                for(var i =0; i < data.length; i++){
+                    var opt = document.createElement("option");
+                    console.log("DATA:")
+                    console.log(data)
+                    opt.innerHTML = data[i][1];
+                    opt.value = data[i][0];
+                    console.log(opt);
+                    sel.append(opt);
+                }
+                console.log(sel);
+            }
+        });
+    });
+
+    </script>
 {% endblock %}

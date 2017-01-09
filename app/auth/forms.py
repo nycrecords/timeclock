@@ -1,6 +1,6 @@
-from flask import current_app
+from flask import flash
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField
+from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from ..models import User
 from ..utils import tags, divisions, roles
@@ -89,7 +89,6 @@ class RegistrationForm(Form):
         if not has_capital:
             raise ValidationError('Password must contain at least one capital letter')
 
-
 class AdminRegistrationForm(Form):
     """Used by admins to register new users into the system."""
     email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
@@ -97,13 +96,15 @@ class AdminRegistrationForm(Form):
     last_name = StringField("Last name")
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
-    supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
+    # SUPERVISOR EMAIL IS DYNAMICALLY ADDED IN VIEW FUNCTION
+    supervisor_email = SelectField('Supervisor Email', choices=[], coerce=int,
+                                   validators=[DataRequired()])
+    is_supervisor = BooleanField('User is supervisor')
+    # supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
     role = SelectField('Role', choices=roles, validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
     object_name = StringField('Object Name')
-
-
     submit = SubmitField('Register')
 
     def validate_email(self, email_field):
@@ -114,7 +115,10 @@ class AdminRegistrationForm(Form):
         :return:
         """
         if User.query.filter_by(email=email_field.data).first():
-            raise ValidationError('An account with this email address already exists')
+            # raise ValidationError
+            # flash('An account with this email address already exists', 'error')
+            self.email.errors = 'An account with this email address already exists',
+            return False
         return True
 
     def validate_tag(self, tag_field):
@@ -124,8 +128,11 @@ class AdminRegistrationForm(Form):
         :param tag_field: Field passed in to validate (Tag)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not tag_field.data or tag_field.data == '':
-            raise ValidationError('All users must be tagged')
+        if not tag_field.data or tag_field.data == '' or int(tag_field.data) < 1 or int(tag_field.data > 7):
+            # raise ValidationError('All users must be tagged')
+            # flash('All users must be tagged', 'error')
+            self.tag.errors = 'All users must have a tag',
+            return False
         return True
 
     def validate_division(self, div_field):
@@ -136,7 +143,10 @@ class AdminRegistrationForm(Form):
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
         if not div_field.data or div_field.data == '':
-            raise ValidationError('All users must belong to a division')
+            # raise ValidationError('All users must belong to a division')
+            # flash('All users must belong to a division', 'error')
+            self.division.errors = 'All users must belong to a division',
+            return False
         return True
 
     def validate_supervisor_email(self, email_field):
@@ -146,10 +156,43 @@ class AdminRegistrationForm(Form):
         :param email_field:
         :return:
         """
-        user = User.query.filter_by(email=email_field.data).first()
+        user = User.query.filter_by(id=email_field.data).first()
         if not user:
-            raise ValidationError('No account with that email exists')
+            # raise ValidationError('No account with that email exists')
+            # flash('Invalid supervisor email', 'error')
+            self.supervisor_email.errors = 'Invalid supervisor',
+            return False
+        return True
 
+    def validate_on_submit(self):
+        is_email = True
+        try:
+            (Email(self.email).__call__(self, self.email))
+        except ValidationError:
+            # flash("Invalid e-mail address", 'error')
+            self.email.errors = 'Invalid e-mail address',
+            is_email = False
+
+        if self.first_name._value():
+            first_name = True
+        else:
+            first_name = False
+            self.first_name.errors = 'User must have a first name',
+            # flash('User must have a first name', 'error')
+
+        if self.last_name._value():
+            last_name = True
+        else:
+            last_name = False
+            self.last_name.errors = 'User must have a last name',
+            # flash('User must have a last name', 'error')
+
+        valid_email = self.validate_email(self.email)
+        valid_div = self.validate_division(self.division)
+        valid_tag = self.validate_tag(self.tag)
+        valid_sup = self.validate_supervisor_email(self.supervisor_email)
+
+        return is_email and valid_email and first_name and last_name and valid_div and valid_tag and valid_sup
 
 class ChangePasswordForm(Form):
     """Form for changing password"""

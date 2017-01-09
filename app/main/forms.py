@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, DateTimeField, ValidationError
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, Optional, Length, Email
 from datetime import date, datetime
 from ..utils import tags, divisions, roles
@@ -116,6 +116,7 @@ class ChangeUserDataForm(Form):
     division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
     supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
+    is_supervisor = BooleanField("User is a supervisor")
     role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')

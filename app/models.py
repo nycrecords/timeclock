@@ -117,6 +117,7 @@ class User(UserMixin, db.Model):
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
 
     # Supervisor
+    is_supervisor = db.Column(db.Boolean, default=False)
     supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     supervisor = db.relationship('User', remote_side=[id])
 

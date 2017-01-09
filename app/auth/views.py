@@ -12,6 +12,7 @@ from ..models import User, Role
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..utils import InvalidResetToken
+from wtforms import SelectField
 from .forms import (
     LoginForm,
     RegistrationForm,
@@ -20,10 +21,10 @@ from .forms import (
     PasswordResetRequestForm,
     ChangePasswordForm
 )
-from .modules import check_password_requirements
+from .modules import check_password_requirements, get_supervisors_for_division
 from datetime import datetime
 from werkzeug.security import check_password_hash
-from flask import current_app
+from flask import current_app, jsonify
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 
@@ -73,9 +74,9 @@ def admin_register():
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
     form = AdminRegistrationForm()
-    if form.validate_on_submit():
-        temp_password = datetime.today().strftime('%A%-d')
 
+    if request.method == "POST" and form.validate_on_submit():
+        temp_password = datetime.today().strftime('%A%-d')
         # Set default tag value to 6 ("Other")
         tag_id = 6
         if 'tag' in form:
@@ -88,7 +89,8 @@ def admin_register():
                     division=form.division.data,
                     role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id,
-                    supervisor=User.query.filter_by(email=form.supervisor_email.data)
+                    is_supervisor=form.is_supervisor.data,
+                    supervisor=User.query.filter_by(id=form.supervisor_email.data)
                     .first(),
                     budget_code=form.budget_code.data
                     )
@@ -387,3 +389,17 @@ def password_reset(token):
 
     current_app.logger.info('End function password_reset')
     return render_template('auth/reset_password.html', form=form)
+
+
+@auth.route('/parse_division', methods=['GET'])
+def get_sups():
+    """
+    Get selected division value from the request body and generate a list of supervisors for that division.
+    :return: list of supervisors for division
+    """
+    if request.args['division']:
+        choices = get_supervisors_for_division(request.args['division'])
+    else:
+        sups = User.query.filter_by(is_supervisor=True).all()
+        choices = [(u.id, u.email) for u in sups]
+    return jsonify(choices)
