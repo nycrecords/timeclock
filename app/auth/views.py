@@ -12,6 +12,7 @@ from ..models import User, Role
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..utils import InvalidResetToken
+from wtforms import SelectField
 from .forms import (
     LoginForm,
     RegistrationForm,
@@ -20,10 +21,10 @@ from .forms import (
     PasswordResetRequestForm,
     ChangePasswordForm
 )
-from .modules import check_password_requirements
+from .modules import check_password_requirements, get_supervisors_for_division
 from datetime import datetime
 from werkzeug.security import check_password_hash
-from flask import current_app
+from flask import current_app, jsonify
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 
@@ -72,10 +73,10 @@ def admin_register():
     :return: HTML page where admins can register new users
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
-    form = AdminRegistrationForm()
+    form = AdminRegistrationForm(request.form)
+
     if form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
-
         # Set default tag value to 6 ("Other")
         tag_id = 6
         if 'tag' in form:
@@ -109,6 +110,14 @@ def admin_register():
 
         current_app.logger.info('End function admin_register() [VIEW]')
         return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        form.supervisor_email.choices = get_supervisors_for_division(form.division.data)
+        if form.validate():
+            return render_template('auth/admin_register.html', form=form)
+        else:
+            supervisors = User.query.filter_by(is_supervisor=True).all()
+            form.supervisor_email.choices = [(supervisor.email, supervisor.email) for supervisor in supervisors]
 
     current_app.logger.info('End function admin_register() [VIEW]')
     return render_template('auth/admin_register.html', form=form)
@@ -387,3 +396,16 @@ def password_reset(token):
 
     current_app.logger.info('End function password_reset')
     return render_template('auth/reset_password.html', form=form)
+
+
+@auth.route('/parse_division', methods=['GET'])
+def get_sups():
+    """
+    Get selected division value from the request body and generate a list of supervisors for that division.
+    :return: list of supervisors for division
+    """
+    if request.args['division']:
+        choices = get_supervisors_for_division(request.args['division'])
+    else:
+        choices = User.query.filter_by(is_supervisor=True).all()
+    return jsonify(choices)

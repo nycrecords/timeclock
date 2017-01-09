@@ -97,13 +97,14 @@ class AdminRegistrationForm(Form):
     last_name = StringField("Last name")
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
-    supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
+    # SUPERVISOR EMAIL IS DYNAMICALLY ADDED IN VIEW FUNCTION
+    supervisor_email = SelectField('Supervisor Email', choices=[],
+                                   validators=[DataRequired()])
+    # supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
     role = SelectField('Role', choices=roles, validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
     object_name = StringField('Object Name')
-
-
     submit = SubmitField('Register')
 
     def validate_email(self, email_field):

@@ -53,3 +53,13 @@ def check_password_requirements(email, old_password, password, password_confirma
         return False
 
     return True
+
+
+def get_supervisors_for_division(div):
+    """
+    Gets a list of all the supervisors for a division
+    :param div: The division
+    :return: A list of users who are supervisors for the division
+    """
+    users = User.query.filter_by(division=div).filter_by(is_supervisor=True).all()
+    return [(user.email, user.email) for user in users]
