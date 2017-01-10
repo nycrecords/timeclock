@@ -84,6 +84,13 @@ class ApproveOrDenyTimePunchForm(Form):
     deny = SubmitField("")
 
 
+class DeleteEventForm(Form):
+    """
+    Form administrators use to delete events. Implemented in all_history.html
+    """
+    delete = SubmitField("")
+
+
 class FilterTimePunchForm(Form):
     """
     Form administrators use to filter through TimePunches.

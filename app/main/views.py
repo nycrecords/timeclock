@@ -25,10 +25,10 @@ from .modules import (
     process_time_periods,
     get_all_tags,
     get_last_clock_type,
-
     update_user_information,
     get_changelog_by_user_id,
-    check_total_clock_count
+    check_total_clock_count,
+    delete_event
 )
 from .timepunch import (
     create_timepunch,
@@ -48,7 +48,8 @@ from .forms import (
     ApproveOrDenyTimePunchForm,
     FilterTimePunchForm,
     ClearTimePunchFilterForm,
-    ChangeUserDataForm
+    ChangeUserDataForm,
+    DeleteEventForm
 )
 from .pdf import (
     generate_header,
@@ -121,6 +122,7 @@ def all_history():
     filtering.
     """
     current_app.logger.info('Start function all_history() [VIEW]')
+
     if 'first_date' not in session:
         current_app.logger.info('\'first_date\' not found in session. Setting to defaults.')
         session['first_date'] = get_time_period('w')[0]
@@ -168,10 +170,18 @@ def all_history():
 
     query_has_results = True if events_query.first() else False
 
+    deleteform = DeleteEventForm()
+    if deleteform.validate_on_submit():
+        delete_event(request.form['event_id'])
+        flash('Event successfully deleted', category='success')
+        current_app.logger.info('{} deleted clock event with event_id {}'
+                                .format(current_user.email, request.form['event_id']))
+
     current_app.logger.info('End function all_history()')
     return render_template('main/all_history.html',
                            events=events,
                            form=form,
+                           deleteform=deleteform,
                            pagination=pagination,
                            tags=tags,
                            generation_events=events_query.all(),
