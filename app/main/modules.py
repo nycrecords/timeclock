@@ -192,9 +192,9 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     if division:
         current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
         events_query = events_query.join(User).filter_by(division=division)
-        current_app.logger.info('Finished querying for events with users with given tag')
+        current_app.logger.info('Finished querying for events with users with given tag: {}'.format(session['tag_input']))
 
-    current_app.logger.info('Sorting query results be time (desc)')
+    current_app.logger.info('Sorting query results by time (desc)')
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
     current_app.logger.info('Finished sorting query results')
     current_app.logger.info('End function get_events_by_date()')
