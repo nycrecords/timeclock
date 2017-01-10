@@ -11,25 +11,25 @@
 {% block page_content %}
 
     <div class="row">
-       {{ wtf.quick_form(form) }}
+        {{ wtf.quick_form(form) }}
     </div>
 
     <div class="row" style="margin-top: 10px">
-     <table class="table">
+        <table class="table">
             <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Pay Start</th>
-                    <th>Rate</th>
-                </tr>
+            <tr>
+                <th>Email</th>
+                <th>Pay Start</th>
+                <th>Rate</th>
+            </tr>
             <tbody>
-                {% for pay in pays %}
+            {% for pay in pays %}
                 <tr>
                     <td>{{ pay.user.email }}</td>
                     <td>{{ pay.start.strftime("%b %d, %Y") }}</td>
                     <td style="color:green">${{ "{0:.2f}".format(pay.rate) }}
                 <tr>
-                {% endfor %}
-     </table>
+            {% endfor %}
+        </table>
     </div>
 {% endblock %}
