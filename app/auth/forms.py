@@ -1,4 +1,3 @@
-from flask import flash
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
@@ -88,6 +87,7 @@ class RegistrationForm(Form):
 
         if not has_capital:
             raise ValidationError('Password must contain at least one capital letter')
+
 
 class AdminRegistrationForm(Form):
     """Used by admins to register new users into the system."""
@@ -193,6 +193,7 @@ class AdminRegistrationForm(Form):
         valid_sup = self.validate_supervisor_email(self.supervisor_email)
 
         return is_email and valid_email and first_name and last_name and valid_div and valid_tag and valid_sup
+
 
 class ChangePasswordForm(Form):
     """Form for changing password"""

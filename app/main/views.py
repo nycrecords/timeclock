@@ -98,7 +98,7 @@ def index():
                 current_user.email,
                 'in' if get_last_clock_type(current_user.id) else 'out',
                 time)
-            )
+                                    )
             flash("Clock submission successfully processed", category='success')
             return redirect(url_for('main.index'))
 
@@ -111,7 +111,7 @@ def index():
                            )
 
 
-@main.route('/all_history',  methods=['GET', 'POST'])
+@main.route('/all_history', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def all_history():
@@ -167,7 +167,6 @@ def all_history():
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
 
-
     # Pagination
     pagination = events_query.paginate(
         page, per_page=15,
@@ -192,7 +191,7 @@ def all_history():
                            )
 
 
-@main.route('/history', methods=['GET', 'POST'])    # User history
+@main.route('/history', methods=['GET', 'POST'])  # User history
 @login_required
 def history():
     """
@@ -261,7 +260,7 @@ def download():
                                  .format(current_user.email)
                                  )
         errors.append('You must specify a user.')
-    if (session['last_date']-session['first_date']).days > 8:
+    if (session['last_date'] - session['first_date']).days > 8:
         current_app.logger.error('User {} tried to generate a timesheet but '
                                  'exceeded maximum duration (one week)'
                                  .format(current_user.email)
@@ -269,10 +268,9 @@ def download():
         errors.append('Maximum timesheet duration is a week. '
                       'Please refine your filters')
 
-
     events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
 
-    if not(check_total_clock_count(events)):
+    if not (check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
         flash('Each clock in must have corresponding clock out to generate a invoice. '
               'Please submit a timepunch for missing times.', category='error')
@@ -286,7 +284,6 @@ def download():
         current_app.logger.error('Errors occurred while generating timesheet (end function download).'
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
-
 
     # Begin generation of the actual PDF here
     current_app.logger.info('Beginning to generate timesheet pdf...')
@@ -345,7 +342,7 @@ def download_invoice():
                                  )
         errors.append('You must specify a user.')
 
-    if (session['last_date']-session['first_date']).days > 8:
+    if (session['last_date'] - session['first_date']).days > 8:
         # If the time period is over a week, flash an error. We use days > 8
         # because we use a < as opposed to a <= in our query in modules.py
         current_app.logger.error('User {} tried to generate a timesheet but '
@@ -378,7 +375,7 @@ def download_invoice():
         return redirect(url_for('main.' + last_page))
 
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
-    if all_info is False: # TODO: why don't we just say if not all_info hee?
+    if all_info is False:  # TODO: why don't we just say if not all_info hee?
         current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
         flash('Each clock in must have corresponding clock out to generate a invoice. '
               'Please submit a timepunch for missing times.', category='error')
@@ -388,7 +385,7 @@ def download_invoice():
     total_earnings = all_info['total_earnings']
     return render_template('payments/invoice.html', day_events_list=day_events_list,
                            employee=u, total_hours=total_hours, total_earnings=total_earnings,
-                           time=datetime.now(), budget_code = u.budget_code, object_code = u.object_code,
+                           time=datetime.now(), budget_code=u.budget_code, object_code=u.object_code,
                            object_name=u.object_name)
 
 
@@ -409,7 +406,6 @@ def clear():
                             current_user.email)
     current_app.logger.info('End function clear()')
     return redirect(url_for('main.all_history'))
-
 
 
 @main.route('/user_clear_filter', methods=['GET', 'POST'])
@@ -542,8 +538,8 @@ def review_timepunch():
                                     .format(current_user.email, request.form['event_id']))
 
     pagination = timepunch_query.paginate(
-            page, per_page=15,
-            error_out=False)
+        page, per_page=15,
+        error_out=False)
 
     query_has_results = True if timepunch_query.first() else False
 
@@ -616,7 +612,8 @@ def user_profile(username):
         else:
             flash('User information has been updated', category='success')
             update_user_information(u, form.first_name.data, form.last_name.data,
-                                    form.division.data, form.tag.data, form.supervisor_email.data, form.is_supervisor.data,
+                                    form.division.data, form.tag.data, form.supervisor_email.data,
+                                    form.is_supervisor.data,
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
@@ -644,4 +641,5 @@ def user_profile(username):
         error_out=False)
     changes = pagination.items
 
-    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes, pagination=pagination)
+    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes,
+                           pagination=pagination)

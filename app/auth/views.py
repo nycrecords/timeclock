@@ -211,16 +211,16 @@ def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if (
-            check_password_hash(pwhash=current_user.password_list.p1,
-                                password=form.password.data) or
-            check_password_hash(pwhash=current_user.password_list.p2,
-                                password=form.password.data) or
-            check_password_hash(pwhash=current_user.password_list.p3,
-                                password=form.password.data) or
-            check_password_hash(pwhash=current_user.password_list.p4,
-                                password=form.password.data) or
-            check_password_hash(pwhash=current_user.password_list.p5,
-                                password=form.password.data)
+                                check_password_hash(pwhash=current_user.password_list.p1,
+                                                    password=form.password.data) or
+                                check_password_hash(pwhash=current_user.password_list.p2,
+                                                    password=form.password.data) or
+                            check_password_hash(pwhash=current_user.password_list.p3,
+                                                password=form.password.data) or
+                        check_password_hash(pwhash=current_user.password_list.p4,
+                                            password=form.password.data) or
+                    check_password_hash(pwhash=current_user.password_list.p5,
+                                        password=form.password.data)
         ):
             # If the inputted password is one of the user's last five passwords
             current_app.logger.info('{} tried to change password. Failed: Used old password.'.format(
@@ -332,16 +332,16 @@ def password_reset(token):
             return redirect(url_for('main.index'))
 
         elif (
-            check_password_hash(pwhash=user.password_list.p1,
-                                password=form.password.data) or
-            check_password_hash(pwhash=user.password_list.p2,
-                                password=form.password.data) or
-            check_password_hash(pwhash=user.password_list.p3,
-                                password=form.password.data) or
-            check_password_hash(pwhash=user.password_list.p4,
-                                password=form.password.data) or
-            check_password_hash(pwhash=user.password_list.p5,
-                                password=form.password.data)
+                                check_password_hash(pwhash=user.password_list.p1,
+                                                    password=form.password.data) or
+                                check_password_hash(pwhash=user.password_list.p2,
+                                                    password=form.password.data) or
+                            check_password_hash(pwhash=user.password_list.p3,
+                                                password=form.password.data) or
+                        check_password_hash(pwhash=user.password_list.p4,
+                                            password=form.password.data) or
+                    check_password_hash(pwhash=user.password_list.p5,
+                                        password=form.password.data)
         ):
             # If user tries to set password to one of last five passwords, flash an error and reset the form
             current_app.logger.error('{} tried to change password. Failed: Used old password.'.format(
@@ -351,7 +351,8 @@ def password_reset(token):
             return render_template("auth/reset_password.html", form=form)
         else:
             try:
-                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
+                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token,
+                                                                                                        form.password.data):
                     # If the token has not been used and the user submits a proper new password, reset users password
                     # and login attempts
                     user.login_attempts = 0
