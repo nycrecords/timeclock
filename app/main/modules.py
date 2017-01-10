@@ -342,6 +342,7 @@ def update_user_information(user,
                             division_input,
                             tag_input,
                             supervisor_email_input,
+                            is_supervisor_input,
                             role_input,
                             budget_code_input,
                             object_code_input,
@@ -354,7 +355,8 @@ def update_user_information(user,
     :param last_name_input: New last name for user.
     :param division_input: New division for user.
     :param tag_input: New tag for user.
-    :param supervisor_email: Email of the user's new supervisor.
+    :param supervisor_email_input: Email of the user's new supervisor.
+    :param is_supervisor_input: Whether or not the user is a supervisor
     :return: None
     """
     current_app.logger.info('Start function update_user_information for {}'.format(user.email))
@@ -417,6 +419,17 @@ def update_user_information(user,
         db.session.commit()
         sup = User.query.filter_by(email=supervisor_email_input).first()
         user.supervisor = sup
+
+    if is_supervisor_input and (user.is_supervisor != is_supervisor_input):
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='IS SUPERVISOR',
+                           old=user.is_supervisor,
+                           new=is_supervisor_input)
+        db.session.add(change)
+        db.session.commit()
+        user.is_supervisor = is_supervisor_input
 
     if budget_code_input and budget_code_input != '' and user.budget_code != budget_code_input:
         change = ChangeLog(changer_id=current_user.id,

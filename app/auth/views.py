@@ -89,6 +89,7 @@ def admin_register():
                     division=form.division.data,
                     role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id,
+                    is_supervisor=form.is_supervisor.data,
                     supervisor=User.query.filter_by(id=form.supervisor_email.data)
                     .first(),
                     budget_code=form.budget_code.data
