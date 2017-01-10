@@ -143,6 +143,7 @@ def all_history():
         session['email'] = None
 
     form = AdminFilterEventsForm()
+
     page = request.args.get('page', 1, type=int)
 
     if form.validate_on_submit():
@@ -154,9 +155,18 @@ def all_history():
         session['division'] = form.division.data
         page = 1
 
+    deleteform = DeleteEventForm(request.form)
+    if deleteform.validate_on_submit() and request.form.get('event_id', None):
+        delete_event(request.form['event_id'])
+        flash('Event successfully deleted', category='success')
+        current_app.logger.info('{} deleted clock event with event_id {}'
+                                .format(current_user.email, request.form['event_id']))
+        return redirect(url_for('main.clear'))
+
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
+
 
     # Pagination
     pagination = events_query.paginate(
@@ -169,14 +179,6 @@ def all_history():
     current_app.logger.info('Finished querying')
 
     query_has_results = True if events_query.first() else False
-
-    deleteform = DeleteEventForm()
-    if 'event_id' in request.form.values() and deleteform.validate_on_submit():
-        delete_event(request.form['event_id'])
-        flash('Event successfully deleted', category='success')
-        current_app.logger.info('{} deleted clock event with event_id {}'
-                                .format(current_user.email, request.form['event_id']))
-        return redirect(url_for('main.clear'))
 
     current_app.logger.info('End function all_history()')
     return render_template('main/all_history.html',
