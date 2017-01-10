@@ -167,8 +167,9 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     if tag_input != 0:
         current_app.logger.info('Querying for events with users with given tag: {}'.format(session['tag_input']))
         tag = Tag.query.filter_by(id=tag_input).first()
-        users = tag.users.all()
-        events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
+        if tag:
+            users = tag.users.all()
+            events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
         current_app.logger.info('Finished querying for events with users with given tag')
 
     # User processing
@@ -516,3 +517,14 @@ def check_total_clock_count(events):
         return True
     else:
         return False
+
+
+def delete_event(event_id):
+    """
+    Removes an event from the database
+    :param event_id: The id of the event to be removes
+    :return: None
+    """
+    e = Event.query.filter_by(id=event_id).first()
+    db.session.delete(e)
+    db.session.commit()

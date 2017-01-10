@@ -12,7 +12,6 @@ from ..models import User, Role
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..utils import InvalidResetToken
-from wtforms import SelectField
 from .forms import (
     LoginForm,
     RegistrationForm,

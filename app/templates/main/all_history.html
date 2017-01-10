@@ -4,9 +4,6 @@
 
 {% block title %}TimeClock - History{% endblock %}
 
-<!-- TODO: IMPLEMENT FILTER GUI [WTF] -->
-<!-- TODO: IMPLEMENT CALENDAR VIEW, CLICKABLE DATE EVENTS -->
-
 {% block page_content %}
     <div class="row">
         <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter Results</button>
@@ -54,6 +51,7 @@
                     <th>Division</th>
                     <th>Tag</th>
                     <th>Time</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,6 +78,31 @@
                         <td>None</td>
                     {% endif %}
                     <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
+
+                    <!-- EVENT DELETE BUTTON -->
+                    <td>
+                        <form method="POST" action="/all_history" name="deleteform">
+                            <input type="hidden" value="{{ event.id }}" name="event_id">
+                            {% for field in deleteform %}
+                                {% if field.type == 'SubmitField' %}
+                                    {% if field.name == 'delete' %}
+                                        <button type="submit" class="btn btn-danger" value="{{ field.name }}" name = "{{ field.name }}"
+                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                    {% endif %}
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                {% if field.errors %}
+                                    <ul class=errors>
+                                    {% for error in field.errors %}
+                                      <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                    {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endfor %}
+                        </form>
+                    </td>
+
                 </tr>
                 {% endfor %}
             </tbody>
