@@ -33,5 +33,6 @@ tags = [
     (7, 'Other')
 ]
 
+
 class InvalidResetToken(Exception):
     pass

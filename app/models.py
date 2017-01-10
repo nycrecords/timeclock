@@ -53,6 +53,7 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role %r>' % self.name
 
+
 # class Budget(db.Model):
 #     """
 #     Specifies the budget code and the corresponding budget name
@@ -159,7 +160,6 @@ class User(UserMixin, db.Model):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         session['reset_token'] = {'token': s, 'valid': True}
         return s.dumps({'reset': self.id})
-
 
     def reset_password(self, token, new_password):
         """
@@ -376,6 +376,7 @@ class ChangeLog(db.Model):
     old = db.Column(db.String(128))
     new = db.Column(db.String(128))
     category = db.Column(db.String(128))
+
 
 login_manager.anonymous_user = AnonymousUser
 

@@ -24,7 +24,7 @@ def create_timepunch(punch_type, punch_time, reason):
     current_app.logger.info('Start function create_timepunch()')
     punch_type = punch_type == 'In'  # Must manually cast string to bool because wtf doesn't support coerce bool
     event = Event(time=punch_time, type=punch_type, note=reason, user=current_user, timepunch=True, approved=False,
-              pending=True)
+                  pending=True)
     db.session.add(event)
     db.session.commit()
     send_email(current_user.supervisor.email,
@@ -63,14 +63,14 @@ def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, 
             timepunch_query = timepunch_query.filter(Event.approved == True)
         elif approved == 'Unapproved':
             timepunch_query = timepunch_query.filter(Event.approved == False)
-        # else approved == 'All', in which case we don't need to add anything to the filter
+            # else approved == 'All', in which case we don't need to add anything to the filter
 
     if status:
         if status == 'Pending':
             timepunch_query = timepunch_query.filter(Event.pending == True)
         elif status == 'Processed':
             timepunch_query = timepunch_query.filter(Event.pending == False)
-        # else status == 'All', in which case we don't need to add anything to the filter
+            # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
     result = timepunch_query.all()

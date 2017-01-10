@@ -8,6 +8,7 @@ import sqlalchemy
 from flask import session, current_app
 from ..email_notification import send_email
 
+
 def process_clock(note_data, ip=None):
     """
     Creates an Event and writes it to the database when a user clocks in
@@ -25,10 +26,9 @@ def process_clock(note_data, ip=None):
         # If the last clock is an IN
         # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
         # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
-        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds/float(3600) >= 8:
+        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds / float(3600) >= 8:
             send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
                        '/main/email/employee_overtime', email=current_user.email)
-
 
     # Create clock event
     event = Event(type=not get_last_clock_type(user_id=current_user.id),
@@ -87,7 +87,7 @@ def get_last_clock():
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=current_user.id).first() is not None:
             # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).\
+            recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)). \
                 first().time.strftime("%b %d, %Y | %H:%M")
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
@@ -149,7 +149,6 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     if division_input:
         division = division_input
 
-
     current_app.logger.info('Start function get_events_by_date with '
                             'start: {}, end: {}, email: {},tag: {}'
                             .format(session['first_date'], session['last_date'],
@@ -192,7 +191,8 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
     if division:
         current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
         events_query = events_query.join(User).filter_by(division=division)
-        current_app.logger.info('Finished querying for events with users with given tag: {}'.format(session['tag_input']))
+        current_app.logger.info(
+            'Finished querying for events with users with given tag: {}'.format(session['tag_input']))
 
     current_app.logger.info('Sorting query results by time (desc)')
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
@@ -238,7 +238,8 @@ def get_time_period(period='d'):
         interval = [first_of_last_month, end_of_last_month]
     else:
         # Set the default interval to this week
-        interval = [today - timedelta(days=today.weekday()), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
+        interval = [today - timedelta(days=today.weekday()),
+                    datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
     return interval
 
 
@@ -441,7 +442,7 @@ def update_user_information(user,
                            new=budget_code_input)
         db.session.add(change)
         db.session.commit()
-        user.budget_code=budget_code_input
+        user.budget_code = budget_code_input
 
     if object_code_input and object_code_input != '' and user.object_code != object_code_input:
         change = ChangeLog(changer_id=current_user.id,
@@ -495,6 +496,7 @@ def get_changelog_by_user_id(id):
     current_app.logger.info('End function get_changelog_by_user_id()')
     return changes
 
+
 def check_total_clock_count(events):
     """
     Calculates the amount of clock-ins and clock-outs from a list of clock events and makes sure that each clock in
@@ -505,7 +507,7 @@ def check_total_clock_count(events):
     current_app.logger.info('Start function check_total_clock_count()')
     clock_in_list = []
     clock_out_list = []
-    #loop through all events and count the number of clock-ins and clock-outs in separate lists
+    # loop through all events and count the number of clock-ins and clock-outs in separate lists
     for event in events:
         if 'OUT' in event:
             clock_out_list.append(event)
@@ -513,7 +515,7 @@ def check_total_clock_count(events):
             clock_in_list.append(event)
         else:
             continue
-    if len(clock_out_list)==len(clock_in_list):
+    if len(clock_out_list) == len(clock_in_list):
         return True
     else:
         return False
