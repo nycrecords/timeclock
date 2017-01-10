@@ -6,7 +6,7 @@
 
 .navbar-inner {
     /*For IE Compatibility*/
-    filter:none;
+    filter: none;
 }
 
 .empty-query {
@@ -17,7 +17,6 @@
     float: none;
     margin: 0 auto;
 }
-
 
 body {
     font-family: "Sofia Pro Soft";

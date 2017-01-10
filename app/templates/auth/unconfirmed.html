@@ -4,7 +4,7 @@
 {% block title %}TimeClock - Validate Account{% endblock %}
 
 {% block page_content %}
-    {%  if current_user.is_authenticated %}
+    {% if current_user.is_authenticated %}
         <h3>Your account is unconfirmed. To use the TimeClock application, you must change your password.</h3>
         <div class="row" style="padding-bottom:10px">
             <div class="col-md-4" style="height:300px">

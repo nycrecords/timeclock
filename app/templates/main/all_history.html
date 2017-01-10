@@ -6,7 +6,9 @@
 
 {% block page_content %}
     <div class="row">
-        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter Results</button>
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter
+            Results
+        </button>
         <form action="/clear_filter" method="POST" style="float:left; margin-left: 5px">
             <input type="submit" value="Clear Filter" class="btn btn-info">
         </form>
@@ -15,13 +17,13 @@
                 {% for event in generation_events %}
                     <input type="hidden" name="event" value="{{ event }}">
                 {% endfor %}
-                    <input type="submit" value="Generate Timesheet" class="btn btn-success">
+                <input type="submit" value="Generate Timesheet" class="btn btn-success">
             </form>
         </div>
         <div style="float:right; margin-right:5px">
             <form action="/download_invoice" method="POST">
                 {% for event in generation_events %}
-                    <input type="hidden" name="event" value = "{{ event }}">
+                    <input type="hidden" name="event" value="{{ event }}">
                 {% endfor %}
                 <input type="submit" value="Generate Invoice" class="btn btn-success">
             </form>
@@ -39,10 +41,10 @@
 
 
 
-     <div class="row">
+    <div class="row">
         {% if query_has_results %}
-        <table class="table">
-            <thead>
+            <table class="table">
+                <thead>
                 <tr>
                     <th>Email</th>
                     <th>First Name</th>
@@ -53,63 +55,64 @@
                     <th>Time</th>
                     <th></th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 {% for event in events %}
-                <tr>
-                    <td>{{ event.user.email }}</td>
-                    <td>{{ event.user.first_name }}</td>
-                    <td>{{ event.user.last_name }}</td>
-                    <td>
-                        {% if event.type %}
-                        <span style="color:green">IN</span>
-                        {% else %}
-                        <span style="color:orange">OUT</span>
+                    <tr>
+                        <td>{{ event.user.email }}</td>
+                        <td>{{ event.user.first_name }}</td>
+                        <td>{{ event.user.last_name }}</td>
+                        <td>
+                            {% if event.type %}
+                                <span style="color:green">IN</span>
+                            {% else %}
+                                <span style="color:orange">OUT</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.user.division }}</td>
+                        {#                    Use tag_id to find corresponding name in tag table #}
+                        {% for tag in tags %}
+                            {% if tag.id==event.user.tag_id %}
+                                <td>{{ tag.name }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if event.user.tag_id==None %}
+                            <td>None</td>
                         {% endif %}
-                    </td>
-                    <td>{{ event.user.division }}</td>
-{#                    Use tag_id to find corresponding name in tag table #}
-                    {% for tag in tags %}
-                        {% if tag.id==event.user.tag_id %}
-                            <td>{{ tag.name }}</td>
-                        {% endif %}
-                    {% endfor %}
-                    {% if event.user.tag_id==None %}
-                        <td>None</td>
-                    {% endif %}
-                    <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
+                        <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
 
-                    <!-- EVENT DELETE BUTTON -->
-                    <td>
-                        <form method="POST" action="/all_history" name="deleteform">
-                            <input type="hidden" value="{{ event.id }}" name="event_id">
-                            {% for field in deleteform %}
-                                {% if field.type == 'SubmitField' %}
-                                    {% if field.name == 'delete' %}
-                                        <button type="submit" class="btn btn-danger" value="{{ field.name }}" name = "{{ field.name }}"
-                                        id="{{ field.name }}"> {{ field.name }} </button>
+                        <!-- EVENT DELETE BUTTON -->
+                        <td>
+                            <form method="POST" action="/all_history" name="deleteform">
+                                <input type="hidden" value="{{ event.id }}" name="event_id">
+                                {% for field in deleteform %}
+                                    {% if field.type == 'SubmitField' %}
+                                        {% if field.name == 'delete' %}
+                                            <button type="submit" class="btn btn-danger" value="{{ field.name }}"
+                                                    name="{{ field.name }}"
+                                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ field }}
                                     {% endif %}
-                                {% else %}
-                                    {{ field }}
-                                {% endif %}
-                                {% if field.errors %}
-                                    <ul class=errors>
-                                    {% for error in field.errors %}
-                                      <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
-                                    {% endfor %}
-                                    </ul>
-                                {% endif %}
-                            {% endfor %}
-                        </form>
-                    </td>
+                                    {% if field.errors %}
+                                        <ul class=errors>
+                                            {% for error in field.errors %}
+                                                <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endfor %}
+                            </form>
+                        </td>
 
-                </tr>
+                    </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-        <div class="col-md-8 col-md-offset-4">
-            {{ macros.pagination_widget(pagination, '.all_history') }}
-        </div>
+                </tbody>
+            </table>
+            <div class="col-md-8 col-md-offset-4">
+                {{ macros.pagination_widget(pagination, '.all_history') }}
+            </div>
         {% else %}
             {% include 'includes/empty_query.html' %}
         {% endif %}

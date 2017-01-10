@@ -11,16 +11,18 @@
 {% block page_content %}
 
     <div class="row">
-        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter Results</button>
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter
+            Results
+        </button>
         <form action="/user_clear_filter" method="POST" style="float:left; margin-left: 5px">
             <input type="submit" value="Clear Filter" class="btn btn-info">
         </form>
         <div style="float:right">
             <form action="/download_timesheet" method="POST">
                 {% for event in generation_events %}
-                    <input type="hidden" name="event" value ="{{ event }}">
+                    <input type="hidden" name="event" value="{{ event }}">
                 {% endfor %}
-                    <input type="submit" value="Generate Timesheet" class="btn btn-success">
+                <input type="submit" value="Generate Timesheet" class="btn btn-success">
             </form>
         </div>
         <div style="float:right; margin-right:5px">
@@ -44,11 +46,11 @@
 
 
 
-     <div class="row">
+    <div class="row">
 
-        {%  if query_has_results %}
-        <table class="table">
-            <thead>
+        {% if query_has_results %}
+            <table class="table">
+                <thead>
                 <tr>
                     <th>Email</th>
                     <th>First Name</th>
@@ -59,38 +61,38 @@
                     <th>Time</th>
 
                 </tr>
-            </thead>
+                </thead>
 
-            <tbody>
+                <tbody>
                 {% for event in events %}
-                <tr>
-                    <td>{{ event.user.email }}</td>
-                    <td>{{ event.user.first_name }}</td>
-                    <td>{{ event.user.last_name }}</td>
-                    <td>{% if event.type %}
-                        <span style="color:green">IN</span>
+                    <tr>
+                        <td>{{ event.user.email }}</td>
+                        <td>{{ event.user.first_name }}</td>
+                        <td>{{ event.user.last_name }}</td>
+                        <td>{% if event.type %}
+                            <span style="color:green">IN</span>
                         {% else %}
-                        <span style="color:orange">OUT</span>
+                            <span style="color:orange">OUT</span>
                         {% endif %}
-                    </td>
-                    <td>{{ event.user.division }}</td>
-{#                    Use tag_id to find corresponding name in tag table #}
-                    {% for tag in tags %}
-                        {% if tag.id==event.user.tag_id %}
-                            <td>{{ tag.name }}</td>
+                        </td>
+                        <td>{{ event.user.division }}</td>
+                        {#                    Use tag_id to find corresponding name in tag table #}
+                        {% for tag in tags %}
+                            {% if tag.id==event.user.tag_id %}
+                                <td>{{ tag.name }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if event.user.tag_id==None %}
+                            <td>None</td>
                         {% endif %}
-                    {% endfor %}
-                    {% if event.user.tag_id==None %}
-                        <td>None</td>
-                    {% endif %}
-                    <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
-                </tr>
+                        <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
+                    </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-        <div class="col-md-8 col-md-offset-4">
-            {{ macros.pagination_widget(pagination, '.history') }}
-        </div>
+                </tbody>
+            </table>
+            <div class="col-md-8 col-md-offset-4">
+                {{ macros.pagination_widget(pagination, '.history') }}
+            </div>
         {% else %}
             {% include 'includes/empty_query.html' %}
         {% endif %}

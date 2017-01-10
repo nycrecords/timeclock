@@ -14,16 +14,16 @@
 
     .sign-line {
         float: right;
-        margin-top:16px;
-        margin-left:3px;
+        margin-top: 16px;
+        margin-left: 3px;
         height: 1px;
         background-color: black;
     }
 
     #footer {
-        position:absolute;
-        bottom:15px;
-        width:18cm;
+        position: absolute;
+        bottom: 15px;
+        width: 18cm;
     }
 }
 
@@ -34,15 +34,15 @@
     outline: 2cm #FFEAEA solid;
 }
 
-
 @page {
     size: A4;
     margin: 0;
 }
+
 @media print {
     html, body {
-    width: 210mm;
-    height: 297mm;
+        width: 210mm;
+        height: 297mm;
     }
 
     .page {
@@ -57,16 +57,16 @@
 
     .sign-line {
         float: right;
-        margin-top:16px;
-        margin-left:3px;
+        margin-top: 16px;
+        margin-left: 3px;
         height: 1px;
         background-color: black;
     }
 
     #footer {
-        position:absolute;
-        bottom:15px;
-        width:18cm;
+        position: absolute;
+        bottom: 15px;
+        width: 18cm;
     }
 
     .header-element-left {
