@@ -521,6 +521,11 @@ def check_total_clock_count(events):
         return False
 
 
+def add_event(user_id, time, type):
+    e = Event(type=type, user_id=user_id, time=time)
+    db.session.add(e)
+    db.session.commit()
+
 def delete_event(event_id):
     """
     Removes an event from the database
