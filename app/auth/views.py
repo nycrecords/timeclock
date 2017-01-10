@@ -73,9 +73,9 @@ def admin_register():
     :return: HTML page where admins can register new users
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
-    form = AdminRegistrationForm(request.form)
+    form = AdminRegistrationForm()
 
-    if form.validate_on_submit():
+    if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
         # Set default tag value to 6 ("Other")
         tag_id = 6
@@ -89,7 +89,7 @@ def admin_register():
                     division=form.division.data,
                     role=Role.query.filter_by(name=form.role.data).first(),
                     tag_id=tag_id,
-                    supervisor=User.query.filter_by(email=form.supervisor_email.data)
+                    supervisor=User.query.filter_by(id=form.supervisor_email.data)
                     .first(),
                     budget_code=form.budget_code.data
                     )
@@ -110,14 +110,6 @@ def admin_register():
 
         current_app.logger.info('End function admin_register() [VIEW]')
         return redirect(url_for('main.index'))
-
-    if request.method == 'POST':
-        form.supervisor_email.choices = get_supervisors_for_division(form.division.data)
-        if form.validate():
-            return render_template('auth/admin_register.html', form=form)
-        else:
-            supervisors = User.query.filter_by(is_supervisor=True).all()
-            form.supervisor_email.choices = [(supervisor.email, supervisor.email) for supervisor in supervisors]
 
     current_app.logger.info('End function admin_register() [VIEW]')
     return render_template('auth/admin_register.html', form=form)
@@ -407,5 +399,6 @@ def get_sups():
     if request.args['division']:
         choices = get_supervisors_for_division(request.args['division'])
     else:
-        choices = User.query.filter_by(is_supervisor=True).all()
+        sups = User.query.filter_by(is_supervisor=True).all()
+        choices = [(u.id, u.email) for u in sups]
     return jsonify(choices)

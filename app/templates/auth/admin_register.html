@@ -38,8 +38,11 @@
                 sel.empty();
                 for(var i =0; i < data.length; i++){
                     var opt = document.createElement("option");
+                    console.log("DATA:")
+                    console.log(data)
                     opt.innerHTML = data[i][1];
                     opt.value = data[i][0];
+                    console.log(opt);
                     sel.append(opt);
                 }
                 console.log(sel);

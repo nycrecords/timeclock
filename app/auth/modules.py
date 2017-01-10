@@ -62,4 +62,4 @@ def get_supervisors_for_division(div):
     :return: A list of users who are supervisors for the division
     """
     users = User.query.filter_by(division=div).filter_by(is_supervisor=True).all()
-    return [(user.email, user.email) for user in users]
+    return [(user.id, user.email) for user in users]
