@@ -54,6 +54,17 @@ class AdminFilterEventsForm(Form):
     last_day = SubmitField("Yesterday")
     this_day = SubmitField("Today")
 
+    def validate_email(self, email):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email: The supervisor's email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
+
 
 class UserFilterEventsForm(Form):
     """
@@ -75,6 +86,17 @@ class CreatePayRateForm(Form):
     rate = FloatField("Rate", validators=[DataRequired()])
     submit = SubmitField("Create Pay Rate")
 
+    def validate_email(self, email):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email: The supervisor's email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
+
 
 class ApproveOrDenyTimePunchForm(Form):
     """
@@ -82,6 +104,29 @@ class ApproveOrDenyTimePunchForm(Form):
     """
     approve = SubmitField("")
     deny = SubmitField("")
+
+
+class AddEventForm(Form):
+    """
+    Form administrators use to add events. Implemented in all_history.html
+    """
+    addemail = StringField("Email", validators=[DataRequired(), Email()])
+    add_date = DateField(u'Date', default=datetime.today(), validators=[DataRequired()])
+    add_time = StringField(u'Time (24-hour)', default="9:00", validators=[DataRequired()])
+    addpunch_type = SelectField(u'Punch Type', validators=[DataRequired()], choices=[('In', 'In'), ('Out', 'Out')])
+    add = SubmitField("Create clock event")
+
+    def validate_addemail(self, email):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email: The supervisor's email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
+
 
 
 class DeleteEventForm(Form):

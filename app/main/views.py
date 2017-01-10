@@ -4,6 +4,9 @@
    :synopsis: Handles all core URL endpoints for the timeclock application
 """
 
+from datetime import datetime
+
+from flask import current_app
 from flask import (
     render_template,
     flash,
@@ -13,8 +16,23 @@ from flask import (
     redirect,
     session
 )
-from . import main
 from flask_login import login_required, current_user
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+from . import main
+from .forms import (
+    AdminFilterEventsForm,
+    UserFilterEventsForm,
+    CreatePayRateForm,
+    TimePunchForm,
+    ApproveOrDenyTimePunchForm,
+    FilterTimePunchForm,
+    ClearTimePunchFilterForm,
+    ChangeUserDataForm,
+    AddEventForm,
+    DeleteEventForm
+)
 from .modules import (
     process_clock,
     set_clock_form,
@@ -28,28 +46,12 @@ from .modules import (
     update_user_information,
     get_changelog_by_user_id,
     check_total_clock_count,
+    add_event,
     delete_event
-)
-from .timepunch import (
-    create_timepunch,
-    get_timepunches_for_review,
-    approve_or_deny
 )
 from .payments import (
     get_payrate_before_or_after,
     calculate_hours_worked
-)
-from ..decorators import admin_required
-from .forms import (
-    AdminFilterEventsForm,
-    UserFilterEventsForm,
-    CreatePayRateForm,
-    TimePunchForm,
-    ApproveOrDenyTimePunchForm,
-    FilterTimePunchForm,
-    ClearTimePunchFilterForm,
-    ChangeUserDataForm,
-    DeleteEventForm
 )
 from .pdf import (
     generate_header,
@@ -58,12 +60,14 @@ from .pdf import (
     generate_timetable,
     generate_signature_template
 )
-from datetime import datetime
-from flask import current_app
-from ..models import Pay, User
+from .timepunch import (
+    create_timepunch,
+    get_timepunches_for_review,
+    approve_or_deny
+)
 from .. import db
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from ..decorators import admin_required
+from ..models import Pay, User
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -155,13 +159,29 @@ def all_history():
         session['division'] = form.division.data
         page = 1
 
+    addform = AddEventForm()
+    if addform.validate_on_submit() and addform.add.data:
+        date_string = addform.add_date.data.strftime('%m/%d/%Y ')
+        time_string = addform.add_time.data
+        datetime_str = date_string + time_string
+        try:
+            datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
+        except ValueError:
+            flash('Please make sure your time input is in the format HH:MM', category='error')
+            return redirect(url_for('main.all_history'))
+        u = User.query.filter_by(email=addform.addemail.data).first()
+        add_event(u.id, datetime_obj, (addform.addpunch_type.data == "In"))
+        flash("Clock event successfully processed")
+
+
     deleteform = DeleteEventForm(request.form)
-    if deleteform.validate_on_submit() and request.form.get('event_id', None):
+    if deleteform.validate_on_submit() and request.form.get('event_id', None) and deleteform.delete.data:
         delete_event(request.form['event_id'])
         flash('Event successfully deleted', category='success')
         current_app.logger.info('{} deleted clock event with event_id {}'
                                 .format(current_user.email, request.form['event_id']))
         return redirect(url_for('main.clear'))
+
 
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
@@ -183,6 +203,7 @@ def all_history():
     return render_template('main/all_history.html',
                            events=events,
                            form=form,
+                           addform=addform,
                            deleteform=deleteform,
                            pagination=pagination,
                            tags=tags,

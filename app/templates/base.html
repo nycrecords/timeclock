@@ -134,10 +134,17 @@
     <script>
 
         $(function () {
+            $("#add_time").timepicker({
+                'timeFormat': 'H:i',
+                'step': 1
+            });
+
             $('#punch_time').timepicker({
                 'timeFormat': 'H:i',
                 'step': 1
             });
+
+
             $("#first_date").datepicker({
                 dateFormat: 'yy-mm-dd'
             });
@@ -146,6 +153,11 @@
                 dateFormat: 'yy-mm-dd'
             });
 
+            $("#add_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+
             $("#punch_date").datepicker({
                 dateFormat: 'yy-mm-dd'
             });
@@ -153,6 +165,11 @@
             $("#start_date").datepicker({
                 dateFormat: 'yy-mm-dd'
             });
+
+            $("#start_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
         });
     </script>
 {% endblock %}
