@@ -88,6 +88,9 @@ def generate_timetable(canvas_field, events):
     next_line = timetable_top
     # Looping through events table to determine values to input on pdf
     for x in range(0, len(events), 2):
+        if next_line <= 100:
+            canvas_field.showPage()
+            next_line = length - 40
         event = events[x]
         next_event = events[x + 1]
         canvas_field.setFont('Courier', 8)

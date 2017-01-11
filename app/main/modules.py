@@ -2,9 +2,10 @@ from datetime import datetime, timedelta, date
 
 import dateutil.relativedelta
 import sqlalchemy
-from flask import session, current_app
+from flask import session, current_app, make_response
 from flask_login import current_user
 
+from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, generate_footer
 from .. import db
 from ..email_notification import send_email
 from ..models import User, Event, Tag, Role, ChangeLog
@@ -542,3 +543,42 @@ def delete_event(event_id):
         '{} deleted clock event with id {} for user with id {}'.format(current_user.email, e.id, e.user.id))
     db.session.delete(e)
     db.session.commit()
+
+
+# This breaks very very badly when there are too many clock events in the period, and doesn't create new pages
+def generate_timesheet(email, start, end):
+    current_app.logger.info('Beginning to generate timesheet pdf...')
+    events = get_events_by_date(email,start,end)
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    import io
+    output = io.BytesIO()
+    c = canvas.Canvas(output, pagesize=letter)
+
+    generate_header(c)
+    generate_employee_info(c)
+    generate_timetable(c, events)
+    generate_signature_template(c)
+    generate_footer(c)
+    c.showPage()
+    c.save()
+    pdf_out = output.getvalue()
+    output.close()
+    current_app.logger.info('Finished generating timesheet PDF')
+
+    response = make_response(pdf_out)
+    response.headers['Content-Disposition'] = \
+        "attachment; filename='timesheet.pdf"
+    response.mimetype = 'application/pdf'
+    current_app.logger.info('%s downloaded timesheet for user %s '
+                            'beginning at %s' %
+                            (current_user.email,
+                             session['email'],
+                             session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
+                             )
+                            )
+
+
+def generate_timesheets(emails, start, end):
+    for email in emails:
+        generate_timesheet(email, start, end)
