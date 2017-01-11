@@ -13,7 +13,8 @@ from flask import (
     request,
     url_for,
     redirect,
-    session
+    session,
+    make_response
 )
 from flask_login import login_required, current_user
 
@@ -28,7 +29,8 @@ from .forms import (
     ClearTimePunchFilterForm,
     ChangeUserDataForm,
     AddEventForm,
-    DeleteEventForm
+    DeleteEventForm,
+    AdvancedTimesheetForm
 )
 from .modules import (
     process_clock,
@@ -45,7 +47,8 @@ from .modules import (
     check_total_clock_count,
     add_event,
     delete_event,
-    generate_timesheet
+    generate_timesheet,
+    generate_timesheets
 )
 from .payments import (
     get_payrate_before_or_after,
@@ -174,6 +177,15 @@ def all_history():
         flash('Event successfully deleted', category='success')
         return redirect(url_for('main.clear'))
 
+    advtimesheetform = AdvancedTimesheetForm()
+    advtimesheetform.emails.choices = [(u.email, u.email) for u in User.query.all()]
+    if advtimesheetform.validate_on_submit() and advtimesheetform.gen_timesheets.data:
+        # TODO: THIS MESSAGE ISNT FLASHING
+        flash('Succesfully generated timesheet(s)', category='success')
+        return generate_timesheets(advtimesheetform.emails.data, advtimesheetform.start_date.data,
+                            advtimesheetform.end_date.data)
+
+
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
@@ -196,6 +208,7 @@ def all_history():
                            form=form,
                            addform=addform,
                            deleteform=deleteform,
+                           advtimesheetform=advtimesheetform,
                            pagination=pagination,
                            tags=tags,
                            generation_events=events_query.all(),
@@ -297,8 +310,19 @@ def download():
                                  ' Redirecting to main.{}...'.format(last_page))
         return redirect(url_for('main.' + last_page))
 
-    # Begin generation of the actual PDF here
-    return generate_timesheet(events)
+    response = make_response(generate_timesheet(events))
+    response.headers['Content-Disposition'] = \
+        "attachment; filename='timesheet.pdf"
+    response.mimetype = 'application/pdf'
+    current_app.logger.info('%s downloaded timesheet for user %s '
+                            'beginning at %s' %
+                            (current_user.email,
+                             session['email'],
+                             session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
+                             )
+                            )
+    return response
+
 
 
 @main.route('/download_invoice', methods=['GET', 'POST'])
@@ -490,8 +514,12 @@ def review_timepunch():
     filter_form = FilterTimePunchForm()
     clear_form = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
-
+    print("VALIDATED:", filter_form.validate_on_submit() and filter_form.filter.data)
     if filter_form.validate_on_submit and filter_form.filter.data:
+        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
+            flash('Successfully filtered', 'success')
+        else:
+            flash('Invalid email', 'error')
         # User submits a filter
         page = 1
 
@@ -500,7 +528,6 @@ def review_timepunch():
                                                      filter_form.email.data,
                                                      filter_form.approved.data,
                                                      filter_form.status.data)
-        flash('Successfully filtered', category='success')
 
     if clear_form.validate_on_submit() and clear_form.clear.data:
         # User submits the clear form

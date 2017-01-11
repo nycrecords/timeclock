@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 
 import dateutil.relativedelta
 import sqlalchemy
-from flask import session, current_app, make_response
+from flask import session, current_app, send_file, make_response
 from flask_login import current_user
 
 from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, generate_footer
@@ -564,22 +564,40 @@ def generate_timesheet(events):
     pdf_out = output.getvalue()
     output.close()
     current_app.logger.info('Finished generating timesheet PDF')
-
-    response = make_response(pdf_out)
-    response.headers['Content-Disposition'] = \
-        "attachment; filename='timesheet.pdf"
-    response.mimetype = 'application/pdf'
-    current_app.logger.info('%s downloaded timesheet for user %s '
-                            'beginning at %s' %
-                            (current_user.email,
-                             session['email'],
-                             session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
-                             )
-                            )
-    return response
+    return pdf_out
 
 
 def generate_timesheets(emails, start, end):
+    import tempfile
+    import os
+    import io
+    import shutil
+    import zipfile
+    dirpath = tempfile.mkdtemp(dir=os.path.dirname(os.path.realpath(__file__)))
+    print(dirpath)
     for email in emails:
-        events = get_events_by_date(email, start, end)
-        generate_timesheet(events)
+        events = get_events_by_date(email, start, end).all()
+        output_file_name = email
+        f = open(dirpath + '/' + output_file_name + '.pdf', 'wb')
+        output = generate_timesheet(events)
+        f.write(output)
+        f.close()
+    print("Done writing files to {}".format(dirpath))
+    memoryfile = io.BytesIO()
+    with zipfile.ZipFile(memoryfile, 'w') as zip:
+        for root, dirs, files in os.walk(dirpath + '/'):
+            for file in files:
+                zip.write(dirpath + '/' + file, arcname=file)
+        print("FILENAME", zip.filename)
+        print("FILES", zip.filelist)
+    print("Deleted directory {} and contents".format(dirpath))
+    memoryfile.seek(0)
+    shutil.rmtree(dirpath)
+    return send_file(memoryfile,
+                     mimetype='zip',
+                     attachment_filename='timesheets.zip',
+                     as_attachment=True)
+
+
+
+

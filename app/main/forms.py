@@ -1,5 +1,6 @@
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, ValidationError
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, SelectMultipleField,\
+    ValidationError
 from wtforms.validators import DataRequired, Optional, Length, Email
 from datetime import date, datetime
 from ..utils import tags, divisions, roles
@@ -150,6 +151,20 @@ class FilterTimePunchForm(Form):
         ('Processed', 'Processed')])
     filter = SubmitField("Filter")
 
+    def validate_email(self, email):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email: The email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        print("USER:", user)
+        if not user:
+            raise ValidationError('No account with that email exists')
+
+
+
 
 class ClearTimePunchFilterForm(Form):
     """
@@ -177,10 +192,18 @@ class ChangeUserDataForm(Form):
     def validate_supervisor_email(self, email_field):
         """
         Verifies that e-mails used for supervisors exist in the system.
-
         :param email_field: The supervisor's email
         :return:
         """
         user = User.query.filter_by(email=email_field.data).first()
         if not user:
             raise ValidationError('No account with that email exists')
+
+
+class AdvancedTimesheetForm(Form):
+    emails = SelectMultipleField(choices=[], validators=[DataRequired()], coerce=str)
+    start_date = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
+    # start_time = StringField(u'Start Time (24-hour)', default="9:00", validators=[DataRequired()])
+    end_date = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
+    # end_time = StringField(u'End Time (24-hour)', default="9:00", validators=[DataRequired()])
+    gen_timesheets = SubmitField("Generate Timesheets")
