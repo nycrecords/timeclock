@@ -4,12 +4,13 @@
    :synopsis: Handles all communication with the database when adding, querying, or modifying timepunches.
    timeclock application
 """
-from .. import db
-from ..models import User, Event
-from ..email_notification import send_email
-from flask_login import current_user
-from flask import current_app
 import sqlalchemy
+from flask import current_app
+from flask_login import current_user
+
+from .. import db
+from ..email_notification import send_email
+from ..models import User, Event
 
 
 def create_timepunch(punch_type, punch_time, reason):

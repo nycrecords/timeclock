@@ -1,19 +1,21 @@
-from flask import Flask, session
-from flask_bootstrap import Bootstrap
-from flask_mail import Mail
-from flask_moment import Moment
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_kvsession import KVSessionExtension
-from simplekv.db.sql import SQLAlchemyStore
-from config import config
+import logging
 import os
 import time
-import logging
 from datetime import timedelta
 from logging import Formatter
 from logging.handlers import RotatingFileHandler
+
+from flask import Flask, session
+from flask_bootstrap import Bootstrap
+from flask_kvsession import KVSessionExtension
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_migrate import Migrate
+from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+from simplekv.db.sql import SQLAlchemyStore
+
+from config import config
 
 bootstrap = Bootstrap()
 mail = Mail()

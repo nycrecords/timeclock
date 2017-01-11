@@ -1,10 +1,12 @@
+from datetime import date, datetime
+
 from flask_wtf import Form
-from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, SelectMultipleField,\
+from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, SelectMultipleField, \
     ValidationError
 from wtforms.validators import DataRequired, Optional, Length, Email
-from datetime import date, datetime
-from ..utils import tags, divisions, roles
+
 from ..models import User
+from ..utils import tags, divisions, roles
 
 
 class ClockInForm(Form):
@@ -162,8 +164,6 @@ class FilterTimePunchForm(Form):
         print("USER:", user)
         if not user:
             raise ValidationError('No account with that email exists')
-
-
 
 
 class ClearTimePunchFilterForm(Form):

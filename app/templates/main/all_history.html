@@ -14,12 +14,11 @@
         </form>
 
 
-
-
         <div style="float:right">
-            <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success" style="float:left">
-            Advanced Timesheets
-        </button>
+            <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success"
+                    style="float:left">
+                Advanced Timesheets
+            </button>
         </div>
         <div style="float:right; margin-right: 5px">
             <form action="/download_timesheet" method="POST">
@@ -103,7 +102,7 @@
                         <!-- EVENT DELETE BUTTON -->
                         <td>
                             {% if event.user.id != current_user.id %}
-                            <form method="POST" action="/all_history" name="deleteform">
+                                <form method="POST" action="/all_history" name="deleteform">
                                 {% for field in deleteform %}
                                     {% if field.type == 'SubmitField' %}
                                         {% if field.name == 'delete' %}

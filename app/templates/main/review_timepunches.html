@@ -76,31 +76,31 @@
                         </td>
                         <td>
                             {% if event.user.id != current_user.id %}
-                            <form method="POST" action="/review_timepunches" name="form">
-                                <input type="hidden" value="{{ event.id }}" name="event_id">
-                                {% for field in form %}
-                                    {% if field.type == 'SubmitField' %}
-                                        {% if field.name == 'approve' %}
-                                            <button type="submit" class="btn btn-success" value="{{ field.name }}"
-                                                    name="{{ field.name }}"
-                                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                <form method="POST" action="/review_timepunches" name="form">
+                                    <input type="hidden" value="{{ event.id }}" name="event_id">
+                                    {% for field in form %}
+                                        {% if field.type == 'SubmitField' %}
+                                            {% if field.name == 'approve' %}
+                                                <button type="submit" class="btn btn-success" value="{{ field.name }}"
+                                                        name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-danger" style=""
+                                                        value="{{ field.name }}" name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% endif %}
                                         {% else %}
-                                            <button type="submit" class="btn btn-danger" style=""
-                                                    value="{{ field.name }}" name="{{ field.name }}"
-                                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                            {{ field }}
                                         {% endif %}
-                                    {% else %}
-                                        {{ field }}
-                                    {% endif %}
-                                    {% if field.errors %}
-                                        <ul class=errors>
-                                            {% for error in field.errors %}
-                                                <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                {% endfor %}
-                            </form>
+                                        {% if field.errors %}
+                                            <ul class=errors>
+                                                {% for error in field.errors %}
+                                                    <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endfor %}
+                                </form>
                             {% endif %}
                         </td>
                     </tr>

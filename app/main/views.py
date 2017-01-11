@@ -183,8 +183,7 @@ def all_history():
         # TODO: THIS MESSAGE ISNT FLASHING
         flash('Succesfully generated timesheet(s)', category='success')
         return generate_timesheets(advtimesheetform.emails.data, advtimesheetform.start_date.data,
-                            advtimesheetform.end_date.data)
-
+                                   advtimesheetform.end_date.data)
 
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
@@ -322,7 +321,6 @@ def download():
                              )
                             )
     return response
-
 
 
 @main.route('/download_invoice', methods=['GET', 'POST'])
