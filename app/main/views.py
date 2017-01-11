@@ -174,7 +174,8 @@ def all_history():
             return redirect(url_for('main.all_history'))
         u = User.query.filter_by(email=addform.addemail.data).first()
         add_event(u.id, datetime_obj, (addform.addpunch_type.data == "In"))
-        flash("Clock event successfully processed")
+        flash("Clock event successfully processed", 'success')
+        return redirect(url_for('main.clear'))
 
     deleteform = DeleteEventForm(request.form)
     if deleteform.validate_on_submit() and request.form.get('event_id', None) and deleteform.delete.data:

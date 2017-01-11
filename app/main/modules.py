@@ -1,12 +1,14 @@
-from .. import db
-from ..models import User, Event, Tag, Role, ChangeLog
-from ..utils import tags
 from datetime import datetime, timedelta, date
+
 import dateutil.relativedelta
-from flask_login import current_user
 import sqlalchemy
 from flask import session, current_app
+from flask_login import current_user
+
+from .. import db
 from ..email_notification import send_email
+from ..models import User, Event, Tag, Role, ChangeLog
+from ..utils import tags
 
 
 def process_clock(note_data, ip=None):
@@ -525,6 +527,9 @@ def add_event(user_id, time, type):
     e = Event(type=type, user_id=user_id, time=time)
     db.session.add(e)
     db.session.commit()
+    current_app.logger.info(
+        '{} added clock event with id {} for user with id {}'.format(current_user.email, e.id, user_id))
+
 
 def delete_event(event_id):
     """
