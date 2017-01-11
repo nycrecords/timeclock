@@ -75,6 +75,7 @@
                             <br>
                         </td>
                         <td>
+                            {% if event.user.id == current_user.id %}
                             <form method="POST" action="/review_timepunches" name="form">
                                 <input type="hidden" value="{{ event.id }}" name="event_id">
                                 {% for field in form %}
@@ -100,6 +101,7 @@
                                     {% endif %}
                                 {% endfor %}
                             </form>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
