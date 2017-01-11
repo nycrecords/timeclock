@@ -538,5 +538,7 @@ def delete_event(event_id):
     :return: None
     """
     e = Event.query.filter_by(id=event_id).first()
+    current_app.logger.info(
+        '{} deleted clock event with id {} for user with id {}'.format(current_user.email, e.id, e.user.id))
     db.session.delete(e)
     db.session.commit()

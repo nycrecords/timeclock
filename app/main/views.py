@@ -181,8 +181,6 @@ def all_history():
     if deleteform.validate_on_submit() and request.form.get('event_id', None) and deleteform.delete.data:
         delete_event(request.form['event_id'])
         flash('Event successfully deleted', category='success')
-        current_app.logger.info('{} deleted clock event with event_id {}'
-                                .format(current_user.email, request.form['event_id']))
         return redirect(url_for('main.clear'))
 
     current_app.logger.info('Querying (calling get_events_by_date)')
