@@ -13,7 +13,15 @@
             <input type="submit" value="Clear Filter" class="btn btn-info">
         </form>
 
+
+
+
         <div style="float:right">
+            <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success" style="float:left">
+            Advanced Timesheets
+        </button>
+        </div>
+        <div style="float:right; margin-right: 5px">
             <form action="/download_timesheet" method="POST">
                 {% for event in generation_events %}
                     <input type="hidden" name="event" value="{{ event }}">
@@ -37,6 +45,15 @@
         <div class="row" style="margin-bottom: 10px">
             <div class="col-md-8 col-md-offset-2">
                 {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+    </div>
+
+    {# Collapsible form for multiple timesheet generation#}
+    <div id="advanced-timesheet-form" class="collapse">
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(advtimesheetform) }}
             </div>
         </div>
     </div>
