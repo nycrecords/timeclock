@@ -128,7 +128,6 @@ class AddEventForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-
 class DeleteEventForm(Form):
     """
     Form administrators use to delete events. Implemented in all_history.html
