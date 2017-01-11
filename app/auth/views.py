@@ -4,14 +4,15 @@
    :synopsis: Handles all authentication URL endpoints for the
    timeclock application
 """
+from datetime import datetime
+
+from flask import current_app, jsonify
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from werkzeug.security import check_password_hash
+
 from . import auth
-from .. import db
-from ..models import User, Role
-from ..decorators import admin_required
-from ..email_notification import send_email
-from ..utils import InvalidResetToken
 from .forms import (
     LoginForm,
     RegistrationForm,
@@ -21,10 +22,11 @@ from .forms import (
     ChangePasswordForm
 )
 from .modules import check_password_requirements, get_supervisors_for_division
-from datetime import datetime
-from werkzeug.security import check_password_hash
-from flask import current_app, jsonify
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from .. import db
+from ..decorators import admin_required
+from ..email_notification import send_email
+from ..models import User, Role
+from ..utils import InvalidResetToken
 
 
 @auth.route('/register', methods=['GET', 'POST'])

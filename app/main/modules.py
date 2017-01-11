@@ -2,10 +2,11 @@ from datetime import datetime, timedelta, date
 
 import dateutil.relativedelta
 import sqlalchemy
-from flask import session, current_app, send_file, make_response
+from flask import session, current_app, send_file
 from flask_login import current_user
 
-from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, generate_footer
+from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, \
+    generate_footer
 from .. import db
 from ..email_notification import send_email
 from ..models import User, Event, Tag, Role, ChangeLog
@@ -597,7 +598,3 @@ def generate_timesheets(emails, start, end):
                      mimetype='zip',
                      attachment_filename='timesheets.zip',
                      as_attachment=True)
-
-
-
-

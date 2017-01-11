@@ -1,10 +1,10 @@
-from ..models import User, Pay
 import sqlalchemy
 from flask import current_app
+
 from .modules import (
-    check_total_clock_count,
     get_events_by_date
 )
+from ..models import User, Pay
 
 
 def get_payrate_before_or_after(email_input, start, before_or_after):

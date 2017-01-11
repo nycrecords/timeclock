@@ -1,12 +1,13 @@
 """
 For generating timesheet pdf with appropriate styling.
 """
+from datetime import datetime
+
 from flask import session, current_app
 from flask_login import current_user
-from datetime import datetime
-from ..models import User
-
 from reportlab.lib.pagesizes import letter
+
+from ..models import User
 
 # Global: Set width and length to values corresponding to normal paper size
 width, length = letter

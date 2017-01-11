@@ -5,11 +5,13 @@
    timeclock application
 """
 
-from werkzeug.security import check_password_hash
-from ..models import User
+import re
+
 from flask import flash, current_app
 from flask_login import current_user
-import re
+from werkzeug.security import check_password_hash
+
+from ..models import User
 
 
 def check_password_requirements(email, old_password, password, password_confirmation):
