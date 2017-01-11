@@ -161,6 +161,9 @@ def all_history():
 
     addform = AddEventForm()
     if addform.validate_on_submit() and addform.add.data:
+        if addform.addemail.data == current_user.email:
+            flash('Administrators cannot edit their own clock events', 'error')
+            return redirect(url_for('main.clear'))
         date_string = addform.add_date.data.strftime('%m/%d/%Y ')
         time_string = addform.add_time.data
         datetime_str = date_string + time_string
@@ -173,7 +176,6 @@ def all_history():
         add_event(u.id, datetime_obj, (addform.addpunch_type.data == "In"))
         flash("Clock event successfully processed")
 
-
     deleteform = DeleteEventForm(request.form)
     if deleteform.validate_on_submit() and request.form.get('event_id', None) and deleteform.delete.data:
         delete_event(request.form['event_id'])
@@ -181,7 +183,6 @@ def all_history():
         current_app.logger.info('{} deleted clock event with event_id {}'
                                 .format(current_user.email, request.form['event_id']))
         return redirect(url_for('main.clear'))
-
 
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
