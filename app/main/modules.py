@@ -546,9 +546,8 @@ def delete_event(event_id):
 
 
 # This breaks very very badly when there are too many clock events in the period, and doesn't create new pages
-def generate_timesheet(email, start, end):
+def generate_timesheet(events):
     current_app.logger.info('Beginning to generate timesheet pdf...')
-    events = get_events_by_date(email,start,end)
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
     import io
@@ -577,8 +576,10 @@ def generate_timesheet(email, start, end):
                              session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
                              )
                             )
+    return response
 
 
 def generate_timesheets(emails, start, end):
     for email in emails:
-        generate_timesheet(email, start, end)
+        events = get_events_by_date(email, start, end)
+        generate_timesheet(events)

@@ -11,14 +11,11 @@ from flask import (
     render_template,
     flash,
     request,
-    make_response,
     url_for,
     redirect,
     session
 )
 from flask_login import login_required, current_user
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 
 from . import main
 from .forms import (
@@ -47,18 +44,12 @@ from .modules import (
     get_changelog_by_user_id,
     check_total_clock_count,
     add_event,
-    delete_event
+    delete_event,
+    generate_timesheet
 )
 from .payments import (
     get_payrate_before_or_after,
     calculate_hours_worked
-)
-from .pdf import (
-    generate_header,
-    generate_footer,
-    generate_employee_info,
-    generate_timetable,
-    generate_signature_template
 )
 from .timepunch import (
     create_timepunch,
@@ -307,35 +298,7 @@ def download():
         return redirect(url_for('main.' + last_page))
 
     # Begin generation of the actual PDF here
-    current_app.logger.info('Beginning to generate timesheet pdf...')
-    import io
-    output = io.BytesIO()
-    c = canvas.Canvas(output, pagesize=letter)
-
-    generate_header(c)
-    generate_employee_info(c)
-    generate_timetable(c, events)
-    generate_signature_template(c)
-    generate_footer(c)
-    c.showPage()
-    c.save()
-    pdf_out = output.getvalue()
-    output.close()
-    current_app.logger.info('Finished generating timesheet PDF')
-
-    response = make_response(pdf_out)
-    response.headers['Content-Disposition'] = \
-        "attachment; filename='timesheet.pdf"
-    response.mimetype = 'application/pdf'
-    current_app.logger.info('%s downloaded timesheet for user %s '
-                            'beginning at %s' %
-                            (current_user.email,
-                             session['email'],
-                             session['first_date'].strftime("%b %d, %Y %H:%M:%S %p")
-                             )
-                            )
-    current_app.logger.info('End function download')
-    return response
+    return generate_timesheet(events)
 
 
 @main.route('/download_invoice', methods=['GET', 'POST'])
