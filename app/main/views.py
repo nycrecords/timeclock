@@ -31,7 +31,8 @@ from .forms import (
     AddEventForm,
     DeleteEventForm,
     AdvancedTimesheetForm,
-    RequestVacationForm
+    RequestVacationForm,
+    FilterVacationForm
 )
 from .modules import (
     process_clock,
@@ -60,7 +61,9 @@ from .payments import (
 from .timepunch import (
     create_timepunch,
     get_timepunches_for_review,
-    approve_or_deny
+    get_vacations_for_review,
+    approve_or_deny,
+    approve_or_deny_vacation
 )
 from .. import db
 from ..decorators import admin_required
@@ -681,3 +684,62 @@ def user_profile(username):
 @admin_required
 def export_events():
     return create_csv()
+
+
+@main.route('/review_vacations', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def review_vacations():
+    current_app.logger.info('Start function review_vacations()')
+    vacation_query = get_vacations_for_review(current_user.email)
+    form = ApproveOrDenyTimePunchForm(request.form) #reuse same form
+    filter_form = FilterVacationForm()
+    clear_form = ClearTimePunchFilterForm()
+    page = request.args.get('page', 1, type=int)
+    if filter_form.validate_on_submit and filter_form.filter.data:
+        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
+            flash('Successfully filtered', 'success')
+        else:
+            flash('Invalid email', 'error')
+        # User submits a filter
+        page = 1
+
+        # Filter through timepunches based on user selections
+        vacation_query = get_vacations_for_review(current_user.email,
+                                                     filter_form.email.data,
+                                                     filter_form.status.data)
+
+    if clear_form.validate_on_submit() and clear_form.clear.data:
+        # User submits the clear form
+        page = 1
+        vacation_query = get_vacations_for_review(current_user.email)
+        flash('Filter successfully cleared', category='success')
+
+    if form.validate_on_submit():
+        # User submits an approve or deny request
+        if form.approve.data:
+            approve_or_deny_vacation(request.form['vacation_id'], True)
+            flash('Vacation successfully approved', category='success')
+            current_app.logger.info('{} approved vacation with event_id {}'
+                                    .format(current_user.email, request.form['vacation_id']))
+        elif form.deny.data:
+            approve_or_deny_vacation(request.form['vacation_id'], False)
+            flash('Vacation successfully unapproved', category='success')
+            current_app.logger.info('{} denied vacation with event_id {}'
+                                    .format(current_user.email, request.form['vacation_id']))
+
+    pagination = vacation_query.paginate(
+        page, per_page=15,
+        error_out=False)
+
+    query_has_results = True if vacation_query.first() else False
+
+    vacation_list = pagination.items
+    current_app.logger.info('End function review_timepunch')
+    return render_template('main/review_vacations.html',
+                           vacation_list=vacation_list,
+                           form=form,
+                           pagination=pagination,
+                           filter=filter_form,
+                           clear=clear_form,
+                           query_has_results=query_has_results)

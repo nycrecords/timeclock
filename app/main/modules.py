@@ -9,7 +9,7 @@ from .pdf import generate_header, generate_employee_info, generate_timetable, ge
     generate_footer
 from .. import db
 from ..email_notification import send_email
-from ..models import User, Event, Tag, Role, ChangeLog
+from ..models import User, Event, Tag, Role, ChangeLog, Vacation
 from ..utils import tags
 
 
@@ -365,6 +365,14 @@ def get_event_by_id(event_id):
     :return: [Event] An Event object.
     """
     return Event.query.filter_by(id=event_id).first()
+
+def get_vacation_by_id(vac_id):
+    """
+    Obtains an event by its id.
+    :param event_id: The id of the event to fetch.
+    :return: [Event] An Event object.
+    """
+    return Vacation.query.filter_by(id=vac_id).first()
 
 
 def update_user_information(user,

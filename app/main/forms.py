@@ -173,6 +173,30 @@ class ClearTimePunchFilterForm(Form):
     clear = SubmitField("Clear Filter")
 
 
+class FilterVacationForm(Form):
+    """
+     Form administrators use to filter through Vacations.
+    """
+    email = StringField("Email", validators=[Optional(), Email()])
+    approved = SelectField(u'Status', validators=[Optional()], choices=[
+        ('All', 'All'),
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Unapproved', 'Unapproved')])
+    filter = SubmitField("Filter")
+
+    def validate_email(self, email):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+
+        :param email: The email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
+
+
 class ChangeUserDataForm(Form):
     """
     Form administrators use to change a User's information.
