@@ -115,7 +115,7 @@ class User(UserMixin, db.Model):
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
-    vacations = db.relationship('Vacation', backref='user', lazy='dynamic')
+    vacations = db.relationship('Vacations', backref='user', lazy='dynamic')
 
     # Supervisor
     is_supervisor = db.Column(db.Boolean, default=False)
