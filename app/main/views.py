@@ -36,6 +36,7 @@ from .modules import (
     process_clock,
     set_clock_form,
     get_last_clock,
+    get_last_clock_relative,
     get_events_by_date,
     get_clocked_in_users,
     get_time_period,
@@ -48,7 +49,8 @@ from .modules import (
     add_event,
     delete_event,
     generate_timesheet,
-    generate_timesheets
+    generate_timesheets,
+    create_csv
 )
 from .payments import (
     get_payrate_before_or_after,
@@ -488,7 +490,10 @@ def request_timepunch():
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
-
+            past_type = get_last_clock_relative(current_user, datetime_obj).type
+            if past_type == form.punch_type.data:
+                flash('Timepunch request failed: you would have two consecutive clocks of the same type', 'error')
+                return redirect(url_for('main.request_timepunch'))
             create_timepunch(form.punch_type.data, datetime_obj, form.note.data)
             flash('Your timepunch request has been successfully submitted and is pending approval',
                   category='success')
@@ -652,3 +657,10 @@ def user_profile(username):
 
     return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes,
                            pagination=pagination)
+
+
+@main.route('/export_events', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def export_events():
+    return create_csv()

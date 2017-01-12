@@ -5,6 +5,11 @@
 
 {% block page_content %}
     {% if current_user.is_authenticated %}
+        {% if current_user.is_administrator() %}
+            <span style="float:right">
+                            {% include 'includes/export_data_button.html' %}
+                        </span>
+        {% endif %}
         <p>Welcome, <br><br>Name: {{ current_user.first_name }} {{ current_user.last_name }}</p>
         <p>Email: {{ current_user.email }}</p>
         <div class="row" style="padding-bottom:10px">
