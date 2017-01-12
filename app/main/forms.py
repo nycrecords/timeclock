@@ -207,3 +207,9 @@ class AdvancedTimesheetForm(Form):
     end_date = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
     # end_time = StringField(u'End Time (24-hour)', default="9:00", validators=[DataRequired()])
     gen_timesheets = SubmitField("Generate Timesheets")
+
+
+class RequestVacationForm(Form):
+    vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
+    vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
+    vac_request = SubmitField("Submit Request")

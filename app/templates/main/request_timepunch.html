@@ -10,8 +10,16 @@ a standalone page for testing purposes. -->
 
 {% block page_content %}
     <div class="row">
-        {{ wtf.quick_form(form) }}
+        <div class="col-lg-6" style="float:left">
+        <h3 style="font-family: 'Sofia Pro Soft'; text-align: center">Request Timepunch</h3>
+            {{ wtf.quick_form(form) }}
+        </div>
+     <div class="col-lg-6" style="float:right">
+        <h3 style="font-family: 'Sofia Pro Soft';  text-align: center">Request Vacation</h3>
+            {{ wtf.quick_form(vacform) }}
+     </div>
     </div>
+    <hr>
 {% endblock %}
 
 

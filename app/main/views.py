@@ -30,7 +30,8 @@ from .forms import (
     ChangeUserDataForm,
     AddEventForm,
     DeleteEventForm,
-    AdvancedTimesheetForm
+    AdvancedTimesheetForm,
+    RequestVacationForm
 )
 from .modules import (
     process_clock,
@@ -63,7 +64,7 @@ from .timepunch import (
 )
 from .. import db
 from ..decorators import admin_required
-from ..models import Pay, User
+from ..models import Pay, User, Vacation
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -472,7 +473,8 @@ def request_timepunch():
     """
     current_app.logger.info('Start function request_timepunch()')
     form = TimePunchForm()
-    if form.validate_on_submit():
+    vacform = RequestVacationForm()
+    if form.validate_on_submit() and form.submit.data:
         if form.note.data is not None and len(form.note.data) > 60:
             flash("Your note cannot exceed 60 characters", category='warning')
             current_app.logger.error('{} submitted a note that exceeded 60 characters'.format(current_user.email))
@@ -499,9 +501,24 @@ def request_timepunch():
                   category='success')
             current_app.logger.info('End function request_timepunch')
             return redirect(url_for('main.request_timepunch'))
+    elif vacform.validate_on_submit() and vacform.vac_request.data:
+        if not current_user.supervisor:
+            flash("You must have a supervisor to request a timepunch. If you believe a supervisor "
+                  "should be assigned to you, please contact the system administrator.", category='error')
+            current_app.logger.error('Does not have a supervisor'.format(current_user.email))
+        else:
+            v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data, approved=False)
+            db.session.add(v)
+            db.session.commit()
+            flash('Your vacation request has been successfully submitted and is pending approval', 'success')
+
+        current_app.logger.info('End function request_timepunch')
+        return redirect(url_for('main.request_timepunch'))
+
+
 
     current_app.logger.info('End function request_timepunch')
-    return render_template('main/request_timepunch.html', form=form)
+    return render_template('main/request_timepunch.html', form=form, vacform=vacform)
 
 
 @main.route('/review_timepunches', methods=['GET', 'POST'])
