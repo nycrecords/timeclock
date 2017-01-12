@@ -115,6 +115,7 @@ class User(UserMixin, db.Model):
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
+    vacations = db.relationship('Vacation', backref='user', lazy='dynamic')
 
     # Supervisor
     is_supervisor = db.Column(db.Boolean, default=False)
@@ -375,6 +376,18 @@ class ChangeLog(db.Model):
     old = db.Column(db.String(128))
     new = db.Column(db.String(128))
     category = db.Column(db.String(128))
+
+
+class Vacation(db.Model):
+    """
+    Model that stores vacation requests and status
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', foreign_keys=[user_id])
+    start = db.Column(db.DateTime())
+    end = db.Column(db.DateTime())
+    approved = db.Column(db.Boolean, default=False)
 
 
 login_manager.anonymous_user = AnonymousUser
