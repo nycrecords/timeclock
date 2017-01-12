@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 
 import dateutil.relativedelta
 import sqlalchemy
-from flask import session, current_app, send_file
+from flask import session, current_app, send_file, make_response
 from flask_login import current_user
 
 from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, \
@@ -92,6 +92,31 @@ def get_last_clock():
         if Event.query.filter_by(user_id=current_user.id).first() is not None:
             # If the user has clock events (at least one), find the most recent clock event.
             recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)). \
+                first().time.strftime("%b %d, %Y | %H:%M")
+            current_app.logger.info('Finished querying for most recent clock event')
+            current_app.logger.info('End function get_last_clock()')
+            return recent_event
+        else:
+            # Because the user has no clock events, we can't search for the most recent one.
+            current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
+                                    'any clock events yet'.format(current_user.email))
+            current_app.logger.info('End function get_last_clock()')
+    except:
+        current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
+        return None
+
+
+def get_last_clock_relative(user=current_user, time=datetime.now()):
+    current_app.logger.info('Start function get_last_clock()')
+    current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
+    try:
+        current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
+        if Event.query.filter_by(user_id=user.id).first() is not None:
+            # If the user has clock events (at least one), find the most recent clock event.
+            recent_event = Event.query.filter_by(user_id=user.id).\
+                filter_by(approved=True).\
+                filter(Event.time <= time).order_by(
+                sqlalchemy.desc(Event.time)). \
                 first().time.strftime("%b %d, %Y | %H:%M")
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
@@ -598,3 +623,23 @@ def generate_timesheets(emails, start, end):
                      mimetype='zip',
                      attachment_filename='timesheets.zip',
                      as_attachment=True)
+
+
+def create_csv():
+    """
+    Creates a csv file that contains all of the event data in the database
+    :return: CSV file
+    """
+    import csv
+    import io
+    si = io.StringIO()
+    writer = csv.writer(si)
+    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'note', 'ip'])
+    for event in events:
+        writer.writerow([event.id, event.user.email, event.user.first_name, event.user.last_name,
+                         event.time.strftime("%b %d, %Y %H:%M"), event.note, event.ip])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
