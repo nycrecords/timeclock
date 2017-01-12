@@ -378,13 +378,12 @@ class ChangeLog(db.Model):
     category = db.Column(db.String(128))
 
 
-class Vacation(db.Model):
+class Vacations(db.Model):
     """
     Model that stores vacation requests and status
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', foreign_keys=[user_id])
     start = db.Column(db.DateTime())
     end = db.Column(db.DateTime())
     approved = db.Column(db.Boolean, default=False)
