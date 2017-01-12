@@ -10,7 +10,7 @@ from flask_login import current_user
 
 from .. import db
 from ..email_notification import send_email
-from ..models import User, Event
+from ..models import User, Event, Vacation
 
 
 def create_timepunch(punch_type, punch_time, reason):
@@ -101,5 +101,67 @@ def approve_or_deny(event_id, approve=False):
         event.approved = False
     event.pending = False
     db.session.add(event)
+    db.session.commit()
+    current_app.logger.info('End function approve_or_deny()')
+
+def get_vacations_for_review(user_email, filter_by_email=None, status=None):
+    """
+    Queries the database for a list of timepunch requests that need to be approved or denied.
+    :param user_email: The email of the supervisor.
+    :param filter_by_email: The email of a specific user for optional filters.
+    :param approved: [String] Pending, Approved, Unapproved, All. Used for more precise filtering.
+    :return: A query of all vacation requests for the given user
+    """
+    current_app.logger.info('Start function get_timepunches_for_review()')
+    u = User.query.filter_by(email=user_email).first()
+    current_app.logger.info('Querying for vacations submitted to {}'.format(user_email))
+    vacation_query = Vacation.query.join(User).filter_by(supervisor=u).order_by(Vacation.id)
+    current_app.logger.info('Finished querying for vacations')
+
+    # Filter by emails if user provides an email
+    if filter_by_email and filter_by_email != '':
+        u = User.query.filter_by(email=filter_by_email).first()
+        if u:
+            vacation_query = vacation_query.filter(Vacation.user_id == u.id)
+        else:
+            current_app.logger.error('Tried to filter vacations from {} but no such account'
+                                     'exists'.format(filter_by_email))
+
+    # Filter by status if user provides a status
+        if status == 'Pending':
+            vacation_query = vacation_query.filter(Vacation.approved is None)
+        if status == 'Approved':
+            vacation_query = vacation_query.filter(Vacation.approved == True)
+        elif status == 'Unapproved':
+            vacation_query = vacation_query.filter(Vacation.approved == False)
+            # else status == 'All', in which case we don't need to add anything to the filter
+
+    # Check to make sure something is returned by the query
+    result = vacation_query.all()
+    if not result:
+        current_app.logger.error('No vacations found for user {}'.format(user_email))
+
+    # Last step: order timepunches by id
+    vacation_query = vacation_query.order_by(sqlalchemy.desc(Vacation.id))
+
+    current_app.logger.info('End function get_timepunches_for_review')
+    return vacation_query
+
+
+def approve_or_deny_vacation(vacation_id, approve=False):
+    """
+    Approve or deny an event.
+    :param event_id: [int] Id of the event to be marked as approved or unapproved.
+    :param approve: [bool] True to approve the event, False to unapprove
+    :return: Nothing.
+    """
+    current_app.logger.info('Start function approve_or_deny()')
+    from .modules import get_vacation_by_id
+    vac = get_vacation_by_id(vacation_id)
+    if approve:
+        vac.approved = True
+    else:
+        vac.approved = False
+    db.session.add(vac)
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')
