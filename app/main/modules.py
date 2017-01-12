@@ -600,7 +600,6 @@ def generate_timesheets(emails, start, end):
     import shutil
     import zipfile
     dirpath = tempfile.mkdtemp(dir=os.path.dirname(os.path.realpath(__file__)))
-    print(dirpath)
     for email in emails:
         events = get_events_by_date(email, start, end).all()
         output_file_name = email
@@ -608,15 +607,11 @@ def generate_timesheets(emails, start, end):
         output = generate_timesheet(events)
         f.write(output)
         f.close()
-    print("Done writing files to {}".format(dirpath))
     memoryfile = io.BytesIO()
     with zipfile.ZipFile(memoryfile, 'w') as zip:
         for root, dirs, files in os.walk(dirpath + '/'):
             for file in files:
                 zip.write(dirpath + '/' + file, arcname=file)
-        print("FILENAME", zip.filename)
-        print("FILES", zip.filelist)
-    print("Deleted directory {} and contents".format(dirpath))
     memoryfile.seek(0)
     shutil.rmtree(dirpath)
     return send_file(memoryfile,
