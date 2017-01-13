@@ -106,13 +106,15 @@ def index():
             flash("Clock submission successfully processed", category='success')
             return redirect(url_for('main.index'))
 
-    last= get_last_clock().time.strftime("%b %d, %Y | %H:%M")
+    last = get_last_clock()
+    last_time = last.time if last else ""
+    last_type = last.type if last else False
     current_app.logger.info('End function index')
     return render_template('main/index.html',
                            form=set_clock_form(),
-                           last_event=last,
+                           last_event=last_time,
                            clocked_in_users=get_clocked_in_users(),
-                           last_clock_event=get_last_clock_type(current_user.id)
+                           last_clock_event=last_type
                            )
 
 
