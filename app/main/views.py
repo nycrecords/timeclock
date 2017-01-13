@@ -26,11 +26,11 @@ from .forms import (
     TimePunchForm,
     ApproveOrDenyForm,
     FilterTimePunchForm,
-    ClearTimePunchFilterForm,
+    ClearForm,
     ChangeUserDataForm,
     AddEventForm,
     DeleteEventForm,
-    AdvancedTimesheetForm,
+    GenerateMultipleTimesheetsForm,
     RequestVacationForm,
     FilterVacationForm
 )
@@ -38,7 +38,7 @@ from .modules import (
     process_clock,
     set_clock_form,
     get_last_clock,
-    get_last_clock_relative,
+    get_last_clock,
     get_events_by_date,
     get_clocked_in_users,
     get_time_period,
@@ -106,10 +106,11 @@ def index():
             flash("Clock submission successfully processed", category='success')
             return redirect(url_for('main.index'))
 
+    last= get_last_clock().time.strftime("%b %d, %Y | %H:%M")
     current_app.logger.info('End function index')
     return render_template('main/index.html',
                            form=set_clock_form(),
-                           last_event=get_last_clock(),
+                           last_event=last,
                            clocked_in_users=get_clocked_in_users(),
                            last_clock_event=get_last_clock_type(current_user.id)
                            )
@@ -183,7 +184,7 @@ def all_history():
         flash('Event successfully deleted', category='success')
         return redirect(url_for('main.clear'))
 
-    advtimesheetform = AdvancedTimesheetForm()
+    advtimesheetform = GenerateMultipleTimesheetsForm()
     advtimesheetform.emails.choices = [(u.email, u.email) for u in User.query.all()]
     if advtimesheetform.validate_on_submit() and advtimesheetform.gen_timesheets.data:
         # TODO: THIS MESSAGE ISNT FLASHING
@@ -495,7 +496,7 @@ def request_timepunch():
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
-            past_type = get_last_clock_relative(current_user, datetime_obj).type if get_last_clock_relative(
+            past_type = get_last_clock(current_user, datetime_obj).type if get_last_clock(
                 current_user, datetime_obj) else None
 
             if past_type == (form.punch_type.data == "In"):
@@ -536,7 +537,7 @@ def review_timepunch():
     timepunch_query = get_timepunches_for_review(current_user.email)
     form = ApproveOrDenyForm(request.form)
     filter_form = FilterTimePunchForm()
-    clear_form = ClearTimePunchFilterForm()
+    clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
     print("VALIDATED:", filter_form.validate_on_submit() and filter_form.filter.data)
     if filter_form.validate_on_submit and filter_form.filter.data:
@@ -703,7 +704,7 @@ def review_vacations():
     vacation_query = get_vacations_for_review(current_user.email)
     form = ApproveOrDenyForm(request.form)  # reuse same form
     filter_form = FilterVacationForm()
-    clear_form = ClearTimePunchFilterForm()
+    clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
