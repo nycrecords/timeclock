@@ -80,6 +80,7 @@ def admin_register():
         temp_password = datetime.today().strftime('%A%-d')
         # Set default tag value to 6 ("Other")
         tag_id = 6
+
         if 'tag' in form:
             # If a tag is specified in the form, change the user's tag_id
             tag_id = form.tag.data
@@ -310,7 +311,6 @@ def password_reset(token):
         current_app.logger.info('{} is already signed in. redirecting to /index...'.format(current_user.email))
         current_app.logger.info('End function password_reset')
         return redirect(url_for('main.index'))
-
     form = PasswordResetForm()
     if form.validate_on_submit():
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -399,9 +399,8 @@ def get_sups():
     Get selected division value from the request body and generate a list of supervisors for that division.
     :return: list of supervisors for division
     """
+    sups = User.query.filter_by(is_supervisor=True).all()
+    choices = [(u.id, u.email) for u in sups]
     if request.args['division']:
         choices = get_supervisors_for_division(request.args['division'])
-    else:
-        sups = User.query.filter_by(is_supervisor=True).all()
-        choices = [(u.id, u.email) for u in sups]
     return jsonify(choices)
