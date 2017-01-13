@@ -150,10 +150,10 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
 
 def approve_or_deny_vacation(vacation_id, approve=False):
     """
-    Approve or deny an event.
-    :param event_id: [int] Id of the event to be marked as approved or unapproved.
-    :param approve: [bool] True to approve the event, False to unapprove
-    :return: Nothing.
+    Approve or deny a vacation.
+    :param event_id: [int] Id of the vacation to be marked as approved or unapproved.
+    :param approve: [bool] True to approve the vacation, False to unapprove
+    :return: None
     """
     current_app.logger.info('Start function approve_or_deny()')
     from .modules import get_vacation_by_id
