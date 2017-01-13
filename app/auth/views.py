@@ -29,37 +29,6 @@ from ..models import User, Role
 from ..utils import InvalidResetToken
 
 
-@auth.route('/register', methods=['GET', 'POST'])
-def register():
-    """
-    Renders the HTML page where users can register new accounts. If the RegistrationForm meets criteria, a new user is
-    written into the database.
-
-    :return: HTML page for registration.
-    """
-    current_app.logger.info('Start function register() [VIEW]')
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(email=form.email.data.lower(),
-                    password=form.password.data,
-                    first_name=form.first_name.data,
-                    last_name=form.last_name.data,
-                    division=form.division.data,
-                    tag_id=form.tag.data,
-                    budget_code=form.budget_code.data,
-                    object_code=form.object_code.data,
-                    object_name=form.object_name.data,
-                    validated=True)
-        db.session.add(user)
-        db.session.commit()
-        current_app.logger.info('Successfully registered user {}'.format(user.email))
-        flash('User successfully registered.', category='success')
-        current_app.logger.info('End function register() [VIEW]')
-        return redirect(url_for('auth.login'))
-    current_app.logger.info('End function register() [VIEW]')
-    return render_template('auth/register.html', form=form)
-
-
 @auth.route('/admin_register', methods=['GET', 'POST'])
 @admin_required
 def admin_register():
@@ -89,6 +58,7 @@ def admin_register():
                     )
         current_app.logger.info('End function admin_register() [VIEW]')
         return redirect(url_for('main.index'))
+
     current_app.logger.info('End function admin_register() [VIEW]')
     return render_template('auth/admin_register.html', form=form)
 
@@ -110,51 +80,51 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=(form.email.data).lower()).first()
-
-        if user and user.login_attempts > 2:
-            # Too many invalid attempts
-            current_app.logger.info('{} has been locked out'.format(user.email))
-            flash('You have too many invalid login attempts. You must reset your password.',
-                  category='error')
-            current_app.logger.info('End function login() [VIEW]')
-            return redirect(url_for('auth.password_reset_request'))
-
-        if user is not None and user.verify_password(form.password.data):
-            # Credentials successfully submitted: log the user in and set their login_attempts to 0
-            login_user(user)
-            user.login_attempts = 0
-            db.session.add(user)
-            db.session.commit()
-            current_app.logger.info('{} successfully logged in'.format(current_user.email))
-
-            # Check to ensure password isn't outdated
-            if (datetime.today() - current_user.password_list.last_changed).days > 90:
-                # If user's password has expired (not update in 90 days)
-                current_app.logger.info('{}\'s password hasn\'t been updated in 90 days: account invalidated.'
-                                        .format(current_user.email))
-                current_user.validated = False
-                db.session.add(current_user)
-                db.session.commit()
-                flash('You haven\'t changed your password in 90 days. You must re-validate your account',
-                      category='error')
-                current_app.logger.info('End function login() [VIEW]')
-                return redirect(url_for('auth.change_password'))
-
-            if (datetime.today() - current_user.password_list.last_changed).days > 75:
-                # If user's password is about to expire (not updated in 75 days)
-                days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
-                flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
-            current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
-            current_app.logger.info('End function login() [VIEW]')
-            return redirect(request.args.get('next') or url_for('main.index'))
+        user = User.query.filter_by(email=form.email.data.lower()).first()
 
         if user:
-            # If the user exists in the database but entered incorrect information
-            current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
-            user.login_attempts += 1
-            db.session.add(user)
-            db.session.commit()
+            if user.login_attempts > 2:
+                # Too many invalid attempts
+                current_app.logger.info('{} has been locked out'.format(user.email))
+                flash('You have too many invalid login attempts. You must reset your password.',
+                      category='error')
+                current_app.logger.info('End function login() [VIEW]')
+                return redirect(url_for('auth.password_reset_request'))
+
+            elif user.verify_password(form.password.data):
+                # Credentials successfully submitted: log the user in and set their login_attempts to 0
+                login_user(user)
+                user.login_attempts = 0
+                db.session.add(user)
+                db.session.commit()
+                current_app.logger.info('{} successfully logged in'.format(current_user.email))
+
+                # Check to ensure password isn't outdated
+                if (datetime.today() - current_user.password_list.last_changed).days > 90:
+                    # If user's password has expired (not update in 90 days)
+                    current_app.logger.info('{}\'s password hasn\'t been updated in 90 days: account invalidated.'
+                                            .format(current_user.email))
+                    current_user.validated = False
+                    db.session.add(current_user)
+                    db.session.commit()
+                    flash('You haven\'t changed your password in 90 days. You must re-validate your account',
+                          category='error')
+                    current_app.logger.info('End function login() [VIEW]')
+                    return redirect(url_for('auth.change_password'))
+                elif (datetime.today() - current_user.password_list.last_changed).days > 75:
+                    # If user's password is about to expire (not updated in 75 days)
+                    days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
+                    flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
+                current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
+                current_app.logger.info('End function login() [VIEW]')
+                return redirect(request.args.get('next') or url_for('main.index'))
+
+            else:
+                # If the user exists in the database but entered incorrect information
+                current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
+                user.login_attempts += 1
+                db.session.add(user)
+                db.session.commit()
         flash('Invalid username or password', category='error')
     current_app.logger.info('End function login() [VIEW]')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
@@ -245,7 +215,7 @@ def password_reset_request():
         current_app.logger.info('Tried to submit a password reset request with account email {}'.format(
             form.email.data))
         current_app.logger.info('Querying for user with given email: {}'.format(form.email.data))
-        user = User.query.filter_by(email=(form.email.data).lower()).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         current_app.logger.info('Finished querying for user with given email')
         if user:
             # If the user exists, generate a reset token and send an email containing a link to reset the user's
@@ -379,3 +349,34 @@ def get_sups():
     if request.args['division']:
         choices = get_supervisors_for_division(request.args['division'])
     return jsonify(choices)
+
+
+@auth.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+    Renders the HTML page where users can register new accounts. If the RegistrationForm meets criteria, a new user is
+    written into the database.
+
+    :return: HTML page for registration.
+    """
+    current_app.logger.info('Start function register() [VIEW]')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data.lower(),
+                    password=form.password.data,
+                    first_name=form.first_name.data,
+                    last_name=form.last_name.data,
+                    division=form.division.data,
+                    tag_id=form.tag.data,
+                    budget_code=form.budget_code.data,
+                    object_code=form.object_code.data,
+                    object_name=form.object_name.data,
+                    validated=True)
+        db.session.add(user)
+        db.session.commit()
+        current_app.logger.info('Successfully registered user {}'.format(user.email))
+        flash('User successfully registered.', category='success')
+        current_app.logger.info('End function register() [VIEW]')
+        return redirect(url_for('auth.login'))
+    current_app.logger.info('End function register() [VIEW]')
+    return render_template('auth/register.html', form=form)
