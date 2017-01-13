@@ -59,9 +59,9 @@ class AdminFilterEventsForm(Form):
 
     def validate_email(self, email):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that a user with the given email exists in the system.
 
-        :param email: The supervisor's email
+        :param email: The filtered email
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
@@ -91,9 +91,9 @@ class CreatePayRateForm(Form):
 
     def validate_email(self, email):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that a user with the given email exists in the system.
 
-        :param email: The supervisor's email
+        :param email: The filtered email
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
@@ -101,7 +101,7 @@ class CreatePayRateForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-class ApproveOrDenyTimePunchForm(Form):
+class ApproveOrDenyForm(Form):
     """
     Form administrators use to approve or deny a TimePunch. Implemented in review_timepunches.html.
     """

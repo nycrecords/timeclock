@@ -42,7 +42,7 @@ def admin_register():
 
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
-        create_user(form.email.data.lower(),
+        email = create_user(form.email.data.lower(),
                     temp_password,
                     form.first_name.data,
                     form.last_name.data,
@@ -54,8 +54,9 @@ def admin_register():
                     form.budget_code.data,
                     form.object_code.data,
                     form.object_name.data,
-                    new=True
                     )
+        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(email),
+              category='success')
         current_app.logger.info('End function admin_register() [VIEW]')
         return redirect(url_for('main.index'))
 
