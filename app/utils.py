@@ -18,8 +18,8 @@ divisions = [
 ]
 
 roles = [
-    ('User', 'User'),
-    ('Administrator', 'Administrator')
+    (1, 'User'),
+    (2, 'Administrator')
 ]
 
 tags = [
