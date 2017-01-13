@@ -2,7 +2,7 @@
 .. module:: auth.views.
 
    :synopsis: Handles all authentication URL endpoints for the
-   timeclock application
+   TimeClock application
 """
 
 import re
@@ -28,14 +28,13 @@ def check_password_requirements(email, old_password, password, password_confirma
     user_password = User.query.filter_by(email=email).first().password_hash
 
     if not check_password_hash(pwhash=user_password, password=old_password):
-        current_app.logger.info('%s tried to change their password but failed: entered invalid old password' %
-                                current_user.email)
+        current_app.logger.info('{} tried to change their password but failed: entered invalid old password'.format(
+                                current_user.email))
         flash('Your old password did not match', category='warning')
         return False
     if password != password_confirmation:
-        current_app.logger.info('%s tried to change their password but failed: passwords did not match' %
-                                current_user.email)
-        flash('Your passwords do not match', category='warning')
+        current_app.logger.info('{} tried to change their password but failed: passwords did not match'.format(
+                                current_user.email))
         return False
 
     # Use a score based system to ensure that users match password requirements

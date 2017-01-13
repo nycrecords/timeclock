@@ -104,6 +104,7 @@ def approve_or_deny(event_id, approve=False):
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')
 
+
 def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
@@ -127,7 +128,7 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
             current_app.logger.error('Tried to filter vacations from {} but no such account'
                                      'exists'.format(filter_by_email))
 
-    # Filter by status if user provides a status
+            # Filter by status if user provides a status
         if status == 'Pending':
             vacation_query = vacation_query.filter(Vacation.approved is None)
         if status == 'Approved':
