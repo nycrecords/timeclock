@@ -2,7 +2,7 @@
 .. module:: auth.views.
 
    :synopsis: Handles all authentication URL endpoints for the
-   timeclock application
+   TimeClock application
 """
 from datetime import datetime
 
@@ -21,7 +21,7 @@ from .forms import (
     PasswordResetRequestForm,
     ChangePasswordForm
 )
-from .modules import check_password_requirements, get_supervisors_for_division
+from .modules import check_password_requirements, get_supervisors_for_division, create_user
 from .. import db
 from ..decorators import admin_required
 from ..email_notification import send_email
@@ -40,17 +40,12 @@ def register():
     current_app.logger.info('Start function register() [VIEW]')
     form = RegistrationForm()
     if form.validate_on_submit():
-        # Set default tag value to 6 ("Other")
-        tag_id = 6
-        if 'tag' in form:
-            # If a tag is specified in the form, change the user's tag_id
-            tag_id = form.tag.data
-        user = User(email=(form.email.data).lower(),
+        user = User(email=form.email.data.lower(),
                     password=form.password.data,
                     first_name=form.first_name.data,
                     last_name=form.last_name.data,
                     division=form.division.data,
-                    tag_id=tag_id,
+                    tag_id=form.tag.data,
                     budget_code=form.budget_code.data,
                     object_code=form.object_code.data,
                     object_name=form.object_name.data,
@@ -78,42 +73,22 @@ def admin_register():
 
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
-        # Set default tag value to 6 ("Other")
-        tag_id = 6
-
-        if 'tag' in form:
-            # If a tag is specified in the form, change the user's tag_id
-            tag_id = form.tag.data
-        user = User(email=(form.email.data).lower(),
-                    password=temp_password,
-                    first_name=form.first_name.data,
-                    last_name=form.last_name.data,
-                    division=form.division.data,
-                    role=Role.query.filter_by(name=form.role.data).first(),
-                    tag_id=tag_id,
-                    is_supervisor=form.is_supervisor.data,
-                    supervisor=User.query.filter_by(id=form.supervisor_email.data)
-                    .first(),
-                    budget_code=form.budget_code.data
+        create_user(form.email.data.lower(),
+                    temp_password,
+                    form.first_name.data,
+                    form.last_name.data,
+                    form.division.data,
+                    form.role.data,
+                    form.tag.data,
+                    form.is_supervisor.data,
+                    form.supervisor_email.data,
+                    form.budget_code.data,
+                    form.object_code.data,
+                    form.object_name.data,
+                    new=True
                     )
-        user.password_list.update(user.password_hash)
-        db.session.add(user)
-        db.session.commit()
-        current_app.logger.info('{} successfully registered user with email {}'.format(current_user.email, user.email))
-
-        send_email(user.email,
-                   'DORIS TimeClock - New User Registration',
-                   'auth/email/new_user',
-                   user=user,
-                   temp_password=temp_password)
-
-        current_app.logger.info('Sent login instructions to {}'.format(user.email))
-        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(user.email),
-              category='success')
-
         current_app.logger.info('End function admin_register() [VIEW]')
         return redirect(url_for('main.index'))
-
     current_app.logger.info('End function admin_register() [VIEW]')
     return render_template('auth/admin_register.html', form=form)
 

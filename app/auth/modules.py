@@ -11,7 +11,10 @@ from flask import flash, current_app
 from flask_login import current_user
 from werkzeug.security import check_password_hash
 
-from ..models import User
+from .. import db
+from ..email_notification import send_email
+from ..models import User, Role
+
 
 
 def check_password_requirements(email, old_password, password, password_confirmation):
@@ -22,12 +25,13 @@ def check_password_requirements(email, old_password, password, password_confirma
     :param old_password: Original password
     :param password: Password that needs to be checked.
     :param password_confirmation: Confirmation of new password
-    :return: Boolean (True if valid, False if not)
+    :return: Whether or not the new password is valid [Boolean]
     """
 
     user_password = User.query.filter_by(email=email).first().password_hash
 
     if not check_password_hash(pwhash=user_password, password=old_password):
+        # If the user enters the wrong current password
         current_app.logger.info('{} tried to change their password but failed: entered invalid old password'.format(
                                 current_user.email))
         flash('Your old password did not match', category='warning')
@@ -46,9 +50,8 @@ def check_password_requirements(email, old_password, password, password_confirma
         # If the password contains lowercase and uppercase letters, increment score
         score += 1
     if score < 2:
-        current_app.logger.info(current_user.email +
-                                'tried to change their password but failed: new password missing uppercase letter '
-                                'or number ')
+        current_app.logger.info('{} tried to change their password but failed: new password missing uppercase letter '
+                                'or number'.format(current_user.email))
         flash('Your new password must contain eight characters and at least one uppercase letter and one number',
               category='warning')
         return False
@@ -64,3 +67,52 @@ def get_supervisors_for_division(div):
     """
     users = User.query.filter_by(division=div).filter_by(is_supervisor=True).all()
     return [(user.id, user.email) for user in users]
+
+
+def create_user(email, password, first, last, div, role, tag, is_sup, sup, budget_code=None, object_code=None,
+                object_name=None, new=False):
+    """
+    Creates a user and adds it to the database. Also updates the user's password_list and emails instructions if the user
+    is new.
+    :param email: User's email
+    :param password: User's password
+    :param first: User's first name
+    :param last: User's last name
+    :param div: User's division
+    :param role: User's role
+    :param tag: User's tag [int]
+    :param is_sup: User's status as a supervisor [bool]
+    :param sup: User's supervisor's id [int]
+    :param budget_code: User's budget code
+    :param object_code: User's object code
+    :param object_name: User's object name
+    :param new: Whether or not the user is new (if new=True, the user will be sent an email containing login instructions)
+    :return: None
+    """
+    r = Role.query.filter_by(id=role).first()
+    s = User.query.filter_by(id=sup).first()
+    u = User(email=email, first_name=first, last_name=last, password=password,
+             division=div, role=r, tag_id=tag, is_supervisor=is_sup, supervisor=s, budget_code=budget_code,
+             object_code=object_code, object_name=object_name)
+    db.session.add(u)
+    db.session.commit()
+    u.password_list.update(u.password_hash)
+    current_app.logger.info('{} successfully registered user with email {}'.format(current_user.email, u.email))
+    if new:
+        def send_new_user_email(user, temp_password):
+            """
+            Sends a user an email instructing them on how to set up their new account.
+            :param user: The user to send the email to
+            :param temp_password: The initial temporary password the user is sent to sign up with
+            :return: None
+            """
+            send_email(user.email,
+                       'DORIS TimeClock - New User Registration',
+                       'auth/email/new_user',
+                       user=user,
+                       temp_password=temp_password)
+            current_app.logger.info('Sent login instructions to {}'.format(user.email))
+
+        send_new_user_email(u, password)
+        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(u.email),
+              category='success')
