@@ -69,8 +69,23 @@ def get_supervisors_for_division(div):
     return [(user.id, user.email) for user in users]
 
 
+def _send_new_user_email(user, temp_password):
+        """
+        Sends a user an email instructing them on how to set up their new account.
+        :param user: The user to send the email to
+        :param temp_password: The initial temporary password the user is sent to sign up with
+        :return: None
+        """
+        send_email(user.email,
+                   'DORIS TimeClock - New User Registration',
+                   'auth/email/new_user',
+                   user=user,
+                   temp_password=temp_password)
+        current_app.logger.info('Sent login instructions to {}'.format(user.email))
+
+
 def create_user(email, password, first, last, div, role, tag, is_sup, sup, budget_code=None, object_code=None,
-                object_name=None, new=False):
+                object_name=None):
     """
     Creates a user and adds it to the database. Also updates the user's password_list and emails instructions if the user
     is new.
@@ -86,33 +101,16 @@ def create_user(email, password, first, last, div, role, tag, is_sup, sup, budge
     :param budget_code: User's budget code
     :param object_code: User's object code
     :param object_name: User's object name
-    :param new: Whether or not the user is new (if new=True, the user will be sent an email containing login instructions)
     :return: None
     """
-    r = Role.query.filter_by(id=role).first()
-    s = User.query.filter_by(id=sup).first()
+    role_obj = Role.query.filter_by(id=role).first()
+    sup_obj = User.query.filter_by(id=sup).first()
     u = User(email=email, first_name=first, last_name=last, password=password,
-             division=div, role=r, tag_id=tag, is_supervisor=is_sup, supervisor=s, budget_code=budget_code,
+             division=div, role=role_obj, tag_id=tag, is_supervisor=is_sup, supervisor=sup_obj, budget_code=budget_code,
              object_code=object_code, object_name=object_name)
     db.session.add(u)
     db.session.commit()
     u.password_list.update(u.password_hash)
+    _send_new_user_email(u, password)
     current_app.logger.info('{} successfully registered user with email {}'.format(current_user.email, u.email))
-    if new:
-        def send_new_user_email(user, temp_password):
-            """
-            Sends a user an email instructing them on how to set up their new account.
-            :param user: The user to send the email to
-            :param temp_password: The initial temporary password the user is sent to sign up with
-            :return: None
-            """
-            send_email(user.email,
-                       'DORIS TimeClock - New User Registration',
-                       'auth/email/new_user',
-                       user=user,
-                       temp_password=temp_password)
-            current_app.logger.info('Sent login instructions to {}'.format(user.email))
-
-        send_new_user_email(u, password)
-        flash('User successfully registered.\nAn email with login instructions has been sent to {}'.format(u.email),
-              category='success')
+    return u.email

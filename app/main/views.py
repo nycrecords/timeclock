@@ -24,7 +24,7 @@ from .forms import (
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
-    ApproveOrDenyTimePunchForm,
+    ApproveOrDenyForm,
     FilterTimePunchForm,
     ClearTimePunchFilterForm,
     ChangeUserDataForm,
@@ -534,7 +534,7 @@ def review_timepunch():
     """
     current_app.logger.info('Start function review_timepunch()')
     timepunch_query = get_timepunches_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm(request.form)
+    form = ApproveOrDenyForm(request.form)
     filter_form = FilterTimePunchForm()
     clear_form = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
@@ -701,7 +701,7 @@ def review_vacations():
     """
     current_app.logger.info('Start function review_vacations()')
     vacation_query = get_vacations_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm(request.form)  # reuse same form
+    form = ApproveOrDenyForm(request.form)  # reuse same form
     filter_form = FilterVacationForm()
     clear_form = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
