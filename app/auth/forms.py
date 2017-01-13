@@ -21,7 +21,7 @@ class RegistrationForm(Form):
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
     password = PasswordField('Password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match')])
+        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
@@ -200,7 +200,7 @@ class ChangePasswordForm(Form):
     """Form for changing password"""
     old_password = PasswordField('Old password', validators=[DataRequired()])
     password = PasswordField('New password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match')])
+        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
     password2 = PasswordField('Confirm new password', validators=[DataRequired()])
     submit = SubmitField('Update Password')
 
