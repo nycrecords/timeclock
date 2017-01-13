@@ -119,8 +119,8 @@ def get_last_clock_relative(user=current_user, time=datetime.now()):
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=user.id).first() is not None:
             # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=user.id).\
-                filter_by(approved=True).\
+            recent_event = Event.query.filter_by(user_id=user.id). \
+                filter_by(approved=True). \
                 filter(Event.time <= time).order_by(
                 sqlalchemy.desc(Event.time)). \
                 first()
@@ -371,6 +371,7 @@ def get_event_by_id(event_id):
     :return: [Event] An Event object.
     """
     return Event.query.filter_by(id=event_id).first()
+
 
 def get_vacation_by_id(vac_id):
     """

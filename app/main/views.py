@@ -495,7 +495,8 @@ def request_timepunch():
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
-            past_type = get_last_clock_relative(current_user, datetime_obj).type if get_last_clock_relative(current_user, datetime_obj) else None
+            past_type = get_last_clock_relative(current_user, datetime_obj).type if get_last_clock_relative(
+                current_user, datetime_obj) else None
 
             if past_type == (form.punch_type.data == "In"):
                 flash('Timepunch request failed: you would have two consecutive clocks of the same type', 'error')
@@ -511,15 +512,14 @@ def request_timepunch():
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
-            v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data, approved=False)
+            v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
+                         approved=False)
             db.session.add(v)
             db.session.commit()
             flash('Your vacation request has been successfully submitted and is pending approval', 'success')
 
         current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
-
-
 
     current_app.logger.info('End function request_timepunch')
     return render_template('main/request_timepunch.html', form=form, vacform=vacform)
@@ -701,7 +701,7 @@ def review_vacations():
     """
     current_app.logger.info('Start function review_vacations()')
     vacation_query = get_vacations_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm(request.form) #reuse same form
+    form = ApproveOrDenyTimePunchForm(request.form)  # reuse same form
     filter_form = FilterVacationForm()
     clear_form = ClearTimePunchFilterForm()
     page = request.args.get('page', 1, type=int)
@@ -715,8 +715,8 @@ def review_vacations():
 
         # Filter through timepunches based on user selections
         vacation_query = get_vacations_for_review(current_user.email,
-                                                     filter_form.email.data,
-                                                     filter_form.status.data)
+                                                  filter_form.email.data,
+                                                  filter_form.status.data)
 
     if clear_form.validate_on_submit() and clear_form.clear.data:
         # User submits the clear form
