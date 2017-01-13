@@ -495,8 +495,9 @@ def request_timepunch():
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
-            past_type = get_last_clock_relative(current_user, datetime_obj).type
-            if past_type == form.punch_type.data:
+            past_type = get_last_clock_relative(current_user, datetime_obj).type if get_last_clock_relative(current_user, datetime_obj) else None
+
+            if past_type == (form.punch_type.data == "In"):
                 flash('Timepunch request failed: you would have two consecutive clocks of the same type', 'error')
                 return redirect(url_for('main.request_timepunch'))
             create_timepunch(form.punch_type.data, datetime_obj, form.note.data)

@@ -107,6 +107,12 @@ def get_last_clock():
 
 
 def get_last_clock_relative(user=current_user, time=datetime.now()):
+    """
+    gets the last valid clock for a user before the given time
+    :param user: The user whose clocks to query
+    :param time: The time
+    :return: The time of the event
+    """
     current_app.logger.info('Start function get_last_clock()')
     current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
     try:
@@ -117,7 +123,7 @@ def get_last_clock_relative(user=current_user, time=datetime.now()):
                 filter_by(approved=True).\
                 filter(Event.time <= time).order_by(
                 sqlalchemy.desc(Event.time)). \
-                first().time.strftime("%b %d, %Y | %H:%M")
+                first()
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
@@ -559,6 +565,13 @@ def check_total_clock_count(events):
 
 
 def add_event(user_id, time, type):
+    """
+    Adds an event to the database
+    :param user_id: The user id to be associated with the event
+    :param time: Time of the event
+    :param type: The type of the event: True is a clock in, False is a clock out [boolean]
+    :return: None
+    """
     e = Event(type=type, user_id=user_id, time=time)
     db.session.add(e)
     db.session.commit()
@@ -581,6 +594,11 @@ def delete_event(event_id):
 
 # This breaks very very badly when there are too many clock events in the period, and doesn't create new pages
 def generate_timesheet(events):
+    """
+    Creates a Bytes object timesheet
+    :param events: List of events to be included in the timesheet
+    :return: Timesheet (as a Bytes obj)
+    """
     current_app.logger.info('Beginning to generate timesheet pdf...')
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
@@ -602,6 +620,13 @@ def generate_timesheet(events):
 
 
 def generate_timesheets(emails, start, end):
+    """
+    Creates a zipfile that contains individual timesheets for each email between the start and end dates.
+    :param emails: List of users' emails
+    :param start: Start date for timesheet [datetime]
+    :param end: End date for timesheet [datetime]
+    :return: Response containing a zipfile
+    """
     import tempfile
     import os
     import io
