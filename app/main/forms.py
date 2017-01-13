@@ -225,6 +225,9 @@ class ChangeUserDataForm(Form):
 
 
 class AdvancedTimesheetForm(Form):
+    """
+    Form to generate multiple timesheets (used only by administrators)
+    """
     emails = SelectMultipleField(choices=[], validators=[DataRequired()], coerce=str)
     start_date = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
     # start_time = StringField(u'Start Time (24-hour)', default="9:00", validators=[DataRequired()])
@@ -234,6 +237,9 @@ class AdvancedTimesheetForm(Form):
 
 
 class RequestVacationForm(Form):
+    """
+    Form for users to request a vacation.
+    """
     vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
     vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
     vac_request = SubmitField("Submit Request")

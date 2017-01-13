@@ -684,6 +684,10 @@ def user_profile(username):
 @login_required
 @admin_required
 def export_events():
+    """
+    Exports all events in the db to a csv file
+    :return: CSV file response
+    """
     return create_csv()
 
 
@@ -691,6 +695,10 @@ def export_events():
 @login_required
 @admin_required
 def review_vacations():
+    """
+    Creates a page on which administrators can review vacation requests, and accept or deny them.
+    :return: HTML page containing a table of vacations and a filter to specify vacations to review (by user and status)
+    """
     current_app.logger.info('Start function review_vacations()')
     vacation_query = get_vacations_for_review(current_user.email)
     form = ApproveOrDenyTimePunchForm(request.form) #reuse same form
