@@ -36,6 +36,15 @@ class TimePunchForm(Form):
     submit = SubmitField("Submit Request")
 
 
+class RequestVacationForm(Form):
+    """
+    Form for users to request a vacation.
+    """
+    vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
+    vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
+    vac_request = SubmitField("Submit Request")
+
+
 class AdminFilterEventsForm(Form):
     """
     Form for Administrators to filter all clock events.
@@ -103,7 +112,8 @@ class CreatePayRateForm(Form):
 
 class ApproveOrDenyForm(Form):
     """
-    Form administrators use to approve or deny a TimePunch. Implemented in review_timepunches.html.
+    Form administrators use to approve or deny a request.
+    Implemented in review_timepunches.html and review_vacations.html
     """
     approve = SubmitField("")
     deny = SubmitField("")
@@ -166,9 +176,9 @@ class FilterTimePunchForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-class ClearTimePunchFilterForm(Form):
+class ClearForm(Form):
     """
-    Form administrators use to clear their TimePunch filter.
+    Form administrators use to clear their filters.
     """
     clear = SubmitField("Clear Filter")
 
@@ -224,22 +234,12 @@ class ChangeUserDataForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-class AdvancedTimesheetForm(Form):
+class GenerateMultipleTimesheetsForm(Form):
     """
     Form to generate multiple timesheets (used only by administrators)
     """
     emails = SelectMultipleField(choices=[], validators=[DataRequired()], coerce=str)
     start_date = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
-    # start_time = StringField(u'Start Time (24-hour)', default="9:00", validators=[DataRequired()])
     end_date = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
-    # end_time = StringField(u'End Time (24-hour)', default="9:00", validators=[DataRequired()])
     gen_timesheets = SubmitField("Generate Timesheets")
 
-
-class RequestVacationForm(Form):
-    """
-    Form for users to request a vacation.
-    """
-    vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
-    vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
-    vac_request = SubmitField("Submit Request")

@@ -30,7 +30,7 @@ def process_clock(note_data, ip=None):
         # If the last clock is an IN
         # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
         # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
-        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds / float(3600) >= 8:
+        if (datetime.now() - get_last_clock().time).seconds / float(3600) >= 8:
             send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
                        '/main/email/employee_overtime', email=current_user.email)
 
@@ -80,33 +80,33 @@ def is_clocked(user_id=None):
         return None
 
 
-def get_last_clock():
-    """
-    Obtains the last clock in or clock out instance created by this user.
-    :return: Formatted time of last clock event
-    """
-    current_app.logger.info('Start function get_last_clock()')
-    current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
-    try:
-        current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
-        if Event.query.filter_by(user_id=current_user.id).first() is not None:
-            # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)). \
-                first().time.strftime("%b %d, %Y | %H:%M")
-            current_app.logger.info('Finished querying for most recent clock event')
-            current_app.logger.info('End function get_last_clock()')
-            return recent_event
-        else:
-            # Because the user has no clock events, we can't search for the most recent one.
-            current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
-                                    'any clock events yet'.format(current_user.email))
-            current_app.logger.info('End function get_last_clock()')
-    except:
-        current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
-        return None
+# def get_last_clock():
+#     """
+#     Obtains the last clock in or clock out instance created by this user.
+#     :return: Formatted time of last clock event
+#     """
+#     current_app.logger.info('Start function get_last_clock()')
+#     current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
+#     try:
+#         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
+#         if Event.query.filter_by(user_id=current_user.id).first() is not None:
+#             # If the user has clock events (at least one), find the most recent clock event.
+#             recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)). \
+#                 first().time.strftime("%b %d, %Y | %H:%M")
+#             current_app.logger.info('Finished querying for most recent clock event')
+#             current_app.logger.info('End function get_last_clock()')
+#             return recent_event
+#         else:
+#             # Because the user has no clock events, we can't search for the most recent one.
+#             current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
+#                                     'any clock events yet'.format(current_user.email))
+#             current_app.logger.info('End function get_last_clock()')
+#     except:
+#         current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
+#         return None
 
 
-def get_last_clock_relative(user=current_user, time=datetime.now()):
+def get_last_clock(user=current_user, time=datetime.now()):
     """
     gets the last valid clock for a user before the given time
     :param user: The user whose clocks to query
