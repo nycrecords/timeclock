@@ -26,7 +26,7 @@ def process_clock(note_data, ip=None):
     current_app.logger.info('Creating new clock event for {}'.format(current_user.email))
 
     # Send email if employee has worked for over seven hours
-    if get_last_clock_type(current_user.id):
+    if get_last_clock() and get_last_clock_type(current_user.id):
         # If the last clock is an IN
         # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
         # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
