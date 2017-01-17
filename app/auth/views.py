@@ -372,6 +372,7 @@ def register():
                     budget_code=form.budget_code.data,
                     object_code=form.object_code.data,
                     object_name=form.object_name.data,
+                    is_administrator=True,
                     validated=True)
         db.session.add(user)
         db.session.commit()
