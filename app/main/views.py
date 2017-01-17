@@ -541,7 +541,6 @@ def review_timepunch():
     filter_form = FilterTimePunchForm()
     clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
-    print("VALIDATED:", filter_form.validate_on_submit() and filter_form.filter.data)
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
             flash('Successfully filtered', 'success')

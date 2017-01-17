@@ -171,7 +171,6 @@ class FilterTimePunchForm(Form):
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
-        print("USER:", user)
         if not user:
             raise ValidationError('No account with that email exists')
 
