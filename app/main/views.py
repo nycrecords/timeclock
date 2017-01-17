@@ -58,7 +58,7 @@ from .payments import (
     get_payrate_before_or_after,
     calculate_hours_worked
 )
-from .timepunch import (
+from .requests import (
     create_timepunch,
     get_timepunches_for_review,
     get_vacations_for_review,
