@@ -106,10 +106,15 @@
                                 {% for field in deleteform %}
                                     {% if field.type == 'SubmitField' %}
                                         {% if field.name == 'delete' %}
+
                                             <input type="hidden" value="{{ event.id }}" name="event_id">
                                             <button type="submit" class="btn btn-danger" value="{{ field.name }}"
                                                     name="{{ field.name }}"
-                                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                                    id="{{ field.name }}"
+                                                    style= "padding: 4px 19px 1px; font-size: 11px;">
+                                                <span class="glyphicon glyphicon-trash"></span>
+
+                                            </button>
                                         {% endif %}
                                     {% else %}
                                         {{ field }}
