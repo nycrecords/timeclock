@@ -107,7 +107,7 @@ def index():
             return redirect(url_for('main.index'))
 
     last = get_last_clock()
-    last_time = last.time if last else ""
+    last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
     last_type = last.type if last else False
     current_app.logger.info('End function index')
     return render_template('main/index.html',
