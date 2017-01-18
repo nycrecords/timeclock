@@ -242,3 +242,6 @@ class GenerateMultipleTimesheetsForm(Form):
     end_date = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
     gen_timesheets = SubmitField("Generate Timesheets")
 
+
+class ExportForm(Form):
+    export = SubmitField("Export")

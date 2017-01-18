@@ -615,7 +615,7 @@ def generate_timesheets(emails, start, end):
                      as_attachment=True)
 
 
-def create_csv():
+def create_csv(events=None):
     """
     Creates a csv file that contains all of the event data in the database
     :return: CSV file
@@ -624,11 +624,12 @@ def create_csv():
     import io
     si = io.StringIO()
     writer = csv.writer(si)
-    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
-    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'note', 'ip'])
+    if not events:
+        events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'type', 'note', 'ip'])
     for event in events:
         writer.writerow([event.id, event.user.email, event.user.first_name, event.user.last_name,
-                         event.time.strftime("%b %d, %Y %H:%M"), event.note, event.ip])
+                         event.time.strftime("%b %d, %Y %H:%M"), 'IN' if event.type else 'OUT', event.note, event.ip])
     output = make_response(si.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"

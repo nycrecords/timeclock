@@ -32,7 +32,8 @@ from .forms import (
     DeleteEventForm,
     GenerateMultipleTimesheetsForm,
     RequestVacationForm,
-    FilterVacationForm
+    FilterVacationForm,
+    ExportForm
 )
 from .modules import (
     process_clock,
@@ -145,7 +146,9 @@ def all_history():
 
     page = request.args.get('page', 1, type=int)
 
-    if form.validate_on_submit():
+    if form.validate_on_submit() and (form.submit.data or form.last_month.data
+                                      or form.this_month.data or form.last_week.data or
+                                      form.this_week.data or form.last_day.data or form.this_day.data):
         time_period = process_time_periods(form)
         session['first_date'] = time_period[0]
         session['last_date'] = time_period[1]
@@ -190,6 +193,12 @@ def all_history():
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
 
+    exportform = ExportForm()
+    if exportform.validate_on_submit() and exportform.export.data:
+        return create_csv(events_query.all())
+        flash("Succesfully exported events in query")
+
+
     # Pagination
     pagination = events_query.paginate(
         page, per_page=15,
@@ -209,6 +218,7 @@ def all_history():
                            addform=addform,
                            deleteform=deleteform,
                            advtimesheetform=advtimesheetform,
+                           exportform=exportform,
                            pagination=pagination,
                            tags=tags,
                            generation_events=events_query.all(),
