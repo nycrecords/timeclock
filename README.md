@@ -1,6 +1,5 @@
 # README #
 
-An introduction to the New York City Department of Education's TimeClock application.
 
 ## About ##
 
