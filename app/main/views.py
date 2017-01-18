@@ -697,7 +697,6 @@ def export_events():
 
 @main.route('/review_vacations', methods=['GET', 'POST'])
 @login_required
-@admin_required
 def review_vacations():
     """
     Creates a page on which administrators can review vacation requests, and accept or deny them.
