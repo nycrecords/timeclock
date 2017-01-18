@@ -10,22 +10,22 @@ The objective is to make TimeClock as encompassing as possible, to provide a con
 
 TimeClock is developed and maintained by the New York City Department of Records.
 
-* Official Production Version: 1.0 (stable)
-* Current Development Version: 2.0
+- Official Production Version: 1.0 (stable)
+- Current Development Version: 2.0
 
 
 ### Get Started ###
 
 Here, you can find information on how to set up and deploy your own version of TimeClock. TimeClock requires Python 3.5.1+, Flask, and Postgresql. A list of all required packages can be found in the `requirements.txt` file in the root directory of the repository. 
 
-* Initialization
+- Initialization
 To get started, download the source code and enter the top directory. We highly recommend [setting up a virtual environment](https://virtualenv.pypa.io/en/stable/) within which you can download and run necessary files. You can update the `config.py` file to set important configuration variables like your database name, your secret key (which we highly recommend you store as an environment variable), CSRF protection, and mail server information. 
 
 Once you are satisfied with your application configuration, you can initialize the database by entering `python manage.py reset_db` in bash. Note that this will override any old data in the database if it already exists. 
 
 That's it, you're all set! From here, you can begin creating user accounts, logging employee hours and payrates, and generating invoices through the web app.
 
-* Testing
+- Testing
 Currently, no unit tests are publicly available.
 
 
