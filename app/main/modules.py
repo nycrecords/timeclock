@@ -484,8 +484,8 @@ def update_user_information(user,
         db.session.commit()
         user.object_name = object_name_input
 
-    if role_input:
-        new_role = Role.query.filter_by(name=role_input).first()
+    if role_input and role_input != user.role_id:
+        new_role = Role.query.filter_by(id=role_input).first()
         if user.role != new_role:
             change = ChangeLog(changer_id=current_user.id,
                                user_id=user.id,
@@ -495,7 +495,7 @@ def update_user_information(user,
                                new=role_input)
             db.session.add(change)
             db.session.commit()
-            user.role = Role.query.filter_by(name=role_input).first()
+            user.role = Role.query.filter_by(id=role_input).first()
 
     db.session.add(user)
     db.session.commit()

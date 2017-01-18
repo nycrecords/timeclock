@@ -216,7 +216,7 @@ class ChangeUserDataForm(Form):
     tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
     supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
     is_supervisor = BooleanField("User is a supervisor")
-    role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
+    role = SelectField(u'Role', choices=roles, coerce=int, validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
     object_name = StringField('Object Name')

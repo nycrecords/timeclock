@@ -345,10 +345,11 @@ def get_sups():
     Get selected division value from the request body and generate a list of supervisors for that division.
     :return: list of supervisors for division
     """
-    sups = User.query.filter_by(is_supervisor=True).all()
-    choices = [(u.id, u.email) for u in sups]
     if request.args['division']:
         choices = get_supervisors_for_division(request.args['division'])
+    if choices is None:
+        sups = User.query.filter_by(is_supervisor=True).all()
+        choices = [(u.id, u.email) for u in sups]
     return jsonify(choices)
 
 
