@@ -10,8 +10,11 @@ The objective is to make TimeClock as encompassing as possible, to provide a con
 
 TimeClock is developed and maintained by the New York City Department of Records.
 
+
 Official Production Version: 1.0 (stable)
+
 Current Development Version: 2.0
+
 
 
 ## Get Started ##
@@ -31,9 +34,11 @@ That's it, you're all set! From here, you can begin creating user accounts, logg
 Currently, no unit tests are publicly available.
 
 
+
 ## Contribution Guidelines ##
 
 We're not currently looking for any contributions, but if there are any features you'd like to see in TimeClock, feel free to contact us.
+
 
 
 ## Contact ##
