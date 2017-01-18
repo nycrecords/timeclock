@@ -25,8 +25,9 @@ def process_clock(note_data, ip=None):
     current_app.logger.info('Start function process_clock({},{})'.format(note_data, ip))
     current_app.logger.info('Creating new clock event for {}'.format(current_user.email))
 
+    last = get_last_clock()
     # Send email if employee has worked for over seven hours
-    if get_last_clock() and get_last_clock_type(current_user.id):
+    if last and last.type:
         # If the last clock is an IN
         # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
         # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
@@ -35,7 +36,8 @@ def process_clock(note_data, ip=None):
                        '/main/email/employee_overtime', email=current_user.email)
 
     # Create clock event
-    event = Event(type=not get_last_clock_type(user_id=current_user.id),
+    typ = True if not last else not last.type
+    event = Event(type=typ,
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
@@ -80,7 +82,7 @@ def is_clocked(user_id=None):
         return None
 
 
-def get_last_clock(user=current_user, time=datetime.now()):
+def get_last_clock(user=current_user, time=None):
     """
     gets the last valid clock for a user before the given time
     :param user: The user whose clocks to query
@@ -93,11 +95,13 @@ def get_last_clock(user=current_user, time=datetime.now()):
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=user.id).first() is not None:
             # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=user.id). \
+            recent_query = Event.query.filter_by(user_id=user.id). \
                 filter_by(approved=True). \
-                filter(Event.time <= time).order_by(
-                sqlalchemy.desc(Event.time)). \
-                first()
+                order_by(
+                sqlalchemy.desc(Event.time))
+            if time:
+                recent_query = recent_query.filter(Event.time <= time)
+            recent_event = recent_query.first()
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
@@ -320,23 +324,6 @@ def get_all_tags():
     current_app.logger.info('Finished querying for all tags...')
     current_app.logger.info('End function get_all_tags()')
     return tags
-
-
-def get_last_clock_type(user_id=None):
-    """
-    Obtains the type of a user's last clock.
-    :param user_id: The id of the user whose clocks are being queried.
-    :return: [Boolean] Type of user's last clock (True for IN, False for OUT)
-    """
-    current_app.logger.info('Start function get_last_clock_type()')
-    event = Event.query.filter_by(user_id=user_id, approved=True).order_by(sqlalchemy.desc(Event.time)).first()
-    if event:
-        current_app.logger.info('End function get_last_clock_type')
-        return event.type
-    else:
-        current_app.logger.info('End function get_last_clock_type')
-        return None
-
 
 def get_event_by_id(event_id):
     """

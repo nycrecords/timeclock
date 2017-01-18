@@ -38,13 +38,11 @@ from .modules import (
     process_clock,
     set_clock_form,
     get_last_clock,
-    get_last_clock,
     get_events_by_date,
     get_clocked_in_users,
     get_time_period,
     process_time_periods,
     get_all_tags,
-    get_last_clock_type,
     update_user_information,
     get_changelog_by_user_id,
     check_total_clock_count,
@@ -98,13 +96,7 @@ def index():
 
             # Stores the time and the ip clocked in form
             process_clock(form.note.data, ip)
-            current_app.logger.info('%s clocked %s at %s' % (
-                current_user.email,
-                'in' if get_last_clock_type(current_user.id) else 'out',
-                time)
-                                    )
             flash("Clock submission successfully processed", category='success')
-            return redirect(url_for('main.index'))
 
     last = get_last_clock()
     last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
