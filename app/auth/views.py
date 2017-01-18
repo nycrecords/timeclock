@@ -39,7 +39,7 @@ def admin_register():
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
     form = AdminRegistrationForm()
-
+    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
         email = create_user(form.email.data.lower(),
