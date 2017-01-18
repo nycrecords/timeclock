@@ -19,9 +19,10 @@ from .forms import (
     AdminRegistrationForm,
     PasswordResetForm,
     PasswordResetRequestForm,
-    ChangePasswordForm
+    ChangePasswordForm,
+    ChangeUserDataForm
 )
-from .modules import check_password_requirements, get_supervisors_for_division, create_user
+from .modules import check_password_requirements, get_supervisors_for_division, create_user, get_changelog_by_user_id, update_user_information
 from .. import db
 from ..decorators import admin_required
 from ..email_notification import send_email
@@ -386,3 +387,73 @@ def register():
         return redirect(url_for('auth.login'))
     current_app.logger.info('End function register() [VIEW]')
     return render_template('auth/register.html', form=form)
+
+
+@auth.route('/user/<username>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def user_profile(username):
+    """
+    Generates an editable user profile page for admins.
+    :param username: The username of the user whose page is viewed/edited.
+    :return: HTML page containing user information and a form to edit it.
+    """
+    current_app.logger.info('Start function user_profile() for user {}'.format(username))
+    # Usernames are everything in the email before the @ symbol
+    # i.e. for sdhillon@records.nyc.gov, username is sdhillon
+    if '@records.nyc.gov' in username:
+        u = User.query.filter_by(email=(username)).first()
+    else:
+        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    form = ChangeUserDataForm()
+    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
+    if not u:
+        flash('No user with username {} was found'.format(username), category='error')
+        return redirect(url_for('main.user_list_page'))
+    elif u.role.name == 'Administrator' and u == current_user:
+        # If user is admin, redirect to index and flash a message,
+        # as admin should not be allowed to edit their own info through frontend.
+        # This also avoids the issue that comes with the fact that admins don't have
+        # a supervisor.
+        flash('Admins cannot edit their own information.', category='error')
+        current_app.logger.info('End function user_profile')
+        return redirect(url_for('main.user_list_page'))
+
+    if form.validate_on_submit():
+        if u.email == form.supervisor_email.data:
+            flash('A user cannot be their own supervisor. Please revise your supervisor '
+                  'field.', category='error')
+        else:
+            flash('User information has been updated', category='success')
+            update_user_information(u, form.first_name.data, form.last_name.data,
+                                    form.division.data, form.tag.data, form.supervisor_email.data,
+                                    form.is_supervisor.data,
+                                    form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
+            current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
+            current_app.logger.info('End function user_profile')
+            return redirect(url_for('main.user_profile', username=username))
+    else:
+        # Pre-populate the form with current values
+        form.first_name.data = u.first_name
+        form.last_name.data = u.last_name
+        form.division.data = u.division
+        form.tag.data = u.tag_id
+        form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
+        form.role.data = u.role.name
+        form.budget_code.data = u.budget_code
+        form.object_code.data = u.object_code
+        form.object_name.data = u.object_name
+
+    current_app.logger.info('End function user_profile')
+
+    # For ChangeLog Table
+    changes = get_changelog_by_user_id(u.id)
+
+    page = request.args.get('page', 1, type=int)
+    pagination = changes.paginate(
+        page, per_page=10,
+        error_out=False)
+    changes = pagination.items
+
+    return render_template('auth/user_page.html', username=username, u=u, form=form, changes=changes,
+                           pagination=pagination)
