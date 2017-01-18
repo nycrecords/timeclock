@@ -195,8 +195,8 @@ def all_history():
 
     exportform = ExportForm()
     if exportform.validate_on_submit() and exportform.export.data:
+        flash('Succesfully exported events in query', 'success')
         return create_csv(events_query.all())
-        flash("Succesfully exported events in query")
 
 
     # Pagination
