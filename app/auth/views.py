@@ -30,6 +30,7 @@ from ..utils import InvalidResetToken
 
 
 @auth.route('/admin_register', methods=['GET', 'POST'])
+@login_required
 @admin_required
 def admin_register():
     """
