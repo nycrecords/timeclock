@@ -102,7 +102,7 @@ class AdminRegistrationForm(Form):
                                    validators=[DataRequired()])
     is_supervisor = BooleanField('User is supervisor')
     # supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
-    role = SelectField('Role', choices=roles, coerce=int, validators=[DataRequired()])
+    role = SelectField('Role', choices=roles, validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
     object_name = StringField('Object Name')
