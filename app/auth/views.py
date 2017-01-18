@@ -375,6 +375,7 @@ def register():
                     object_code=form.object_code.data,
                     object_name=form.object_name.data,
                     is_administrator=True,
+                    is_supervisor=True,
                     validated=True)
         db.session.add(user)
         db.session.commit()
