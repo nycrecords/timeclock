@@ -103,7 +103,7 @@ def create_user(email, password, first, last, div, role, tag, is_sup, sup, budge
     :param object_name: User's object name
     :return: None
     """
-    role_obj = Role.query.filter_by(id=role).first()
+    role_obj = Role.query.filter_by(name=role).first()
     sup_obj = User.query.filter_by(id=sup).first()
     u = User(email=email, first_name=first, last_name=last, password=password,
              division=div, role=role_obj, tag_id=tag, is_supervisor=is_sup, supervisor=sup_obj, budget_code=budget_code,
