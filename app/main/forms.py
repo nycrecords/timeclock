@@ -153,14 +153,11 @@ class FilterTimePunchForm(Form):
     Form administrators use to filter through TimePunches.
     """
     email = StringField("Email", validators=[Optional(), Email()])
-    approved = SelectField(u'Approval Status', validators=[Optional()], choices=[
-        ('All', 'All'),
-        ('Approved', 'Approved'),
-        ('Unapproved', 'Unapproved')])
     status = SelectField(u'Status', validators=[Optional()], choices=[
         ('All', 'All'),
         ('Pending', 'Pending'),
-        ('Processed', 'Processed')])
+        ('Approved', 'Approved'),
+        ('Unapproved', 'Unapproved')])
     filter = SubmitField("Filter")
 
     def validate_email(self, email):

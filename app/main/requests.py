@@ -59,19 +59,13 @@ def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, 
                                      'exists'.format(filter_by_email))
 
     # Filter by status if user provides a status
-    if approved:
-        if approved == 'Approved':
-            timepunch_query = timepunch_query.filter(Event.approved == True)
-        elif approved == 'Unapproved':
-            timepunch_query = timepunch_query.filter(Event.approved == False)
-            # else approved == 'All', in which case we don't need to add anything to the filter
-
-    if status:
-        if status == 'Pending':
-            timepunch_query = timepunch_query.filter(Event.pending == True)
-        elif status == 'Processed':
-            timepunch_query = timepunch_query.filter(Event.pending == False)
-            # else status == 'All', in which case we don't need to add anything to the filter
+    if status == 'Pending':
+        timepunch_query = timepunch_query.filter(Event.pending == True).filter(Event.approved == False)
+    if status == 'Approved':
+        timepunch_query = timepunch_query.filter(Event.approved == True).filter(Event.pending == False)
+    elif status == 'Unapproved':
+        timepunch_query = timepunch_query.filter(Event.approved == False).filter(Event.pending == False)
+    # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
     result = timepunch_query.all()
@@ -128,7 +122,7 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
             current_app.logger.error('Tried to filter vacations from {} but no such account'
                                      'exists'.format(filter_by_email))
 
-     # Filter by status if user provides a status
+    # Filter by status if user provides a status
     if status == 'Pending':
         vacation_query = vacation_query.filter(Vacation.pending == True).filter(Vacation.approved == False)
     if status == 'Approved':
