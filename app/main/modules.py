@@ -55,7 +55,8 @@ def set_clock_form():
     """
     from .forms import ClockInForm, ClockOutForm
     current_app.logger.info('Start function get_clock_form()')
-    if is_clocked():
+    last = get_last_clock()
+    if last and last.type:
         current_app.logger.info('Setting clock form to: clock out')
         form = ClockOutForm()
     else:
@@ -63,23 +64,6 @@ def set_clock_form():
         form = ClockInForm()
     current_app.logger.info('End function get_clock_form()')
     return form
-
-
-def is_clocked(user_id=None):
-    """
-    Checks if the user with given user_id is clocked in.
-    :param user_id: id of the user to check for.
-    :return: True if the user is clocked in, False if user is clocked out
-    """
-
-    if user_id:
-        event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
-    else:
-        event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event is not None:
-        return event.type
-    else:
-        return None
 
 
 def get_last_clock(user=current_user, time=None):
