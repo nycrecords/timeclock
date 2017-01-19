@@ -248,6 +248,6 @@ class ChangeUserDataForm(Form):
         :param email_field: The supervisor's email
         :return:
         """
-        user = User.query.filter_by(email=email_field.data).first()
+        user = User.query.filter_by(id=email_field.data).first()
         if not user:
             raise ValidationError('No account with that email exists')

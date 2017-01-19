@@ -431,7 +431,7 @@ def user_profile(username):
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
-            return redirect(url_for('main.user_profile', username=username))
+            return redirect(url_for('auth.user_profile', username=username))
     else:
         # Pre-populate the form with current values
         form.first_name.data = u.first_name
