@@ -128,14 +128,14 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
             current_app.logger.error('Tried to filter vacations from {} but no such account'
                                      'exists'.format(filter_by_email))
 
-            # Filter by status if user provides a status
-        if status == 'Pending':
-            vacation_query = vacation_query.filter(Vacation.pending == True)
-        if status == 'Approved':
-            vacation_query = vacation_query.filter(Vacation.approved == True)
-        elif status == 'Unapproved':
-            vacation_query = vacation_query.filter(Vacation.approved == False)
-            # else status == 'All', in which case we don't need to add anything to the filter
+     # Filter by status if user provides a status
+    if status == 'Pending':
+        vacation_query = vacation_query.filter(Vacation.pending == True).filter(Vacation.approved == False)
+    if status == 'Approved':
+        vacation_query = vacation_query.filter(Vacation.approved == True).filter(Vacation.pending == False)
+    elif status == 'Unapproved':
+        vacation_query = vacation_query.filter(Vacation.approved == False).filter(Vacation.pending == False)
+        # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
     result = vacation_query.all()
