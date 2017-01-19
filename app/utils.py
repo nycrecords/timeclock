@@ -14,7 +14,6 @@ divisions = [
     ('Reference Room', 'Reference Room'),
     ('Social Media', 'Social Media'),
     ('Tech', 'Tech'),
-    ("Women's", "Women's")
 ]
 
 roles = [
