@@ -515,7 +515,7 @@ def request_timepunch():
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
             v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
-                         approved=False)
+                         approved=False, pending=True)
             db.session.add(v)
             db.session.commit()
             flash('Your vacation request has been successfully submitted and is pending approval', 'success')

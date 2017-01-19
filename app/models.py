@@ -387,6 +387,7 @@ class Vacation(db.Model):
     start = db.Column(db.DateTime())
     end = db.Column(db.DateTime())
     approved = db.Column(db.Boolean, default=False)
+    pending = db.Column(db.Boolean, default=True)
 
 
 login_manager.anonymous_user = AnonymousUser

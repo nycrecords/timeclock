@@ -187,7 +187,7 @@ class FilterVacationForm(Form):
      Form administrators use to filter through Vacations.
     """
     email = StringField("Email", validators=[Optional(), Email()])
-    approved = SelectField(u'Status', validators=[Optional()], choices=[
+    status = SelectField(u'Status', validators=[Optional()], choices=[
         ('All', 'All'),
         ('Pending', 'Pending'),
         ('Approved', 'Approved'),
