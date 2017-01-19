@@ -34,7 +34,7 @@ def create_timepunch(punch_type, punch_time, reason):
                user=current_user, punch_time=punch_time, type=punch_type, note=reason)
 
 
-def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, status=None):
+def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.

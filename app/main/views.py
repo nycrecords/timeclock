@@ -551,7 +551,6 @@ def review_timepunch():
         # Filter through timepunches based on user selections
         timepunch_query = get_timepunches_for_review(current_user.email,
                                                      filter_form.email.data,
-                                                     filter_form.approved.data,
                                                      filter_form.status.data)
 
     if clear_form.validate_on_submit() and clear_form.clear.data:
