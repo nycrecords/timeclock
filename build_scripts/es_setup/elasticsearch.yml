@@ -14,13 +14,13 @@
 #
 # Use a descriptive name for your cluster:
 #
-cluster.name: gpp_development
+cluster.name: timeclock_development
 #
 # ------------------------------------ Node ------------------------------------
 #
 # Use a descriptive name for the node:
 #
-node.name: gpp_development_node_1
+node.name: timeclock_development_node_1
 #
 # Add custom attributes to the node:
 #

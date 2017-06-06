@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 1. Install Nginx
-yum -y install rh-nginx18-nginx
+yum -y install rh-nginx18
 
 # 2. Autostart Nginx
 chkconfig rh-nginx18-nginx on
@@ -21,9 +21,9 @@ fi
 
 # 6. Create ssl Certs
 openssl req \
-       -newkey rsa:4096 -nodes -keyout /vagrant/build_scripts/web_setup/gpp_dev.key \
-       -x509 -days 365 -out /vagrant/build_scripts/web_setup/gpp_dev.crt -subj "/C=US/ST=New York/L=New York/O=NYC Department of Records and Information Services/OU=IT/CN=gpp.nyc"
-openssl x509 -in /vagrant/build_scripts/web_setup/gpp_dev.crt -out /vagrant/build_scripts/web_setup/gpp_dev.pem -outform PEM
+       -newkey rsa:4096 -nodes -keyout /vagrant/build_scripts/web_setup/timeclock_dev.key \
+       -x509 -days 365 -out /vagrant/build_scripts/web_setup/timeclock_dev.crt -subj "/C=US/ST=New York/L=New York/O=NYC Department of Records and Information Services/OU=IT/CN=timeclock.nyc"
+openssl x509 -in /vagrant/build_scripts/web_setup/timeclock_dev.crt -out /vagrant/build_scripts/web_setup/timeclock_dev.pem -outform PEM
 
 # 7. Restart Nginx
 sudo service rh-nginx18-nginx restart
