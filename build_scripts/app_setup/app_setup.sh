@@ -14,6 +14,22 @@ yum -y install rh-postgresql95-postgresql-devel
 yum -y install rh-python35-python-psycopg2
 yum -y install openssl-devel
 yum -y install libffi-devel
+yum -y install libxslt
+yum -y install libxslt-devel
+yum -y install libxml2
+yum -y install libxml2-devel
+yum -y install libtiff-devel
+yum -y install libjpeg-devel
+yum -y install libzip-devel
+yum -y install freetype-devel
+yum -y install lcms2-devel
+yum -y install libwebp-devel
+yum -y install tcl-devel
+yum -y install tk-devel
+
+
+
+
 
 # 5. Install Developer Tools
 yum -y groupinstall "Development Tools"
@@ -22,7 +38,7 @@ yum -y groupinstall "Development Tools"
 source /opt/rh/rh-python35/enable
 pip install virtualenv
 mkdir /home/vagrant/.virtualenvs
-virtualenv --system-site-packages /home/vagrant/.virtualenvs/
+virtualenv --system-site-packages /home/vagrant/.virtualenvs/timeclock
 chown -R vagrant:vagrant /home/vagrant
 source /home/vagrant/.virtualenvs/timeclock/bin/activate
 pip install -r /vagrant/requirements/app.txt --no-binary :all:

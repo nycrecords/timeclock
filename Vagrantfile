@@ -42,7 +42,6 @@ Vagrant.configure("2") do |config|
     default.vm.network "private_network", ip: "10.0.0.2"
     default.vm.provision "shell", path: "build_scripts/web_setup/web_setup.sh", args: 'single_server'
     default.vm.provision "shell", path: "build_scripts/app_setup/app_setup.sh"
-    default.vm.provision "shell", path: "build_scripts/es_setup/es_setup.sh", args: 'single_server'
     default.vm.provision "shell", path: "build_scripts/db_setup/db_setup_install.sh", args: 'single_server'
     default.vm.provision :reload  # to prevent 'database is starting up' issue
     default.vm.provision "shell", path: "build_scripts/db_setup/db_setup_config.sh"
@@ -71,18 +70,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "db_2", autostart: false do |db|
     # Database Server 2 Configuration
-  end
-
-  config.vm.define "es_1", autostart: false do |es|
-    # Elasticsearch Server 1 Configuration
-  end
-
-  config.vm.define "es_2", autostart: false do |es|
-    # Elasticsearch Server 1 Configuration
-  end
-
-  config.vm.define "es_3", autostart: false do |es|
-    # Elasticsearch Server 1 Configuration
   end
 
   # Unsubscribe and unregister from RedHat before destroying
