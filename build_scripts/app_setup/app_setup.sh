@@ -9,7 +9,7 @@ yum -y install rh-redis32
 # 3. Setup /etc/profile.d/python.sh
 bash -c "printf '#\!/bin/bash\nsource /opt/rh/rh-python35/enable\n' > /etc/profile.d/python35.sh"
 
-# 4. Install Postgres Python Package (psycopg2) and Postgres Developer Package
+# 4. Install Postgres Python Package (psycopg2) and Postgres Developer Packagecd /
 yum -y install rh-postgresql95-postgresql-devel
 yum -y install rh-python35-python-psycopg2
 yum -y install openssl-devel
@@ -27,10 +27,6 @@ yum -y install libwebp-devel
 yum -y install tcl-devel
 yum -y install tk-devel
 
-
-
-
-
 # 5. Install Developer Tools
 yum -y groupinstall "Development Tools"
 
@@ -41,8 +37,7 @@ mkdir /home/vagrant/.virtualenvs
 virtualenv --system-site-packages /home/vagrant/.virtualenvs/timeclock
 chown -R vagrant:vagrant /home/vagrant
 source /home/vagrant/.virtualenvs/timeclock/bin/activate
-pip install -r /vagrant/requirements/app.txt --no-binary :all:
-pip install -r /vagrant/requirements/dev.txt --no-binary :all:
+pip install -r /vagrant/requirements.txt --no-binary :all:
 
 # 7. Install telnet-server
 yum -y install telnet-server
