@@ -24,29 +24,25 @@ from .forms import (
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
-    ApproveOrDenyTimePunchForm,
+    ApproveOrDenyForm,
     FilterTimePunchForm,
-    ClearTimePunchFilterForm,
-    ChangeUserDataForm,
+    ClearForm,
     AddEventForm,
     DeleteEventForm,
-    AdvancedTimesheetForm,
+    GenerateMultipleTimesheetsForm,
     RequestVacationForm,
-    FilterVacationForm
+    FilterVacationForm,
+    ExportForm
 )
 from .modules import (
     process_clock,
     set_clock_form,
     get_last_clock,
-    get_last_clock_relative,
     get_events_by_date,
     get_clocked_in_users,
     get_time_period,
     process_time_periods,
     get_all_tags,
-    get_last_clock_type,
-    update_user_information,
-    get_changelog_by_user_id,
     check_total_clock_count,
     add_event,
     delete_event,
@@ -58,7 +54,7 @@ from .payments import (
     get_payrate_before_or_after,
     calculate_hours_worked
 )
-from .timepunch import (
+from .requests import (
     create_timepunch,
     get_timepunches_for_review,
     get_vacations_for_review,
@@ -98,20 +94,17 @@ def index():
 
             # Stores the time and the ip clocked in form
             process_clock(form.note.data, ip)
-            current_app.logger.info('%s clocked %s at %s' % (
-                current_user.email,
-                'in' if get_last_clock_type(current_user.id) else 'out',
-                time)
-                                    )
             flash("Clock submission successfully processed", category='success')
-            return redirect(url_for('main.index'))
 
+    last = get_last_clock()
+    last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
+    last_type = last.type if last else False
     current_app.logger.info('End function index')
     return render_template('main/index.html',
                            form=set_clock_form(),
-                           last_event=get_last_clock(),
+                           last_event=last_time,
                            clocked_in_users=get_clocked_in_users(),
-                           last_clock_event=get_last_clock_type(current_user.id)
+                           last_clock_event=last_type
                            )
 
 
@@ -150,7 +143,9 @@ def all_history():
 
     page = request.args.get('page', 1, type=int)
 
-    if form.validate_on_submit():
+    if form.validate_on_submit() and (form.submit.data or form.last_month.data
+                                      or form.this_month.data or form.last_week.data or
+                                      form.this_week.data or form.last_day.data or form.this_day.data):
         time_period = process_time_periods(form)
         session['first_date'] = time_period[0]
         session['last_date'] = time_period[1]
@@ -183,7 +178,7 @@ def all_history():
         flash('Event successfully deleted', category='success')
         return redirect(url_for('main.clear'))
 
-    advtimesheetform = AdvancedTimesheetForm()
+    advtimesheetform = GenerateMultipleTimesheetsForm()
     advtimesheetform.emails.choices = [(u.email, u.email) for u in User.query.all()]
     if advtimesheetform.validate_on_submit() and advtimesheetform.gen_timesheets.data:
         # TODO: THIS MESSAGE ISNT FLASHING
@@ -194,6 +189,12 @@ def all_history():
     current_app.logger.info('Querying (calling get_events_by_date)')
     events_query = get_events_by_date()
     current_app.logger.info('Finished querying')
+
+    exportform = ExportForm()
+    if exportform.validate_on_submit() and exportform.export.data:
+        flash('Succesfully exported events in query', 'success')
+        return create_csv(events_query.all())
+
 
     # Pagination
     pagination = events_query.paginate(
@@ -214,6 +215,7 @@ def all_history():
                            addform=addform,
                            deleteform=deleteform,
                            advtimesheetform=advtimesheetform,
+                           exportform=exportform,
                            pagination=pagination,
                            tags=tags,
                            generation_events=events_query.all(),
@@ -495,7 +497,8 @@ def request_timepunch():
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
-            past_type = get_last_clock_relative(current_user, datetime_obj).type if get_last_clock_relative(current_user, datetime_obj) else None
+            past_type = get_last_clock(current_user, datetime_obj).type if get_last_clock(
+                current_user, datetime_obj) else None
 
             if past_type == (form.punch_type.data == "In"):
                 flash('Timepunch request failed: you would have two consecutive clocks of the same type', 'error')
@@ -511,15 +514,14 @@ def request_timepunch():
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         else:
-            v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data, approved=False)
+            v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
+                         approved=False, pending=True)
             db.session.add(v)
             db.session.commit()
             flash('Your vacation request has been successfully submitted and is pending approval', 'success')
 
         current_app.logger.info('End function request_timepunch')
         return redirect(url_for('main.request_timepunch'))
-
-
 
     current_app.logger.info('End function request_timepunch')
     return render_template('main/request_timepunch.html', form=form, vacform=vacform)
@@ -534,11 +536,10 @@ def review_timepunch():
     """
     current_app.logger.info('Start function review_timepunch()')
     timepunch_query = get_timepunches_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm(request.form)
+    form = ApproveOrDenyForm(request.form)
     filter_form = FilterTimePunchForm()
-    clear_form = ClearTimePunchFilterForm()
+    clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
-    print("VALIDATED:", filter_form.validate_on_submit() and filter_form.filter.data)
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
             flash('Successfully filtered', 'success')
@@ -550,7 +551,6 @@ def review_timepunch():
         # Filter through timepunches based on user selections
         timepunch_query = get_timepunches_for_review(current_user.email,
                                                      filter_form.email.data,
-                                                     filter_form.approved.data,
                                                      filter_form.status.data)
 
     if clear_form.validate_on_submit() and clear_form.clear.data:
@@ -610,76 +610,6 @@ def user_list_page():
                            nondivision_users=nondivision_users)
 
 
-@main.route('/user/<username>', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def user_profile(username):
-    """
-    Generates an editable user profile page for admins.
-    :param username: The username of the user whose page is viewed/edited.
-    :return: HTML page containing user information and a form to edit it.
-    """
-    current_app.logger.info('Start function user_profile() for user {}'.format(username))
-    # Usernames are everything in the email before the @ symbol
-    # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    if '@records.nyc.gov' in username:
-        u = User.query.filter_by(email=(username)).first()
-    else:
-        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
-    form = ChangeUserDataForm()
-
-    if not u:
-        flash('No user with username {} was found'.format(username), category='error')
-        return redirect(url_for('main.user_list_page'))
-    elif u.role.name == 'Administrator' and u == current_user:
-        # If user is admin, redirect to index and flash a message,
-        # as admin should not be allowed to edit their own info through frontend.
-        # This also avoids the issue that comes with the fact that admins don't have
-        # a supervisor.
-        flash('Admins cannot edit their own information.', category='error')
-        current_app.logger.info('End function user_profile')
-        return redirect(url_for('main.user_list_page'))
-
-    if form.validate_on_submit():
-        if u.email == form.supervisor_email.data:
-            flash('A user cannot be their own supervisor. Please revise your supervisor '
-                  'field.', category='error')
-        else:
-            flash('User information has been updated', category='success')
-            update_user_information(u, form.first_name.data, form.last_name.data,
-                                    form.division.data, form.tag.data, form.supervisor_email.data,
-                                    form.is_supervisor.data,
-                                    form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
-            current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
-            current_app.logger.info('End function user_profile')
-            return redirect(url_for('main.user_profile', username=username))
-    else:
-        # Pre-populate the form with current values
-        form.first_name.data = u.first_name
-        form.last_name.data = u.last_name
-        form.division.data = u.division
-        form.tag.data = u.tag_id
-        form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
-        form.role.data = u.role.name
-        form.budget_code.data = u.budget_code
-        form.object_code.data = u.object_code
-        form.object_name.data = u.object_name
-
-    current_app.logger.info('End function user_profile')
-
-    # For ChangeLog Table
-    changes = get_changelog_by_user_id(u.id)
-
-    page = request.args.get('page', 1, type=int)
-    pagination = changes.paginate(
-        page, per_page=10,
-        error_out=False)
-    changes = pagination.items
-
-    return render_template('main/user_page.html', username=username, u=u, form=form, changes=changes,
-                           pagination=pagination)
-
-
 @main.route('/export_events', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -693,7 +623,6 @@ def export_events():
 
 @main.route('/review_vacations', methods=['GET', 'POST'])
 @login_required
-@admin_required
 def review_vacations():
     """
     Creates a page on which administrators can review vacation requests, and accept or deny them.
@@ -701,9 +630,9 @@ def review_vacations():
     """
     current_app.logger.info('Start function review_vacations()')
     vacation_query = get_vacations_for_review(current_user.email)
-    form = ApproveOrDenyTimePunchForm(request.form) #reuse same form
+    form = ApproveOrDenyForm(request.form)  # reuse same form
     filter_form = FilterVacationForm()
-    clear_form = ClearTimePunchFilterForm()
+    clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
@@ -715,8 +644,8 @@ def review_vacations():
 
         # Filter through timepunches based on user selections
         vacation_query = get_vacations_for_review(current_user.email,
-                                                     filter_form.email.data,
-                                                     filter_form.status.data)
+                                                  filter_form.email.data,
+                                                  filter_form.status.data)
 
     if clear_form.validate_on_submit() and clear_form.clear.data:
         # User submits the clear form
@@ -752,3 +681,4 @@ def review_vacations():
                            filter=filter_form,
                            clear=clear_form,
                            query_has_results=query_has_results)
+

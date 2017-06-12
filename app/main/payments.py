@@ -52,9 +52,6 @@ def calculate_hours_worked(email_input, start, end):
     """
     current_app.logger.info('Start function calculate_hours()')
     events = get_events_by_date(email_input, start, end).all()
-    # To be implemented properly later
-    # if check_total_clock_count(events) is False:
-    #     return False
     if len(events) % 2 != 0:
         return False
 

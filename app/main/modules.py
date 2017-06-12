@@ -9,8 +9,8 @@ from .pdf import generate_header, generate_employee_info, generate_timetable, ge
     generate_footer
 from .. import db
 from ..email_notification import send_email
-from ..models import User, Event, Tag, Role, ChangeLog, Vacation
-from ..utils import tags
+from ..models import User, Event, Tag, Vacation
+
 
 
 def process_clock(note_data, ip=None):
@@ -25,17 +25,19 @@ def process_clock(note_data, ip=None):
     current_app.logger.info('Start function process_clock({},{})'.format(note_data, ip))
     current_app.logger.info('Creating new clock event for {}'.format(current_user.email))
 
+    last = get_last_clock()
     # Send email if employee has worked for over seven hours
-    if get_last_clock_type(current_user.id):
+    if last and last.type:
         # If the last clock is an IN
         # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
         # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
-        if (datetime.now() - datetime.strptime(get_last_clock(), "%b %d, %Y | %H:%M")).seconds / float(3600) >= 8:
+        if (datetime.now() - get_last_clock().time).seconds / float(3600) >= 8:
             send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
                        '/main/email/employee_overtime', email=current_user.email)
 
     # Create clock event
-    event = Event(type=not get_last_clock_type(user_id=current_user.id),
+    typ = True if not last else not last.type
+    event = Event(type=typ,
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
@@ -53,7 +55,8 @@ def set_clock_form():
     """
     from .forms import ClockInForm, ClockOutForm
     current_app.logger.info('Start function get_clock_form()')
-    if is_clocked():
+    last = get_last_clock()
+    if last and last.type:
         current_app.logger.info('Setting clock form to: clock out')
         form = ClockOutForm()
     else:
@@ -63,50 +66,7 @@ def set_clock_form():
     return form
 
 
-def is_clocked(user_id=None):
-    """
-    Checks if the user with given user_id is clocked in.
-    :param user_id: id of the user to check for.
-    :return: True if the user is clocked in, False if user is clocked out
-    """
-
-    if user_id:
-        event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
-    else:
-        event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event is not None:
-        return event.type
-    else:
-        return None
-
-
-def get_last_clock():
-    """
-    Obtains the last clock in or clock out instance created by this user.
-    :return: Formatted time of last clock event
-    """
-    current_app.logger.info('Start function get_last_clock()')
-    current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
-    try:
-        current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
-        if Event.query.filter_by(user_id=current_user.id).first() is not None:
-            # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)). \
-                first().time.strftime("%b %d, %Y | %H:%M")
-            current_app.logger.info('Finished querying for most recent clock event')
-            current_app.logger.info('End function get_last_clock()')
-            return recent_event
-        else:
-            # Because the user has no clock events, we can't search for the most recent one.
-            current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
-                                    'any clock events yet'.format(current_user.email))
-            current_app.logger.info('End function get_last_clock()')
-    except:
-        current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
-        return None
-
-
-def get_last_clock_relative(user=current_user, time=datetime.now()):
+def get_last_clock(user=current_user, time=None):
     """
     gets the last valid clock for a user before the given time
     :param user: The user whose clocks to query
@@ -119,11 +79,13 @@ def get_last_clock_relative(user=current_user, time=datetime.now()):
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
         if Event.query.filter_by(user_id=user.id).first() is not None:
             # If the user has clock events (at least one), find the most recent clock event.
-            recent_event = Event.query.filter_by(user_id=user.id).\
-                filter_by(approved=True).\
-                filter(Event.time <= time).order_by(
-                sqlalchemy.desc(Event.time)). \
-                first()
+            recent_query = Event.query.filter_by(user_id=user.id). \
+                filter_by(approved=True). \
+                order_by(
+                sqlalchemy.desc(Event.time))
+            if time:
+                recent_query = recent_query.filter(Event.time <= time)
+            recent_event = recent_query.first()
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
@@ -328,7 +290,7 @@ def get_clocked_in_users():
     current_app.logger.info('Finished querying for all clocked in users...')
     clocked_in_users = []
     for user in users:
-        event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
+        event = Event.query.filter_by(user_id=user.id, approved=True).order_by(sqlalchemy.desc(Event.time)).first()
         if event is not None and event.type is True and user not in clocked_in_users:
             clocked_in_users.append(user)
     current_app.logger.info('End function get_clocked_in_users()')
@@ -347,23 +309,6 @@ def get_all_tags():
     current_app.logger.info('End function get_all_tags()')
     return tags
 
-
-def get_last_clock_type(user_id=None):
-    """
-    Obtains the type of a user's last clock.
-    :param user_id: The id of the user whose clocks are being queried.
-    :return: [Boolean] Type of user's last clock (True for IN, False for OUT)
-    """
-    current_app.logger.info('Start function get_last_clock_type()')
-    event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event:
-        current_app.logger.info('End function get_last_clock_type')
-        return event.type
-    else:
-        current_app.logger.info('End function get_last_clock_type')
-        return None
-
-
 def get_event_by_id(event_id):
     """
     Obtains an event by its id.
@@ -372,6 +317,7 @@ def get_event_by_id(event_id):
     """
     return Event.query.filter_by(id=event_id).first()
 
+
 def get_vacation_by_id(vac_id):
     """
     Obtains an event by its id.
@@ -379,165 +325,6 @@ def get_vacation_by_id(vac_id):
     :return: [Event] An Event object.
     """
     return Vacation.query.filter_by(id=vac_id).first()
-
-
-def update_user_information(user,
-                            first_name_input,
-                            last_name_input,
-                            division_input,
-                            tag_input,
-                            supervisor_email_input,
-                            is_supervisor_input,
-                            role_input,
-                            budget_code_input,
-                            object_code_input,
-                            object_name_input
-                            ):
-    """
-    To be used in the user_profile view function to update a user's information in the database.
-    :param user: The user whose information to update (must be a user object)
-    :param first_name_input: New first name for user.
-    :param last_name_input: New last name for user.
-    :param division_input: New division for user.
-    :param tag_input: New tag for user.
-    :param supervisor_email_input: Email of the user's new supervisor.
-    :param is_supervisor_input: Whether or not the user is a supervisor
-    :return: None
-    """
-    current_app.logger.info('Start function update_user_information for {}'.format(user.email))
-    if first_name_input and first_name_input != '' and (user.first_name != first_name_input):
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='FIRST NAME',
-                           old=user.first_name,
-                           new=first_name_input)
-        db.session.add(change)
-        db.session.commit()
-        user.first_name = first_name_input
-
-    if last_name_input and last_name_input != '' and (user.last_name != last_name_input):
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='LAST NAME',
-                           old=user.last_name,
-                           new=last_name_input)
-        db.session.add(change)
-        db.session.commit()
-        user.last_name = last_name_input
-
-    if division_input and division_input != '' and (user.division != division_input):
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='DIVISION',
-                           old=user.division,
-                           new=division_input)
-        db.session.add(change)
-        db.session.commit()
-        user.division = division_input
-
-    if tag_input and user.tag_id != tag_input:
-        if user.tag_id:
-            old_tag = tags[user.tag_id][1]
-        else:
-            old_tag = 'None'
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='TAG_INPUT',
-                           old=old_tag,
-                           new=tags[tag_input][1])
-        db.session.add(change)
-        db.session.commit()
-        user.tag_id = tag_input
-
-    if supervisor_email_input and supervisor_email_input != '' and user.supervisor.email != supervisor_email_input:
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='SUPERVISOR',
-                           old=user.supervisor.email,
-                           new=supervisor_email_input)
-        db.session.add(change)
-        db.session.commit()
-        sup = User.query.filter_by(email=supervisor_email_input).first()
-        user.supervisor = sup
-
-    if is_supervisor_input and (user.is_supervisor != is_supervisor_input):
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='IS SUPERVISOR',
-                           old=user.is_supervisor,
-                           new=is_supervisor_input)
-        db.session.add(change)
-        db.session.commit()
-        user.is_supervisor = is_supervisor_input
-
-    if budget_code_input and budget_code_input != '' and user.budget_code != budget_code_input:
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='BUDGET CODE',
-                           old=user.budget_code,
-                           new=budget_code_input)
-        db.session.add(change)
-        db.session.commit()
-        user.budget_code = budget_code_input
-
-    if object_code_input and object_code_input != '' and user.object_code != object_code_input:
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='OBJECT CODE',
-                           old=user.object_code,
-                           new=object_code_input)
-        db.session.add(change)
-        db.session.commit()
-        user.object_code = object_code_input
-
-    if object_name_input and object_name_input != '' and user.object_name != object_name_input:
-        change = ChangeLog(changer_id=current_user.id,
-                           user_id=user.id,
-                           timestamp=datetime.now(),
-                           category='OBJECT NAME',
-                           old=user.object_name,
-                           new=object_name_input)
-        db.session.add(change)
-        db.session.commit()
-        user.object_name = object_name_input
-
-    if role_input:
-        new_role = Role.query.filter_by(name=role_input).first()
-        if user.role != new_role:
-            change = ChangeLog(changer_id=current_user.id,
-                               user_id=user.id,
-                               timestamp=datetime.now(),
-                               category='ROLE',
-                               old=user.role.name,
-                               new=role_input)
-            db.session.add(change)
-            db.session.commit()
-            user.role = Role.query.filter_by(name=role_input).first()
-
-    db.session.add(user)
-    db.session.commit()
-    current_app.logger.info('End function update_user_information')
-
-
-def get_changelog_by_user_id(id):
-    """
-    Obtains a changelog based on a user's id.
-    :param id: The id of the user whose changelog is being queried for.
-    :return: [BaseQuery] A ChangeLog query. We return a query to leverage the pagination macro.
-    """
-    current_app.logger.info('Start function get_changelog_by_user_id()')
-    current_app.logger.info('Querying for changes made to user with id {}'.format(id))
-    changes = ChangeLog.query.filter_by(user_id=id).order_by(sqlalchemy.desc(ChangeLog.timestamp))
-    current_app.logger.info('End function get_changelog_by_user_id()')
-    return changes
 
 
 def check_total_clock_count(events):
@@ -653,7 +440,7 @@ def generate_timesheets(emails, start, end):
                      as_attachment=True)
 
 
-def create_csv():
+def create_csv(events=None):
     """
     Creates a csv file that contains all of the event data in the database
     :return: CSV file
@@ -662,11 +449,12 @@ def create_csv():
     import io
     si = io.StringIO()
     writer = csv.writer(si)
-    events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
-    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'note', 'ip'])
+    if not events:
+        events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'type', 'note', 'ip'])
     for event in events:
         writer.writerow([event.id, event.user.email, event.user.first_name, event.user.last_name,
-                         event.time.strftime("%b %d, %Y %H:%M"), event.note, event.ip])
+                         event.time.strftime("%b %d, %Y %H:%M"), 'IN' if event.type else 'OUT', event.note, event.ip])
     output = make_response(si.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"

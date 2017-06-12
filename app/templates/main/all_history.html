@@ -13,8 +13,10 @@
             <input type="submit" value="Clear Filter" class="btn btn-info">
         </form>
 
-
-        <div style="float:right">
+         <div style="float:right">
+            {{ wtf.quick_form(exportform) }}
+        </div>
+        <div style="float:right; margin-right: 5px">
             <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success"
                     style="float:left">
                 Advanced Timesheets
@@ -106,10 +108,15 @@
                                 {% for field in deleteform %}
                                     {% if field.type == 'SubmitField' %}
                                         {% if field.name == 'delete' %}
+
                                             <input type="hidden" value="{{ event.id }}" name="event_id">
                                             <button type="submit" class="btn btn-danger" value="{{ field.name }}"
                                                     name="{{ field.name }}"
-                                                    id="{{ field.name }}"> {{ field.name }} </button>
+                                                    id="{{ field.name }}"
+                                                    style="padding: 4px 19px 1px; font-size: 11px;">
+                                                <span class="glyphicon glyphicon-trash"></span>
+
+                                            </button>
                                         {% endif %}
                                     {% else %}
                                         {{ field }}

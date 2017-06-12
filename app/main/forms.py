@@ -36,6 +36,15 @@ class TimePunchForm(Form):
     submit = SubmitField("Submit Request")
 
 
+class RequestVacationForm(Form):
+    """
+    Form for users to request a vacation.
+    """
+    vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
+    vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
+    vac_request = SubmitField("Submit Request")
+
+
 class AdminFilterEventsForm(Form):
     """
     Form for Administrators to filter all clock events.
@@ -59,9 +68,9 @@ class AdminFilterEventsForm(Form):
 
     def validate_email(self, email):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that a user with the given email exists in the system.
 
-        :param email: The supervisor's email
+        :param email: The filtered email
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
@@ -91,9 +100,9 @@ class CreatePayRateForm(Form):
 
     def validate_email(self, email):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that a user with the given email exists in the system.
 
-        :param email: The supervisor's email
+        :param email: The filtered email
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
@@ -101,9 +110,10 @@ class CreatePayRateForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-class ApproveOrDenyTimePunchForm(Form):
+class ApproveOrDenyForm(Form):
     """
-    Form administrators use to approve or deny a TimePunch. Implemented in review_timepunches.html.
+    Form administrators use to approve or deny a request.
+    Implemented in review_timepunches.html and review_vacations.html
     """
     approve = SubmitField("")
     deny = SubmitField("")
@@ -143,14 +153,11 @@ class FilterTimePunchForm(Form):
     Form administrators use to filter through TimePunches.
     """
     email = StringField("Email", validators=[Optional(), Email()])
-    approved = SelectField(u'Approval Status', validators=[Optional()], choices=[
-        ('All', 'All'),
-        ('Approved', 'Approved'),
-        ('Unapproved', 'Unapproved')])
     status = SelectField(u'Status', validators=[Optional()], choices=[
         ('All', 'All'),
         ('Pending', 'Pending'),
-        ('Processed', 'Processed')])
+        ('Approved', 'Approved'),
+        ('Unapproved', 'Unapproved')])
     filter = SubmitField("Filter")
 
     def validate_email(self, email):
@@ -161,14 +168,13 @@ class FilterTimePunchForm(Form):
         :return:
         """
         user = User.query.filter_by(email=email.data).first()
-        print("USER:", user)
         if not user:
             raise ValidationError('No account with that email exists')
 
 
-class ClearTimePunchFilterForm(Form):
+class ClearForm(Form):
     """
-    Form administrators use to clear their TimePunch filter.
+    Form administrators use to clear their filters.
     """
     clear = SubmitField("Clear Filter")
 
@@ -178,7 +184,7 @@ class FilterVacationForm(Form):
      Form administrators use to filter through Vacations.
     """
     email = StringField("Email", validators=[Optional(), Email()])
-    approved = SelectField(u'Status', validators=[Optional()], choices=[
+    status = SelectField(u'Status', validators=[Optional()], choices=[
         ('All', 'All'),
         ('Pending', 'Pending'),
         ('Approved', 'Approved'),
@@ -197,49 +203,15 @@ class FilterVacationForm(Form):
             raise ValidationError('No account with that email exists')
 
 
-class ChangeUserDataForm(Form):
-    """
-    Form administrators use to change a User's information.
-    """
-    first_name = StringField("First name")
-    last_name = StringField("Last name")
-    division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
-    tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
-    supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
-    is_supervisor = BooleanField("User is a supervisor")
-    role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
-    budget_code = StringField('Budget Code')
-    object_code = StringField('Object Code')
-    object_name = StringField('Object Name')
-    submit = SubmitField('Update')
-
-    def validate_supervisor_email(self, email_field):
-        """
-        Verifies that e-mails used for supervisors exist in the system.
-        :param email_field: The supervisor's email
-        :return:
-        """
-        user = User.query.filter_by(email=email_field.data).first()
-        if not user:
-            raise ValidationError('No account with that email exists')
-
-
-class AdvancedTimesheetForm(Form):
+class GenerateMultipleTimesheetsForm(Form):
     """
     Form to generate multiple timesheets (used only by administrators)
     """
     emails = SelectMultipleField(choices=[], validators=[DataRequired()], coerce=str)
     start_date = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
-    # start_time = StringField(u'Start Time (24-hour)', default="9:00", validators=[DataRequired()])
     end_date = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
-    # end_time = StringField(u'End Time (24-hour)', default="9:00", validators=[DataRequired()])
     gen_timesheets = SubmitField("Generate Timesheets")
 
 
-class RequestVacationForm(Form):
-    """
-    Form for users to request a vacation.
-    """
-    vac_start = DateField(u'Start Date', default=datetime.today(), validators=[DataRequired()])
-    vac_end = DateField(u'End Date', default=datetime.today(), validators=[DataRequired()])
-    vac_request = SubmitField("Submit Request")
+class ExportForm(Form):
+    export = SubmitField("Export")

@@ -34,7 +34,7 @@ def create_timepunch(punch_type, punch_time, reason):
                user=current_user, punch_time=punch_time, type=punch_type, note=reason)
 
 
-def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, status=None):
+def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
@@ -59,19 +59,13 @@ def get_timepunches_for_review(user_email, filter_by_email=None, approved=None, 
                                      'exists'.format(filter_by_email))
 
     # Filter by status if user provides a status
-    if approved:
-        if approved == 'Approved':
-            timepunch_query = timepunch_query.filter(Event.approved == True)
-        elif approved == 'Unapproved':
-            timepunch_query = timepunch_query.filter(Event.approved == False)
-            # else approved == 'All', in which case we don't need to add anything to the filter
-
-    if status:
-        if status == 'Pending':
-            timepunch_query = timepunch_query.filter(Event.pending == True)
-        elif status == 'Processed':
-            timepunch_query = timepunch_query.filter(Event.pending == False)
-            # else status == 'All', in which case we don't need to add anything to the filter
+    if status == 'Pending':
+        timepunch_query = timepunch_query.filter(Event.pending == True).filter(Event.approved == False)
+    if status == 'Approved':
+        timepunch_query = timepunch_query.filter(Event.approved == True).filter(Event.pending == False)
+    elif status == 'Unapproved':
+        timepunch_query = timepunch_query.filter(Event.approved == False).filter(Event.pending == False)
+    # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
     result = timepunch_query.all()
@@ -104,12 +98,13 @@ def approve_or_deny(event_id, approve=False):
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')
 
+
 def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     """
     Queries the database for a list of timepunch requests that need to be approved or denied.
     :param user_email: The email of the supervisor.
     :param filter_by_email: The email of a specific user for optional filters.
-    :param approved: [String] Pending, Approved, Unapproved, All. Used for more precise filtering.
+    :param status: [String] Pending, Approved, Unapproved, All. Used for more precise filtering.
     :return: A query of all vacation requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
@@ -128,13 +123,13 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
                                      'exists'.format(filter_by_email))
 
     # Filter by status if user provides a status
-        if status == 'Pending':
-            vacation_query = vacation_query.filter(Vacation.approved is None)
-        if status == 'Approved':
-            vacation_query = vacation_query.filter(Vacation.approved == True)
-        elif status == 'Unapproved':
-            vacation_query = vacation_query.filter(Vacation.approved == False)
-            # else status == 'All', in which case we don't need to add anything to the filter
+    if status == 'Pending':
+        vacation_query = vacation_query.filter(Vacation.pending == True).filter(Vacation.approved == False)
+    if status == 'Approved':
+        vacation_query = vacation_query.filter(Vacation.approved == True).filter(Vacation.pending == False)
+    elif status == 'Unapproved':
+        vacation_query = vacation_query.filter(Vacation.approved == False).filter(Vacation.pending == False)
+        # else status == 'All', in which case we don't need to add anything to the filter
 
     # Check to make sure something is returned by the query
     result = vacation_query.all()
@@ -144,7 +139,7 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     # Last step: order timepunches by id
     vacation_query = vacation_query.order_by(sqlalchemy.desc(Vacation.id))
 
-    current_app.logger.info('End function get_timepunches_for_review')
+    current_app.logger.info('End function get_vacations_for_review')
     return vacation_query
 
 
@@ -162,6 +157,7 @@ def approve_or_deny_vacation(vacation_id, approve=False):
         vac.approved = True
     else:
         vac.approved = False
+    vac.pending = False
     db.session.add(vac)
     db.session.commit()
     current_app.logger.info('End function approve_or_deny()')

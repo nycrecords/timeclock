@@ -21,7 +21,7 @@ class RegistrationForm(Form):
     division = SelectField('Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
     password = PasswordField('Password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match')])
+        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
@@ -200,7 +200,7 @@ class ChangePasswordForm(Form):
     """Form for changing password"""
     old_password = PasswordField('Old password', validators=[DataRequired()])
     password = PasswordField('New password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match')])
+        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
     password2 = PasswordField('Confirm new password', validators=[DataRequired()])
     submit = SubmitField('Update Password')
 
@@ -222,3 +222,32 @@ class PasswordResetForm(Form):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first() is None:
             raise ValidationError('Unknown email address.')
+
+
+class ChangeUserDataForm(Form):
+    """
+    Form administrators use to change a User's information.
+    """
+    first_name = StringField("First name")
+    last_name = StringField("Last name")
+    division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
+    tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
+    # supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
+    supervisor_email = SelectField('Supervisor Email', choices=[], coerce=int,
+                                   validators=[DataRequired()])
+    is_supervisor = BooleanField("User is a supervisor")
+    role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
+    budget_code = StringField('Budget Code')
+    object_code = StringField('Object Code')
+    object_name = StringField('Object Name')
+    submit = SubmitField('Update')
+
+    def validate_supervisor_email(self, email_field):
+        """
+        Verifies that e-mails used for supervisors exist in the system.
+        :param email_field: The supervisor's email
+        :return:
+        """
+        user = User.query.filter_by(id=email_field.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
