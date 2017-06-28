@@ -5,4 +5,4 @@ LogFile
 log/
 .idea/*
 venv/*
-
+.vagrant/
