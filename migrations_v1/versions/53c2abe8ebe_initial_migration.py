@@ -1,13 +1,13 @@
 """Initial Migration
 
-Revision ID: 4bd9bebcc5c
+Revision ID: 53c2abe8ebe
 Revises: None
-Create Date: 2016-07-19 10:24:52.197869
+Create Date: 2017-06-07 16:37:38.358299
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '4bd9bebcc5c'
+revision = '53c2abe8ebe'
 down_revision = None
 
 from alembic import op

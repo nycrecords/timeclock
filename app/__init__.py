@@ -50,7 +50,7 @@ def create_app(config_name):  # App Factory
     migrate.init_app(app, db)
     db.init_app(app)
     with app.app_context():
-        load_db(db)
+        # load_db(db)
         store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
         kvsession = KVSessionExtension(store, app)
         logfile_name = 'logfile_directory' + \
