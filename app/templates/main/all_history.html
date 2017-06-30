@@ -16,12 +16,12 @@
          <div style="float:right">
             {{ wtf.quick_form(exportform) }}
         </div>
-        <div style="float:right; margin-right: 5px">
-            <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success"
-                    style="float:left">
-                Advanced Timesheets
-            </button>
-        </div>
+{#        <div style="float:right; margin-right: 5px">#}
+{#            <button data-toggle="collapse" data-target="#advanced-timesheet-form" class="btn btn-success"#}
+{#                    style="float:left">#}
+{#                Advanced Timesheets#}
+{#            </button>#}
+{#        </div>#}
         <div style="float:right; margin-right: 5px">
             <form action="/download_timesheet" method="POST">
                 {% for event in generation_events %}
@@ -39,7 +39,7 @@
             </form>
         </div>
     </div>
-
+    <br/>
 
     {#  Collapsible form for filter options  #}
     <div id="filter-form" class="collapse">
