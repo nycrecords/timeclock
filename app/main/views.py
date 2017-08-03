@@ -21,6 +21,7 @@ from flask_login import login_required, current_user
 from . import main
 from .forms import (
     AdminFilterEventsForm,
+    AdminFilterUsersForm,
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
@@ -48,7 +49,7 @@ from .modules import (
     delete_event,
     generate_timesheet,
     generate_timesheets,
-    create_csv
+    create_csv,
 )
 from .payments import (
     get_payrate_before_or_after,
@@ -598,16 +599,107 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
-    nondivision_users = []
-    tags = get_all_tags()
-    list_of_users = User.query.all()
-    for user in list_of_users:
-        if user.division is None:
-            list_of_users.remove(user)
-            nondivision_users.append(user)
-    # Pass in separate list of users with and without divisions
-    return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
-                           nondivision_users=nondivision_users)
+    form = AdminFilterUsersForm()
+
+    if form.validate_on_submit():
+
+
+        nondivision_users = []
+        tags = get_all_tags()
+
+        if form.clear_filter.data:
+            current_app.logger.info('Start function clear()')
+            session.pop('email', None)
+            session.pop('tag_input', None)
+            session.pop('division', None)
+            current_app.logger.info('User %s cleared their admin history filter.' %
+                                    current_user.email)
+            current_app.logger.info('End function clear()')
+            return redirect(url_for('main.user_list_page'))
+
+        if form.email.data and form.division.data and form.tag.data:
+            list_of_users = User.query.filter_by(email = form.email.data, division = form.division.data, tag_id = form.tag.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.email.data and form.division.data:
+            list_of_users = User.query.filter_by(email=form.email.data, division= form.division.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.email.data and form.tag.data:
+            list_of_users = User.query.filter_by(email= form.email.data, tag_id=form.tag.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.email.data:
+            list_of_users = User.query.filter_by(email = form.email.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.division.data and form.tag.data:
+            tag_num = convert_tags(form.tag.data)
+            list_of_users = User.query.filter_by(division=form.division.data, tag_id=form.tag.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.division.data:
+            list_of_users = User.query.filter_by(division=form.division.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        elif form.tag.data:
+            list_of_users = User.query.filter_by(tag_id=form.tag.data).all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+
+        else:
+            nondivision_users = []
+            tags = get_all_tags()
+            list_of_users = User.query.all()
+            for user in list_of_users:
+                if user.division is None:
+                    list_of_users.remove(user)
+                    nondivision_users.append(user)
+
+        return render_template('main/user_list.html',
+                               form = form,
+                               tags=tags,
+                               list_of_users=list_of_users,
+                               nondivision_users=nondivision_users)
+
+    else:
+
+        nondivision_users = []
+        tags = get_all_tags()
+        list_of_users = User.query.all()
+        for user in list_of_users:
+            if user.division is None:
+                list_of_users.remove(user)
+                nondivision_users.append(user)
+
+        return render_template('main/user_list.html',
+                                form=form,
+                                tags=tags,
+                                list_of_users=list_of_users,
+                                nondivision_users=nondivision_users
+                               )
+
 
 
 @main.route('/export_events', methods=['GET', 'POST'])

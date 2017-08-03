@@ -5,7 +5,16 @@
 {% block title %}TimeClock - History{% endblock %}
 
 {% block page_content %}
+
+
     <div class="row">
+
+    <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(form) }}
+
+
+            </div>
+
         <table class="table">
             <thead>
             <tr>
@@ -18,7 +27,7 @@
             </tr>
             </thead>
             <tbody>
-            {#                list out the users without a division#}
+            {# list out the users without a division#}
             {% for user in nondivision_users %}
                 <tr>
                     <td>{{ user.email }}</td>

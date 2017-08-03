@@ -77,6 +77,29 @@ class AdminFilterEventsForm(Form):
         if not user:
             raise ValidationError('No account with that email exists')
 
+class AdminFilterUsersForm(Form):
+    """
+    Form for Administrators to filter all users.
+    Administrators can search users by email.
+    Administrators can search fof users by tag/division.
+    """
+    email = StringField("Username/Email", validators=[Optional()])
+    tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
+    division = SelectField("Division", choices=divisions, validators=[Optional()])
+    submit = SubmitField("Filter")
+    clear_filter = SubmitField("Clear Filter")
+
+    def validate_email(self, email):
+        """
+        Verifies that a user with the given email exists in the system.
+
+        :param email: The filtered email
+        :return:
+        """
+        user = User.query.filter_by(email=email.data).first()
+        if not user:
+            raise ValidationError('No account with that email exists')
+
 
 class UserFilterEventsForm(Form):
     """
