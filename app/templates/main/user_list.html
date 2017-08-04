@@ -6,6 +6,12 @@
 
 {% block page_content %}
 
+    {%  if list_of_users == [] %}
+    {% include 'includes/empty_query.html' %}
+    {% else %}
+    {% endif %}
+
+
 
     <div class="row">
 
@@ -74,4 +80,8 @@
     </div>
 
 
+
+
+
 {% endblock %}
+

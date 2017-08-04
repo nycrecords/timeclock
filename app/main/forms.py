@@ -84,23 +84,12 @@ class AdminFilterUsersForm(Form):
     Administrators can search fof users by tag/division.
     """
     email = StringField("Email", validators=[Optional()])
-    name = StringField("Name", validators=[Optional()])
+    name = StringField("First Name", validators=[Optional()])
     last_name = StringField("Last Name", validators=[Optional()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
     division = SelectField("Division", choices=divisions, validators=[Optional()])
     submit = SubmitField("Filter")
     clear_filter = SubmitField("Clear Filter")
-
-    def validate_email(self, email):
-        """
-        Verifies that a user with the given email exists in the system.
-
-        :param email: The filtered email
-        :return:
-        """
-        user = User.query.filter_by(email=email.data).first()
-        if not user:
-            raise ValidationError('No account with that email exists')
 
 
 class UserFilterEventsForm(Form):

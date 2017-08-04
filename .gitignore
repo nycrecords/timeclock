@@ -1,5 +1,6 @@
 __pycache__/
 LogFile
+LogFile.1
 *.pyc
 *.log
 log/
