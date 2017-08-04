@@ -83,7 +83,9 @@ class AdminFilterUsersForm(Form):
     Administrators can search users by email.
     Administrators can search fof users by tag/division.
     """
-    email = StringField("Username/Email", validators=[Optional()])
+    email = StringField("Email", validators=[Optional()])
+    name = StringField("Name", validators=[Optional()])
+    last_name = StringField("Last Name", validators=[Optional()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
     division = SelectField("Division", choices=divisions, validators=[Optional()])
     submit = SubmitField("Filter")

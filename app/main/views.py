@@ -617,74 +617,75 @@ def user_list_page():
             current_app.logger.info('End function clear()')
             return redirect(url_for('main.user_list_page'))
 
-        if form.email.data and form.division.data and form.tag.data:
-            list_of_users = User.query.filter_by(email = form.email.data, division = form.division.data, tag_id = form.tag.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
+        # elif form.email.data and form.division.data and form.tag.data:
+        #     list_of_users = User.query.filter_by(email = form.email.data, division = form.division.data, tag_id = form.tag.data).all()
+        #
+        #
+        # elif form.email.data and form.division.data:
+        #     list_of_users = User.query.filter_by(email=form.email.data, division= form.division.data).all()
+        #
+        #
+        # elif form.email.data and form.tag.data:
+        #     list_of_users = User.query.filter_by(email= form.email.data, tag_id=form.tag.data).all()
+        #
+        #
+        # elif form.email.data:
+        #     list_of_users = User.query.filter_by(email = form.email.data).all()
+        #
+        #
+        # elif form.division.data and form.tag.data:
+        #     list_of_users = User.query.filter_by(division=form.division.data, tag_id=form.tag.data).all()
+        #
+        #
+        # elif form.division.data:
+        #     list_of_users = User.query.filter_by(division=form.division.data).all()
+        #
+        #
+        # elif form.tag.data:
+        #     list_of_users = User.query.filter_by(tag_id=form.tag.data).all()
 
-        elif form.email.data and form.division.data:
-            list_of_users = User.query.filter_by(email=form.email.data, division= form.division.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
+        list_of_users = User.query.all()
+        changed_list = User.query.all()
 
-        elif form.email.data and form.tag.data:
-            list_of_users = User.query.filter_by(email= form.email.data, tag_id=form.tag.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
-
-        elif form.email.data:
-            list_of_users = User.query.filter_by(email = form.email.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
-
-        elif form.division.data and form.tag.data:
-            tag_num = convert_tags(form.tag.data)
-            list_of_users = User.query.filter_by(division=form.division.data, tag_id=form.tag.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
-
-        elif form.division.data:
-            list_of_users = User.query.filter_by(division=form.division.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
-
-        elif form.tag.data:
-            list_of_users = User.query.filter_by(tag_id=form.tag.data).all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
+        if form.email.data:
+            for u in list_of_users:
+                if u.email != form.email.data:
+                    changed_list.remove(u)
 
 
-        else:
-            nondivision_users = []
-            tags = get_all_tags()
-            list_of_users = User.query.all()
-            for user in list_of_users:
-                if user.division is None:
-                    list_of_users.remove(user)
-                    nondivision_users.append(user)
+        if form.division.data:
+            for u in list_of_users:
+                if u.division != form.division.data:
+                     changed_list.remove(u)
+
+        if form.tag.data:
+            for u in list_of_users:
+                if u.tag_id != form.tag.data:
+                    changed_list.remove(u)
+
+        if form.name.data:
+            for u in list_of_users:
+                if u.first_name != form.name.data:
+                    changed_list.remove(u)
+
+        if form.last_name.data:
+            for u in list_of_users:
+                if u.last_name != form.last_name.data:
+                    changed_list.remove(u)
+
+
+
+        for user in list_of_users:
+            if user.division is None:
+                changed_list.remove(user)
+                nondivision_users.append(user)
 
         return render_template('main/user_list.html',
                                form = form,
                                tags=tags,
-                               list_of_users=list_of_users,
+                               list_of_users=changed_list,
                                nondivision_users=nondivision_users)
-
     else:
-
         nondivision_users = []
         tags = get_all_tags()
         list_of_users = User.query.all()
