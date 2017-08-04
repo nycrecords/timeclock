@@ -617,7 +617,6 @@ def user_list_page():
             current_app.logger.info('End function clear()')
             return redirect(url_for('main.user_list_page'))
 
-
         if form.email.data:
             list_of_users = [u for u in list_of_users if u.email == form.email.data]
         if form.division.data:
@@ -634,12 +633,11 @@ def user_list_page():
             list_of_users.remove(user)
             nondivision_users.append(user)
 
-
     return render_template('main/user_list.html',
-                            form=form,
-                            tags=tags,
-                            list_of_users=list_of_users,
-                            nondivision_users=nondivision_users)
+                           form=form,
+                           tags=tags,
+                           list_of_users=list_of_users,
+                           nondivision_users=nondivision_users)
 
 
 @main.route('/export_events', methods=['GET', 'POST'])
