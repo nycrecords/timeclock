@@ -599,7 +599,6 @@ def user_list_page():
     :return: user_list.html which lists all the users in the application
     """
     form = AdminFilterUsersForm()
-
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = User.query.all()
@@ -611,6 +610,8 @@ def user_list_page():
             session.pop('email', None)
             session.pop('tag_input', None)
             session.pop('division', None)
+            session.pop('first_name', None)
+            session.pop('last_name', None)
             current_app.logger.info('User %s cleared their admin history filter.' %
                                     current_user.email)
             current_app.logger.info('End function clear()')
