@@ -14,6 +14,7 @@
                 <th>Last Name</th>
                 <th>Division</th>
                 <th>Tag</th>
+                <th>Active</th>
                 <th></th>
             </tr>
             </thead>
@@ -34,13 +35,18 @@
                     {% if user.tag_id==None %}
                         <td>None</td>
                     {% endif %}
+                    {%  if user.user_status == 'active' %}
+                    <td> Active </td>
+                    {% else %}
+                    <td>Inactive</td>
+                    {% endif %}
                     <td><a class="btn btn-success" style="font-size:12px"
                            href="{{ url_for('auth.user_profile', username=user) }}">Edit</a></td>
                 </tr>
             {% endfor %}
             {#followed by users who do have division, sorted by their divison#}
             {% for user in list_of_users|sort(attribute='division') %}
-                <tr>
+                <au>
                     <td>{{ user.email }}</td>
                     <td>{{ user.first_name }}</td>
                     <td>{{ user.last_name }}</td>
@@ -53,7 +59,15 @@
                     {% endfor %}
                     {% if user.tag_id==None %}
                         <td>None</td>
+
                     {% endif %}
+                    {%  if user.user_status == 'active' %}
+                    <td> Active </td>
+                    {% else %}
+                    <td>Inactive</td>
+                    {% endif %}
+
+
                     <td><a class="btn btn-success" style="font-size:12px"
                            href="{{ url_for('auth.user_profile', username=user.email[:user.email.find('@')]) }}">Edit</a>
                     </td>

@@ -240,6 +240,8 @@ class ChangeUserDataForm(Form):
     budget_code = StringField('Budget Code')
     object_code = StringField('Object Code')
     object_name = StringField('Object Name')
+    status = SelectField('Set Status', choices=[("Active", "Active"), ("Inactive", "Inactive") ], validators=[DataRequired()])
+
     submit = SubmitField('Update')
 
     def validate_supervisor_email(self, email_field):
