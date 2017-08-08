@@ -428,7 +428,8 @@ def user_profile(username):
             update_user_information(u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
                                     form.is_supervisor.data,
-                                    form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
+                                    form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data,
+                                    form.user_status.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
             return redirect(url_for('auth.user_profile', username=username))

@@ -141,7 +141,8 @@ def update_user_information(user,
                             role_input,
                             budget_code_input,
                             object_code_input,
-                            object_name_input
+                            object_name_input,
+                            user_status_input
                             ):
     """
     To be used in the user_profile view function to update a user's information in the database.
@@ -273,6 +274,13 @@ def update_user_information(user,
             db.session.add(change)
             db.session.commit()
             user.role = Role.query.filter_by(name=role_input).first()
+
+    if user_status_input:
+        if user_status_input == "Active":
+            user.user_status = "active"
+        elif user_status_input =="Inactive":
+            user.user_status = "inactive"
+        db.session.commit()
 
     db.session.add(user)
     db.session.commit()
