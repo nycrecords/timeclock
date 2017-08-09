@@ -223,11 +223,6 @@ class PasswordResetForm(Form):
         if User.query.filter_by(email=field.data).first() is None:
             raise ValidationError('Unknown email address.')
 
-
-def user_status(args):
-    pass
-
-
 class ChangeUserDataForm(Form):
     """
     Form administrators use to change a User's information.

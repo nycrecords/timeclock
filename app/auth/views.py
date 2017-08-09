@@ -434,7 +434,7 @@ def user_profile(username):
                   'field.', category='error')
         else:
             flash('User information has been updated', category='success')
-            update_user_information(current_user, u, form.first_name.data, form.last_name.data,
+            update_user_information(u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
                                     form.is_supervisor.data,
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data,

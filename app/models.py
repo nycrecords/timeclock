@@ -108,7 +108,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     validated = db.Column(db.Boolean, default=False)
-    user_status = db.Column(db.Enum('Active', 'Inactive', name='user_status'), default='Active')
+    user_status = db.Column(db.Enum('active', 'inactive', name='user_status'), default='active')
     division = db.Column(db.String(128))
     login_attempts = db.Column(db.Integer, default=0)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
