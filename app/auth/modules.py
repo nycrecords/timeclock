@@ -131,7 +131,7 @@ def get_changelog_by_user_id(id):
     return changes
 
 
-def update_user_information(user,
+def update_user_information(current_user, user,
                             first_name_input,
                             last_name_input,
                             division_input,
@@ -275,12 +275,16 @@ def update_user_information(user,
             db.session.commit()
             user.role = Role.query.filter_by(name=role_input).first()
 
-    if user_status_input:
+    if user_status:
+
         if user_status_input == "Active":
             user.user_status = "active"
         elif user_status_input =="Inactive":
             user.user_status = "inactive"
         db.session.commit()
+
+
+
 
     db.session.add(user)
     db.session.commit()

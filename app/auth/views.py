@@ -85,6 +85,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
 
+        if user.user_status == 'inactive':
+            return render_template('auth/inactive_user.html')
+
         if user:
             if user.login_attempts > 2:
                 # Too many invalid attempts
@@ -407,6 +410,12 @@ def user_profile(username):
         u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
     form = ChangeUserDataForm()
     form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
+
+    if u.user_status == 'active':
+        form.user_status.choices = [('Active', 'Active'), ('Inactive', 'Inactive')]
+    else:
+        form.user_status.choices = [('Inactive', 'Inactive'), ('Active', 'Active')]
+
     if not u:
         flash('No user with username {} was found'.format(username), category='error')
         return redirect(url_for('main.user_list_page'))
@@ -425,14 +434,14 @@ def user_profile(username):
                   'field.', category='error')
         else:
             flash('User information has been updated', category='success')
-            update_user_information(u, form.first_name.data, form.last_name.data,
+            update_user_information(current_user, u, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
                                     form.is_supervisor.data,
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data,
                                     form.user_status.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
             current_app.logger.info('End function user_profile')
-            return redirect(url_for('auth.user_profile', username=username))
+            return redirect(url_for('main.user_list_page'))
     else:
         # Pre-populate the form with current values
         form.first_name.data = u.first_name
