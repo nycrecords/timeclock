@@ -600,7 +600,7 @@ def user_list_page():
     """
     nondivision_users = []
     tags = get_all_tags()
-    list_of_users = User.query.all()
+    list_of_users = User.query.filter_by(is_active=True).all()
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)

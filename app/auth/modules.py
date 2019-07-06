@@ -138,6 +138,7 @@ def update_user_information(user,
                             tag_input,
                             supervisor_email_input,
                             is_supervisor_input,
+                            is_active_input,
                             role_input,
                             budget_code_input,
                             object_code_input,
@@ -226,6 +227,17 @@ def update_user_information(user,
         db.session.add(change)
         db.session.commit()
         user.is_supervisor = is_supervisor_input
+    import ipdb; ipdb.set_trace()
+    if is_active_input is not None and (user.is_active != is_active_input):
+        change = ChangeLog(changer_id=current_user.id,
+                           user_id=user.id,
+                           timestamp=datetime.now(),
+                           category='IS ACTIVE',
+                           old=user.is_active,
+                           new=is_active_input)
+        db.session.add(change)
+        db.session.commit()
+        user.is_active = is_active_input
 
     if budget_code_input and budget_code_input != '' and user.budget_code != budget_code_input:
         change = ChangeLog(changer_id=current_user.id,
