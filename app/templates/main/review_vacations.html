@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TimeClock - Review Vacations{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter
+            Results
+        </button>
+
+        <div style="float: right">
+            {{ wtf.quick_form(clear) }}
+        </div>
+    </div>
+
+    <div id="filter-form" class="collapse">
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(filter) }}
+            </div>
+        </div>
+    </div>
+
+    {% if query_has_results %}
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for vacation in vacation_list %}
+                    <tr>
+                        <td>{{ vacation.user.email }}</td>
+                        <td>{{ vacation.user.first_name }}</td>
+                        <td>{{ vacation.user.last_name }}</td>
+                        <td>{{ vacation.start.strftime("%b %d, %Y %H:%M:%S") }}</td>
+                        <td>{{ vacation.end.strftime("%b %d, %Y %H:%M:%S") }}</td>
+                        <td>{% if vacation.pending %}
+                            <span style="color: #8b0000;">Pending</span>
+                        {% elif vacation.approved %}
+                            <span style="color:green">Approved</span>
+                        {% else %}
+                            <span style="color:orange">Unapproved</span>
+                        {% endif %}
+                            <br>
+                        </td>
+                        <td>
+                            {% if vacation.user.id != current_user.id %}
+                                <form method="POST" action="/review_vacations" name="form">
+                                    <input type="hidden" value="{{ vacation.id }}" name="vacation_id">
+                                    {% for field in form %}
+                                        {% if field.type == 'SubmitField' %}
+                                            {% if field.name == 'approve' %}
+                                                <button type="submit" class="btn btn-success" value="{{ field.name }}"
+                                                        name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-danger" style=""
+                                                        value="{{ field.name }}" name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% endif %}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                        {% if field.errors %}
+                                            <ul class=errors>
+                                                {% for error in field.errors %}
+                                                    <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endfor %}
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-8 col-md-offset-4">
+            {{ macros.pagination_widget(pagination, '.review_timepunch') }}
+        </div>
+
+    {% else %}
+        <div class="row">
+            {% include 'includes/empty_query.html' %}
+        </div>
+    {% endif %}
+
+
+{% endblock %}

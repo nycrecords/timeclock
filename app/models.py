@@ -54,13 +54,55 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
+# class Budget(db.Model):
+#     """
+#     Specifies the budget code and the corresponding budget name
+#     """
+#     __tablename__ = 'budget'
+#     id = db.Column(db.Integer, primary_key=True)
+#     budget_code = db.Column(db.Integer, default=0)
+#     object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
+#
+#     def __repr__(self):
+#         return '<Budget %r' % self.budget_code
+#
+# class Object(db.Model):
+#     """
+#     Object codes and names for users
+#     """
+#     __tablename__ = 'object'
+#     id = db.Column(db.Integer, primary_key=True)
+#     object_name = db.Column(db.String(64))
+#     object_code = db.Column(db.Integer, default=0)
+#
+#
+#     @staticmethod
+#     def insert_objects():
+#         """
+#         Inserts object codes/names into database
+#         Call from manage.py with Object.insert_objects()
+#         """
+#         object_name = {
+#             'Contract Services' : 600
+#         }
+#         for obj in object_name:
+#             o = Object(object_name=obj)
+#             o.object_code=object_name[obj]
+#             db.session.add(o)
+#         db.session.commit()
+#
+#
+#
+#     def __repr__(self):
+#         return '<Object %r>' % self.object_name
+
+
 class User(UserMixin, db.Model):
     """
     Specifies properties and functions of a TimeClock User.
     """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    # TODO: ENSURE USER EMAILS ARE xxx@records.nyc.gov
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
@@ -73,6 +115,17 @@ class User(UserMixin, db.Model):
     old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
     events = db.relationship('Event', backref='user', lazy='dynamic')
     pays = db.relationship('Pay', backref='user', lazy='dynamic')
+    vacations = db.relationship('Vacation', backref='user', lazy='dynamic')
+
+    # Supervisor
+    is_supervisor = db.Column(db.Boolean, default=False)
+    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    supervisor = db.relationship('User', remote_side=[id])
+
+    # Budget/Object Codes
+    budget_code = db.Column(db.String)
+    object_code = db.Column(db.String)
+    object_name = db.Column(db.String)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -80,8 +133,8 @@ class User(UserMixin, db.Model):
             if self.email == current_app.config['ADMIN']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
                 self.validated = True
-        if self.role is None:
-            self.role = Role.query.filter_by(default=True).first()
+            else:
+                self.role = Role.query.filter_by(default=True).first()
         self.password_list = Password(p1='', p2='', p3='', p4='', p5='', last_changed=datetime.now())
 
     @property
@@ -107,7 +160,6 @@ class User(UserMixin, db.Model):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         session['reset_token'] = {'token': s, 'valid': True}
         return s.dumps({'reset': self.id})
-
 
     def reset_password(self, token, new_password):
         """
@@ -207,6 +259,17 @@ class Event(db.Model):
     time = db.Column(db.DateTime)  # Time of clock in/out event
     note = db.Column(db.String(120))
     ip = db.Column(db.String(120))
+
+    timepunch = db.Column(db.Boolean, default=False)
+    # True if this is a timepunch request, false otherwise
+
+    approved = db.Column(db.Boolean, default=True)
+    # ^True if this is an approved timepunch request, false if
+    # this is an unapproved timepunch request, Null otherwise
+
+    pending = db.Column(db.Boolean, default=False)
+    # True if this is a timepunch request that hasn't been approved or denied yet
+
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
@@ -298,6 +361,33 @@ class Password(db.Model):
         self.p2 = self.p1
         self.p1 = password_hash
         self.last_changed = datetime.now()
+
+
+class ChangeLog(db.Model):
+    """
+    A model that contains a list of changes made to a user account.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    changer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', foreign_keys=[user_id])
+    changer = db.relationship('User', foreign_keys=[changer_id])
+    timestamp = db.Column(db.DateTime)
+    old = db.Column(db.String(128))
+    new = db.Column(db.String(128))
+    category = db.Column(db.String(128))
+
+
+class Vacation(db.Model):
+    """
+    Model that stores vacation requests and status
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    start = db.Column(db.DateTime())
+    end = db.Column(db.DateTime())
+    approved = db.Column(db.Boolean, default=False)
+    pending = db.Column(db.Boolean, default=True)
 
 
 login_manager.anonymous_user = AnonymousUser

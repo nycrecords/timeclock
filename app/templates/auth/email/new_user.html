@@ -1,10 +1,14 @@
 <p>Hi {{ user.first_name }},</p>
 <p>Your account for the NYC Department of Records and Information Services TimeClock has been created.</p>
-<p>Please visit <a href="{{ url_for('auth.login', _external=True) }}">{{ url_for('auth.login', _external=True) }}</a> to login to the site.</p>
+<p>Please visit <a href="{{ url_for('auth.login', _external=True) }}">{{ url_for('auth.login', _external=True) }}</a> to
+    login to the site.</p>
 <p>Your username is {{ user.email }}</p>
 <p>Your initial password is {{ temp_password }}. You will be prompted to reset it upon login.</p>
-<br />
-<p>If you have any questions, please contact the Office of Administration <a href="mailto:administration@records.nyc.gov">(administration@records.nyc.gov)</a></p>
+<br/>
+<p>If you have any questions, please contact the Office of Administration <a
+        href="mailto:administration@records.nyc.gov">(administration@records.nyc.gov)</a></p>
 <p>Sincerely,</p>
 <p>The TimeClock Team</p>
-<p><small>Note: replies to this email address are not monitored.</small></p>
+<p>
+    <small>Note: replies to this email address are not monitored.</small>
+</p>

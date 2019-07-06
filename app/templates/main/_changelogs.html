@@ -1,0 +1,31 @@
+{# Displays a list of past changes made to a user account #}
+
+{% import "_macros.html" as macros %}
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Time</th>
+        <th>Changer</th>
+        <th>Category</th>
+        <th>Old Value</th>
+        <th>New Value</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for change in changes %}
+        <tr>
+            <td>{{ change.timestamp.strftime("%b %d, %Y %H:%M:%S") }}</td>
+            <td>{{ change.changer.email }}</td>
+            <td>{{ change.category }}</td>
+            <td>{{ change.old }}</td>
+            <td>{{ change.new }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="col-md-8 col-md-offset-4">
+    {{ macros.pagination_widget(pagination, '.user_profile', username=username) }}
+</div>

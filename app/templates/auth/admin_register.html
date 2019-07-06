@@ -4,10 +4,39 @@
 {% block title %}TimeClock - Register User{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1 style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased ">Register</h1>
-</div>
-<div class="col-md-4">
-    {{ wtf.quick_form(form) }}
-</div>
+    <div class="page-header">
+        <h1 style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased ">Register</h1>
+    </div>
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+    </div>
+
+
+    <script>
+
+        $("#division").change(function () {
+            $.ajax({
+                url: "/auth/parse_division",
+                type: "GET",
+                data: {
+                    division: $("#division").val()
+                },
+                success: function (data) {
+                    var sel = $("#supervisor_email");
+                    sel.empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var opt = document.createElement("option");
+                        console.log("DATA:");
+                        console.log(data);
+                        opt.innerHTML = data[i][1];
+                        opt.value = data[i][0];
+                        console.log(opt);
+                        sel.append(opt);
+                    }
+                    console.log(sel);
+                }
+            });
+        });
+
+    </script>
 {% endblock %}

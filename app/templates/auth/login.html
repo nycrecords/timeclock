@@ -4,11 +4,11 @@
 {% block title %}TimeClock - Login{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1 style="font-family:'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">Login</h1>
-</div>
-<div class="col-md-4">
-    {{ wtf.quick_form(form) }}
-    <a href="{{ reset_url }}" style="float:right">Forgot your password?</a>
-</div>
+    <div class="page-header">
+        <h1 style="font-family:'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">Login</h1>
+    </div>
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+        <a href="{{ reset_url }}" style="float:right">Forgot your password?</a>
+    </div>
 {% endblock %}

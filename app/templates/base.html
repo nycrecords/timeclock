@@ -3,54 +3,118 @@
 {% block title %}TimeClock{% endblock %}  <!-- title block inherited from bootstrap/base.html -->
 
 {% block head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
-type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
-type="image/x-icon">
+    {{ super() }}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
+          type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
+          type="image/x-icon">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet"
+          media="screen">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" rel="stylesheet"
+          media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css"
+          rel="stylesheet" media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css.map"
+          rel="stylesheet" media="screen">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}"/>
 {% endblock %}
 
 {% block navbar %}  <!-- Navigation base HTML will go here -->
-    <div class="navbar navbar-default" role="navigation" style="border-radius: 0; font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased;
+    <div class="navbar navbar-default" role="navigation" style="border-radius: 0; font-family: 'Sofia Pro Soft', 'Trebuchet MS'; -webkit-font-smoothing: antialiased;
     background-color: #2a6496; border-color: #2a6496;">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}" style="color:white">TimeClock Home</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                {% if current_user.is_authenticated %}
-                    {% if current_user.is_administrator() %}
-                         <li><a href="{{ url_for('auth.admin_register') }}" style="color:white">Register User</a></li>
-                        <li><a href="{{ url_for('main.all_history') }}" style="color:white">All History</a></li>
-                    {% endif %}
-                        <li><a href="{{ url_for('main.history') }}" style="color:white">History</a></li>
-                    <li><a href="{{ url_for('auth.change_password') }}" style="color:white">Change Password</a></li>
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}" style="color:white">TimeClock Home</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_administrator() %}
+                            <li>
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle" type="button"
+                                            id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                                        Users
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                        <li><a href="{{ url_for('auth.admin_register') }}">Register User</a></li>
+                                        <li><a href="{{ url_for('main.pay') }}">Create Pay Rate</a></li>
+                                        <li><a href="{{ url_for('main.user_list_page') }}">Edit User Information</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="dropdown">
+                                    <button class="btn btn-default dropdown-toggle" type="button"
+                                            id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                                        History
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                        <li><a href="{{ url_for('main.history') }}">My History</a></li>
+                                        <li><a href="{{ url_for('main.all_history') }}">All History</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                        {% else %}
+                            <li><a href="{{ url_for('main.history') }}" style="color:white">History</a></li>
+                        {% endif %}
+                        <li>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button"
+                                        id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                                    Requests
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                    <li><a href="{{ url_for('main.request_timepunch') }}">Request Timepunch/Vacation</a></li>
+                                    <li><a href="{{ url_for('main.review_timepunch') }}">Review Timepunches</a></li>
+                                    <li><a href="{{ url_for('main.review_vacations') }}">Review Vacations</a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li><a href="{{ url_for('auth.change_password') }}" style="color:white">Change Password</a></li>
                         <li><a href="{{ url_for('auth.logout') }}" style="color:white">Sign Out</a></li>
-                {% else %}
-                <li><a href="{{ url_for('auth.login') }}" style="color:white">Sign In</a></li>
-                {% endif %}
-            </ul>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" style="color:white">Sign In</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block content %}
-<div class="container" style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">
+    <div class="container" style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">
     {% for category, message in get_flashed_messages(with_categories=True) %}
         {% if category == 'error' %}
             <div class="alert alert-danger">
         {% else %}
             <div class="alert alert-{{ category }}">
         {% endif %}
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ message }}
-            </div>
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    {{ message }}
+    </div>
     {% endfor %}
 
-    {% block page_content %}
-    {% endblock %}
+{% block page_content %}
+{% endblock %}
 </div>
 {% endblock %}
 
@@ -59,4 +123,59 @@ type="image/x-icon">
 {% block scripts %} <!-- Include any JS scripts here -->
     {{ super() }}
     {{ moment.include_moment() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
+    <script>
+
+        $(function () {
+            $("#add_time").timepicker({
+                'timeFormat': 'H:i',
+                'step': 1
+            });
+
+            $('#punch_time').timepicker({
+                'timeFormat': 'H:i',
+                'step': 1
+            });
+
+
+            $("#first_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#last_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#add_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+
+            $("#punch_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#start_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#end_date").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#vac_start").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+            $("#vac_end").datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+
+        });
+    </script>
 {% endblock %}

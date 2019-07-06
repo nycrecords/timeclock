@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Home{% endblock %}
+
+{% block page_content %}
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_administrator() %}
+            <span style="float:right">
+                            {% include 'includes/export_data_button.html' %}
+                        </span>
+        {% endif %}
+        <p>Welcome, <br><br>Name: {{ current_user.first_name }} {{ current_user.last_name }}</p>
+        <p>Email: {{ current_user.email }}</p>
+        <div class="row" style="padding-bottom:10px">
+            <div class="col-md-4" style="height:300px">
+                <div>
+                    {{ wtf.quick_form(form) }}
+                </div>
+                <div style="position: absolute; bottom:0">
+                    {% if last_clock_event!=None %}
+                        {% if last_clock_event==True %}
+                            <p><b>You last clocked in</b> at {{ last_event }}</p>
+                        {% else %}
+                            <p><b>You last clocked out</b> at {{ last_event }}</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+
+
+            {% if current_user.is_administrator() %}
+                <div class="col-md-8" style="height:300px; overflow: auto">
+                    <p>Currently clocked in:</p>
+                    <table class="table" style="padding:4px">
+                        <thead>
+                        <tr>
+                            <th>Division</th>
+                            <th>Email</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in clocked_in_users %}
+                            <tr>
+                                <td>{{ user.division }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.first_name }}</td>
+                                <td>{{ user.last_name }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+                <hr>
+
+            {% endif %}
+    {% endif %}
+
+
+
+
+{% endblock %}

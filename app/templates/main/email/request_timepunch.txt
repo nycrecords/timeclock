@@ -1,0 +1,20 @@
+This is a notification to inform you that {{ user.first_name }} {{ user.last_name }} [email: {{ user.email }}has requested a change to their TimeClock Logs.
+
+Request information:
+Type: Clock
+    {% if type %}
+    IN
+    {% else %}
+    OUT
+    {% endif %}
+
+
+Time: {{ punch_time.strftime("%b %d, %Y %H:%M:%S") }}
+Reason: {{ note }}
+
+
+You can approve or reject this request <a href="{{ url_for('main.review_timepunch', _external=True) }} >here.</a>
+
+Alternatively, you can copy and paste this url into your browser: {{ url_for('main.review_timepunch', _external=True) }}.
+
+Responses to this email are not monitored.

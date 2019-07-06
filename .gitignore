@@ -4,3 +4,6 @@ LogFile
 *.log
 log/
 .idea/*
+venv/*
+.vagrant/
+Vargrantfile

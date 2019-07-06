@@ -1,10 +1,16 @@
-from .. import db
-from ..models import User, Event, Tag, Pay
 from datetime import datetime, timedelta, date
+
 import dateutil.relativedelta
-from flask_login import current_user
 import sqlalchemy
-from flask import session, current_app
+from flask import session, current_app, send_file, make_response
+from flask_login import current_user
+
+from .pdf import generate_header, generate_employee_info, generate_timetable, generate_signature_template, \
+    generate_footer
+from .. import db
+from ..email_notification import send_email
+from ..models import User, Event, Tag, Vacation
+
 
 
 def process_clock(note_data, ip=None):
@@ -19,12 +25,23 @@ def process_clock(note_data, ip=None):
     current_app.logger.info('Start function process_clock({},{})'.format(note_data, ip))
     current_app.logger.info('Creating new clock event for {}'.format(current_user.email))
 
-    event = Event(type=not get_last_clock_type(user_id=current_user.id),
+    last = get_last_clock()
+    # Send email if employee has worked for over seven hours
+    if last and last.type:
+        # If the last clock is an IN
+        # TODO: ADJUST EMAIL TO PROPER ADMIN EMAIL BEFORE DEPLOYING
+        # CURRENT EMAIL IS BRIAN'S FOR QA TESTING
+        if (datetime.now() - get_last_clock().time).seconds / float(3600) >= 8:
+            send_email('bwaite@records.nyc.gov', 'Overtime - {}'.format(current_user.email),
+                       '/main/email/employee_overtime', email=current_user.email)
+
+    # Create clock event
+    typ = True if not last else not last.type
+    event = Event(type=typ,
                   time=datetime.now(),
                   user_id=current_user.id,
                   note=note_data, ip=ip)
     current_app.logger.info('Saving new event to database')
-    db.session.add(current_user)
     db.session.add(event)
     db.session.commit()
     current_app.logger.info('Saved new event to database')
@@ -38,7 +55,8 @@ def set_clock_form():
     """
     from .forms import ClockInForm, ClockOutForm
     current_app.logger.info('Start function get_clock_form()')
-    if is_clocked():
+    last = get_last_clock()
+    if last and last.type:
         current_app.logger.info('Setting clock form to: clock out')
         form = ClockOutForm()
     else:
@@ -47,47 +65,41 @@ def set_clock_form():
     current_app.logger.info('End function get_clock_form()')
     return form
 
-def is_clocked(user_id=None):
-    '''
-    checks if the user is clocked in
-    :return: True if the user is clocked in, False if user is clocked out
-    '''
 
-    if user_id:
-        event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
-    else:
-        event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event is not None:
-        return event.type
-    else:
-        return None
-
-def get_last_clock():
+def get_last_clock(user=current_user, time=None):
     """
-    Obtains the last clock in or clock out instance created by this user.
-    :return: Formatted time of last clock event
+    gets the last valid clock for a user before the given time
+    :param user: The user whose clocks to query
+    :param time: The time
+    :return: The time of the event
     """
     current_app.logger.info('Start function get_last_clock()')
     current_app.logger.info('Querying for last clock of {}'.format(current_user.email))
     try:
         current_app.logger.info('Querying for most recent clock event for user {}'.format(current_user.email))
-        if Event.query.filter_by(user_id=current_user.id).first() is not None:
-            recent_event = Event.query.filter_by(user_id=current_user.id).order_by(sqlalchemy.desc(Event.time)).\
-                first().time.strftime("%b %d, %Y | %H:%M:%S")
+        if Event.query.filter_by(user_id=user.id).first() is not None:
+            # If the user has clock events (at least one), find the most recent clock event.
+            recent_query = Event.query.filter_by(user_id=user.id). \
+                filter_by(approved=True). \
+                order_by(
+                sqlalchemy.desc(Event.time))
+            if time:
+                recent_query = recent_query.filter(Event.time <= time)
+            recent_event = recent_query.first()
             current_app.logger.info('Finished querying for most recent clock event')
             current_app.logger.info('End function get_last_clock()')
             return recent_event
         else:
+            # Because the user has no clock events, we can't search for the most recent one.
             current_app.logger.info('Failed to find most recent clock event for {}: user probably does not have'
                                     'any clock events yet'.format(current_user.email))
             current_app.logger.info('End function get_last_clock()')
-
     except:
         current_app.logger.error('EXCEPTION: Failed to query {}\'s last event'.format(current_user.email))
         return None
 
 
-def get_events_by_date():
+def get_events_by_date(email=None, first_date_input=None, last_date_input=None, division_input=None):
     """
     Filters the Events table for events granted by an (optional) user from an (optional) begin_date to an (optional)
     end date.
@@ -95,6 +107,8 @@ def get_events_by_date():
     :return: QUERY of Event objects from a given user between two given dates
     """
     current_app.logger.info('Start function get_events_by_date')
+
+    # Ensure session variables exist
     if 'first_date' not in session:
         current_app.logger.info('First date not in session, setting to defaults')
         session['first_date'] = get_time_period('w')[0]
@@ -107,22 +121,36 @@ def get_events_by_date():
         session['tag_input'] = 0
     tag_input = session['tag_input']
 
+    if 'division' not in session:
+        current_app.logger.info('Tag not in session, setting to defaults')
+        session['division'] = None
+    division = session['division']
+
     if 'email' not in session:
         current_app.logger.info('Email not in session, setting to defaults')
         session['email'] = current_user.email
     email_input = session['email']
 
+    if email_input and email_input.find('@') == -1:
+        # If the email input by the user does not contain the @records.nyc.gov portion, add it in
+        email_input += '@records.nyc.gov'
+
+    # Insert parameters into this function to manually search for events, disregarding session variables
+    # This is used when querying for timepunches for supervisor review
+    if email:
+        email_input = email
+    if first_date_input:
+        first_date = first_date_input
+    if last_date_input:
+        last_date = last_date_input
+    if division_input:
+        division = division_input
+
     current_app.logger.info('Start function get_events_by_date with '
                             'start: {}, end: {}, email: {},tag: {}'
                             .format(session['first_date'], session['last_date'],
-                                    session['email'], session['tag_input'])
+                                    session['email'], session['tag_input'], session['division'])
                             )
-    # What to do if form date fields are left blank
-    # TODO: This is extraneous code. Ensure this is true during code review and then remove - Sarvar
-    if first_date is None:
-        first_date = get_time_period('w')[0]   # First possible clock-in date
-    if last_date is None:
-        last_date = get_time_period('w')[1]          # Last possible clock-in date
 
     current_app.logger.info('Querying for all events between provided dates ({},{})'.
                             format(session['first_date'], session['last_date']))
@@ -135,18 +163,35 @@ def get_events_by_date():
     if tag_input != 0:
         current_app.logger.info('Querying for events with users with given tag: {}'.format(session['tag_input']))
         tag = Tag.query.filter_by(id=tag_input).first()
-        users = tag.users.all()
-        events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
+        if tag:
+            users = tag.users.all()
+            events_query = events_query.filter(Event.user_id.in_(u.id for u in users))
         current_app.logger.info('Finished querying for events with users with given tag')
 
     # User processing
-    if email_input is not None and User.query.filter_by(email=email_input).first() is not None:
-        current_app.logger.info('Querying for events with given user: {}')
-        user_id = User.query.filter_by(email=email_input).first().id
-        events_query = events_query.filter(Event.user_id == user_id)
-        current_app.logger.info('Finished querying for events with given user.')
+    if email_input is not None:
+        if User.query.filter_by(email=email_input).first() is not None:
+            current_app.logger.info('Querying for events with given user: {}'.format(email_input))
+            user_id = User.query.filter_by(email=email_input).first().id
+            events_query = events_query.filter(Event.user_id == user_id)
+            current_app.logger.info('Finished querying for events with given user.')
+        elif email_input != '':
+            # The user doesn't exist, so set events_query to something we know
+            # will return an empty query.
+            events_query = events_query.filter(Event.user_id == -1)
 
-    current_app.logger.info('Sorting query results be time (desc)')
+    # Eliminate unapproved timepunches to avoid showing them in the history pages and rendering them in Timesheets
+    # and invoices
+    events_query = events_query.filter_by(approved=True)
+
+    # Division processing
+    if division:
+        current_app.logger.info('Querying for events with users with given division: {}'.format(session['division']))
+        events_query = events_query.join(User).filter_by(division=division)
+        current_app.logger.info(
+            'Finished querying for events with users with given tag: {}'.format(session['tag_input']))
+
+    current_app.logger.info('Sorting query results by time (desc)')
     events_query = events_query.order_by(sqlalchemy.desc(Event.time))
     current_app.logger.info('Finished sorting query results')
     current_app.logger.info('End function get_events_by_date()')
@@ -189,7 +234,9 @@ def get_time_period(period='d'):
     elif period == 'lm':
         interval = [first_of_last_month, end_of_last_month]
     else:
-        interval = [today - timedelta(days=today.weekday()), datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
+        # Set the default interval to this week
+        interval = [today - timedelta(days=today.weekday()),
+                    datetime.today() + dateutil.relativedelta.relativedelta(days=1)]
     return interval
 
 
@@ -234,27 +281,26 @@ def process_time_periods(form):
 
 def get_clocked_in_users():
     """
+    Obtains a list of clocked in users.
     :return: An array of all currently clocked in users.
     """
     current_app.logger.info('Start function get_clocked_in_users()')
     current_app.logger.info('Querying for all clocked in users...')
-    users = User.query.all()
+    users = User.query.order_by(User.division).all()
     current_app.logger.info('Finished querying for all clocked in users...')
-    clocked_in_users=[]
+    clocked_in_users = []
     for user in users:
-        event = Event.query.filter_by(user_id=user.id).order_by(sqlalchemy.desc(Event.time)).first()
-        if event is not None and event.type == True and user not in clocked_in_users:
+        event = Event.query.filter_by(user_id=user.id, approved=True).order_by(sqlalchemy.desc(Event.time)).first()
+        if event is not None and event.type is True and user not in clocked_in_users:
             clocked_in_users.append(user)
-        else:
-            continue
     current_app.logger.info('End function get_clocked_in_users()')
     return clocked_in_users
 
 
 def get_all_tags():
     """
-    Returns all the tags
-    :return:
+    Fetches all the tags in the database.
+    :return: A list of all tags.
     """
     current_app.logger.info('Start function get_all_tags()')
     current_app.logger.info('Querying for all tags...')
@@ -263,76 +309,153 @@ def get_all_tags():
     current_app.logger.info('End function get_all_tags()')
     return tags
 
-
-def get_pay_before(email_input, start):
+def get_event_by_id(event_id):
     """
-    Gets the pay
-    :param email_input: Email of the user whose pays to query through.
-    :param start: Start date - the query will search for the pay with a start date closest (but before)
-    to this date.
-    :return: An object from the pay table.
+    Obtains an event by its id.
+    :param event_id: The id of the event to fetch.
+    :return: [Event] An Event object.
     """
-    current_app.logger.info('Start function get_pay_before()')
-    current_app.logger.info('Querying for user with given e-mail: {}'.format(email_input))
-    user_id = User.query.filter_by(email=email_input).first().id
-    current_app.logger.info('Finished querying for user with given e-mail')
-    current_app.logger.info('Querying for most recent pay for user {}'.format(email_input))
-    pay_query = Pay.query.filter(Pay.user_id == user_id)
-    p = pay_query.filter(Pay.start<=start).order_by(sqlalchemy.desc(Pay.start)).first()
-    current_app.logger.info('Finished querying for most recent pay for user {}'.format(email_input))
-    current_app.logger.info('End function get_pay_before()')
-    return p
+    return Event.query.filter_by(id=event_id).first()
 
 
-def calculate_hours(email_input, first, last):
+def get_vacation_by_id(vac_id):
     """
-    Calculates the hours worked by a user between two dates.
-    :param email_input: Email of the user whose hours to query through.
-    :param first: Start date
-    :param last: End date
-    :return: [FLOAT] The number of hours worked within the given period
+    Obtains an event by its id.
+    :param event_id: The id of the event to fetch.
+    :return: [Event] An Event object.
     """
-    current_app.logger.info('Start function calculate_hours({},{},{})'.
-                            format(email_input, first, last))
-    current_app.logger.info('End function calculate_hours')
+    return Vacation.query.filter_by(id=vac_id).first()
 
 
-def calculate_pays(email_input, start, end):
+def check_total_clock_count(events):
     """
-    Calculates the amount an employee has earned between two given dates.
-    :param email_input: Email of user whose earning are being calculated.
-    :param start: Start of the pay period
-    :param end: End of the pay period
-    :return: [Float] value of users earnings between start and end date.
+    Calculates the amount of clock-ins and clock-outs from a list of clock events and makes sure that each clock in
+    has a matching clock out
+    :param events: list containing clock-ins and clock-outs events
+    :return: True if there are matching clock outs for each clock in, otherwise False
     """
-    current_app.logger.info('Start function calculate_pays({},{},{})'.
-                            format(email_input, start, end))
-    """
-    Here's the general idea (we'll be using a recursive function:
-        1) We keep track of a current_start date - that's the start of the most recent worked day we
-        haven't yet accounted for. Initially, this will be the parameter start.
-
-        2) We keep track of an current_end - that's the end of the pay rate corresponding to current_day. Once
-        this value is greater than or equal to the parameter end, we're good to go: all we have to do is get the hours
-        from current_start to end and add this to the hours we've already got.
-    """
-    total_pay = 0
-    pay = get_pay_before(email_input, start)
-    # Now get all hours worked within this pay date
-    if end <= pay.end:
-        # If the work period ends before the pay period, calculate the hours worked up to the end of the work period
-        pass
-    current_app.logger.info('End function calculate_pays')
-
-
-    return Tag.query.all()
-
-def get_last_clock_type(user_id=None):
-    current_app.logger.info('Start function get_last_clock_type()')
-    event = Event.query.filter_by(user_id=user_id).order_by(sqlalchemy.desc(Event.time)).first()
-    if event:
-        current_app.logger.info('End function get_last_clock_type')
-        return event.type
+    current_app.logger.info('Start function check_total_clock_count()')
+    clock_in_list = []
+    clock_out_list = []
+    # loop through all events and count the number of clock-ins and clock-outs in separate lists
+    for event in events:
+        if 'OUT' in event:
+            clock_out_list.append(event)
+        elif 'IN' in event:
+            clock_in_list.append(event)
+        else:
+            continue
+    if len(clock_out_list) == len(clock_in_list):
+        return True
     else:
-        current_app.logger.info('End function get_last_clock_type')
-        return None
+        return False
+
+
+def add_event(user_id, time, type):
+    """
+    Adds an event to the database
+    :param user_id: The user id to be associated with the event
+    :param time: Time of the event
+    :param type: The type of the event: True is a clock in, False is a clock out [boolean]
+    :return: None
+    """
+    e = Event(type=type, user_id=user_id, time=time)
+    db.session.add(e)
+    db.session.commit()
+    current_app.logger.info(
+        '{} added clock event with id {} for user with id {}'.format(current_user.email, e.id, user_id))
+
+
+def delete_event(event_id):
+    """
+    Removes an event from the database
+    :param event_id: The id of the event to be removes
+    :return: None
+    """
+    e = Event.query.filter_by(id=event_id).first()
+    current_app.logger.info(
+        '{} deleted clock event with id {} for user with id {}'.format(current_user.email, e.id, e.user.id))
+    db.session.delete(e)
+    db.session.commit()
+
+
+# This breaks very very badly when there are too many clock events in the period, and doesn't create new pages
+def generate_timesheet(events):
+    """
+    Creates a Bytes object timesheet
+    :param events: List of events to be included in the timesheet
+    :return: Timesheet (as a Bytes obj)
+    """
+    current_app.logger.info('Beginning to generate timesheet pdf...')
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    import io
+    output = io.BytesIO()
+    c = canvas.Canvas(output, pagesize=letter)
+
+    generate_header(c)
+    generate_employee_info(c)
+    generate_timetable(c, events)
+    generate_signature_template(c)
+    generate_footer(c)
+    c.showPage()
+    c.save()
+    pdf_out = output.getvalue()
+    output.close()
+    current_app.logger.info('Finished generating timesheet PDF')
+    return pdf_out
+
+
+def generate_timesheets(emails, start, end):
+    """
+    Creates a zipfile that contains individual timesheets for each email between the start and end dates.
+    :param emails: List of users' emails
+    :param start: Start date for timesheet [datetime]
+    :param end: End date for timesheet [datetime]
+    :return: Response containing a zipfile
+    """
+    import tempfile
+    import os
+    import io
+    import shutil
+    import zipfile
+    dirpath = tempfile.mkdtemp(dir=os.path.dirname(os.path.realpath(__file__)))
+    for email in emails:
+        events = get_events_by_date(email, start, end).all()
+        output_file_name = email
+        f = open(dirpath + '/' + output_file_name + '.pdf', 'wb')
+        output = generate_timesheet(events)
+        f.write(output)
+        f.close()
+    memoryfile = io.BytesIO()
+    with zipfile.ZipFile(memoryfile, 'w') as zip:
+        for root, dirs, files in os.walk(dirpath + '/'):
+            for file in files:
+                zip.write(dirpath + '/' + file, arcname=file)
+    memoryfile.seek(0)
+    shutil.rmtree(dirpath)
+    return send_file(memoryfile,
+                     mimetype='zip',
+                     attachment_filename='timesheets.zip',
+                     as_attachment=True)
+
+
+def create_csv(events=None):
+    """
+    Creates a csv file that contains all of the event data in the database
+    :return: CSV file
+    """
+    import csv
+    import io
+    si = io.StringIO()
+    writer = csv.writer(si)
+    if not events:
+        events = Event.query.order_by(sqlalchemy.desc(Event.time)).all()
+    writer.writerow(['id', 'email', 'first name', 'last name', 'time', 'type', 'note', 'ip'])
+    for event in events:
+        writer.writerow([event.id, event.user.email, event.user.first_name, event.user.last_name,
+                         event.time.strftime("%b %d, %Y %H:%M"), 'IN' if event.type else 'OUT', event.note, event.ip])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

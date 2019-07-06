@@ -1,7 +1,7 @@
 """
 .. module:: utils.
 
-   :synopsis: Utiltiy functions used throughout the application.
+   :synopsis: Utility functions used throughout the application.
 """
 
 divisions = [
@@ -14,12 +14,10 @@ divisions = [
     ('Reference Room', 'Reference Room'),
     ('Social Media', 'Social Media'),
     ('Tech', 'Tech'),
-    ("Women's", "Women's")
 ]
 
 roles = [
     ('User', 'User'),
-    # ('Moderator', 'Moderator'),
     ('Administrator', 'Administrator')
 ]
 
@@ -28,8 +26,8 @@ tags = [
     (1, 'Intern'),
     (2, 'Contractor'),
     (3, 'SYEP'),
-    (4, 'Employee'),
-    (5, 'PENCIL'),
+    (4, 'PENCIL'),
+    (5, 'Employee'),
     (6, 'Volunteer'),
     (7, 'Other')
 ]

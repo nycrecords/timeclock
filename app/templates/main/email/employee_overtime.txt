@@ -1,0 +1,7 @@
+<!-- TODO: ADD ACTUAL EMAIL DETAILS -->
+Dearest Brian,
+   This email is to inform you that employee {{ email }} has worked over seven hours today.
+
+Regards,
+
+The TimeClock Team

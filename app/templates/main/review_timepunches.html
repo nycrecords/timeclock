@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TimeClock - Review TimePunches{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter
+            Results
+        </button>
+
+        <div style="float: right">
+            {{ wtf.quick_form(clear) }}
+        </div>
+    </div>
+
+    <div id="filter-form" class="collapse">
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(filter) }}
+            </div>
+        </div>
+    </div>
+
+    {% if query_has_results %}
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Clocked</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Division</th>
+                    <th>Tag</th>
+                    <th>Status</th>
+
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for event in timepunch_list %}
+                    <tr>
+                        <td>{{ event.user.email }}</td>
+                        <td>{{ event.user.first_name }}</td>
+                        <td>{{ event.user.last_name }}</td>
+                        <td>{% if event.type %}
+                            <span style="color:green">IN</span>
+                        {% else %}
+                            <span style="color:orange">OUT</span>
+                        {% endif %}
+                        </td>
+                        <td>{{ event.time.strftime("%b %d, %Y %H:%M:%S") }}</td>
+                        <td>{{ event.note }}</td>
+                        <td>{{ event.user.division }}</td>
+                        {#                    Use tag_id to find corresponding name in tag table #}
+                        {% for tag in tags %}
+                            {% if tag.id==event.user.tag_id %}
+                                <td>{{ tag.name }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if event.user.tag_id==None %}
+                            <td>None</td>
+                        {% endif %}
+                        <td>{% if event.pending %}
+                            <span style="color: #8b0000;">Pending</span>
+                        {% elif event.approved %}
+                            <span style="color:green">Approved</span>
+                        {% else %}
+                            <span style="color:orange">Unapproved</span>
+                        {% endif %}
+                            <br>
+                        </td>
+                        <td>
+                            {% if event.user.id != current_user.id %}
+                                <form method="POST" action="/review_timepunches" name="form">
+                                    <input type="hidden" value="{{ event.id }}" name="event_id">
+                                    {% for field in form %}
+                                        {% if field.type == 'SubmitField' %}
+                                            {% if field.name == 'approve' %}
+                                                <button type="submit" class="btn btn-success" value="{{ field.name }}"
+                                                        name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-danger" style=""
+                                                        value="{{ field.name }}" name="{{ field.name }}"
+                                                        id="{{ field.name }}"> {{ field.name }} </button>
+                                            {% endif %}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                        {% if field.errors %}
+                                            <ul class=errors>
+                                                {% for error in field.errors %}
+                                                    <li>{{ error }}</li> <!-- is returning: 'CSRF TOKEN MISSING' -->
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    {% endfor %}
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-8 col-md-offset-4">
+            {{ macros.pagination_widget(pagination, '.review_timepunch') }}
+        </div>
+
+    {% else %}
+        <div class="row">
+            {% include 'includes/empty_query.html' %}
+        </div>
+    {% endif %}
+
+
+{% endblock %}

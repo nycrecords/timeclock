@@ -1,12 +1,15 @@
 """
 For generating timesheet pdf with appropriate styling.
 """
-from flask import session, url_for, current_app
+from datetime import datetime
+
+from flask import session, current_app
 from flask_login import current_user
-from datetime import datetime, timedelta
+from reportlab.lib.pagesizes import letter
+
 from ..models import User
 
-from reportlab.lib.pagesizes import letter
+# Global: Set width and length to values corresponding to normal paper size
 width, length = letter
 
 
@@ -29,7 +32,7 @@ def generate_header(canvas_field):
     """
     current_app.logger.info('PDF: Generating header...')
     canvas_field.setFont('Courier', 8)
-    canvas_field.drawString(25, length-30, 'The City of New York - Department of Records and Information Services')
+    canvas_field.drawString(25, length - 30, 'The City of New York - Department of Records and Information Services')
     canvas_field.line(25, 30, width - 25, 30)
     current_app.logger.info('PDF: Finished generating header')
 
@@ -71,9 +74,8 @@ def generate_timetable(canvas_field, events):
     total_hours = 0
 
     canvas_field.setFont('Courier-Bold', 10)
-    print(canvas_field.getAvailableFonts())
     canvas_field.drawString(55, timetable_top - 5, 'DATE')
-    canvas_field.drawString(135, timetable_top - 5,  'TIME IN')
+    canvas_field.drawString(135, timetable_top - 5, 'TIME IN')
     canvas_field.drawString(222, timetable_top - 5, 'TIME OUT')
     canvas_field.drawString(310, timetable_top - 5, 'HOURS')
     canvas_field.drawString(370, timetable_top - 5, 'NOTE IN')
@@ -87,12 +89,13 @@ def generate_timetable(canvas_field, events):
     next_line = timetable_top
     # Looping through events table to determine values to input on pdf
     for x in range(0, len(events), 2):
+        if next_line <= 100:
+            canvas_field.showPage()
+            next_line = length - 40
         event = events[x]
         next_event = events[x + 1]
-        print(event)
         canvas_field.setFont('Courier', 8)
         time_in = event[:event.index('|') - 1]
-        print(time_in)
         event = event[(event.index('|') + 2):]
         event = event[(event.index('|') + 2):]
         note_in = event[(event.index('|') + 2):]
@@ -100,7 +103,7 @@ def generate_timetable(canvas_field, events):
         time_out = next_event[:next_event.index('|') - 1]
         next_event = next_event[(next_event.index('|') + 2):]
         next_event = next_event[(next_event.index('|') + 2):]
-        note_out = next_event[(event.index('|') + 2):]
+        note_out = next_event[(event.index('|') + 3):]
 
         if note_in or note_out:
             if len(note_in) > len(note_out):
@@ -110,38 +113,41 @@ def generate_timetable(canvas_field, events):
         else:
             max_note_length = 20
 
-        padding = 25 + max_note_length/7
-        #  TODO: FIX padding TO ADJUST TO TEXT LENGTH
+        # Dynamically adjust padding (space provided for the row) according to note length
+        padding = 25 + max_note_length / 7
 
         time_in_datetime = datetime.strptime(time_in, "%b %d, %Y %H:%M:%S %p")
         time_out_datetime = datetime.strptime(time_out, "%b %d, %Y %H:%M:%S %p")
 
         date = time_in_datetime.strftime('%a %b %d, %Y')
-        hours_this_day = (time_out_datetime - time_in_datetime).seconds/3600
+        hours_this_day = (time_out_datetime - time_in_datetime).seconds / float(3600)
+        hours_this_day = (hours_this_day - 1
+                          if hours_this_day >= 5
+                          else hours_this_day)
         total_hours += hours_this_day
 
         next_line -= padding
-        # print('padding', padding)
-        # print('NEXT LINE', next_line)
-        # print('MAX NOTE LENGTH', max_note_length)
+
         # Begin drawing here
         canvas_field.drawString(30, next_line, date)
         canvas_field.drawString(130, next_line, time_in_datetime.strftime('%H:%M:%S'))
         canvas_field.drawString(220, next_line, time_out_datetime.strftime('%H:%M:%S'))
         canvas_field.drawString(310, next_line, "{0:.2f}".format(hours_this_day))
-        canvas_field.drawString(370, next_line + max_note_length/padding + 10, note_in[0:20])
-        canvas_field.drawString(370, next_line + max_note_length/padding + 3, note_in[20:40])
-        canvas_field.drawString(370, next_line + max_note_length/padding - 4, note_in[40:60])
-        canvas_field.drawString(370, next_line + max_note_length/padding - 11, note_in[60:80])
-        canvas_field.drawString(370, next_line + max_note_length/padding - 18, note_in[80:100])
-        canvas_field.drawString(370, next_line + max_note_length/padding - 25, note_in[100:120])
-        canvas_field.drawString(480, next_line + max_note_length/padding + 10, note_out[0:20])
-        canvas_field.drawString(480, next_line + max_note_length/padding + 3, note_out[20:40])
-        canvas_field.drawString(480, next_line + max_note_length/padding - 4, note_out[40:60])
-        canvas_field.drawString(480, next_line + max_note_length/padding - 11, note_out[60:80])
-        canvas_field.drawString(480, next_line + max_note_length/padding - 18, note_out[80:100])
-        canvas_field.drawString(480, next_line + max_note_length/padding - 25, note_out[100:120])
-        next_line -= max_note_length/padding
+
+        # Provide 7 pixels of space between note lines: (10, 3, -4, -11, etc.)
+        canvas_field.drawString(370, next_line + max_note_length / padding + 10, note_in[0:20])
+        canvas_field.drawString(370, next_line + max_note_length / padding + 3, note_in[20:40])
+        canvas_field.drawString(370, next_line + max_note_length / padding - 4, note_in[40:60])
+        canvas_field.drawString(370, next_line + max_note_length / padding - 11, note_in[60:80])
+        canvas_field.drawString(370, next_line + max_note_length / padding - 18, note_in[80:100])
+        canvas_field.drawString(370, next_line + max_note_length / padding - 25, note_in[100:120])
+        canvas_field.drawString(480, next_line + max_note_length / padding + 10, note_out[0:20])
+        canvas_field.drawString(480, next_line + max_note_length / padding + 3, note_out[20:40])
+        canvas_field.drawString(480, next_line + max_note_length / padding - 4, note_out[40:60])
+        canvas_field.drawString(480, next_line + max_note_length / padding - 11, note_out[60:80])
+        canvas_field.drawString(480, next_line + max_note_length / padding - 18, note_out[80:100])
+        canvas_field.drawString(480, next_line + max_note_length / padding - 25, note_out[100:120])
+        next_line -= max_note_length / padding
         canvas_field.setLineWidth(.5)
         canvas_field.line(20, next_line - 10, 600, next_line - 10)
 
@@ -198,6 +204,5 @@ def generate_footer(canvas_field):
     canvas_field.setFont('Courier', 8)
     canvas_field.drawString(25, 20, 'Generated by ' + current_user.first_name + ' ' + current_user.last_name)
     canvas_field.drawString(470, 20, datetime.now().strftime("%b %d, %Y %l:%M:%S %p"))
-    canvas_field.line(25, 30, width-25, 30)
+    canvas_field.line(25, 30, width - 25, 30)
     current_app.logger.info('PDF: Finished generating footer...')
-

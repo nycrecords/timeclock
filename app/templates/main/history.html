@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TimeClock - History{% endblock %}
+
+{% block page_content %}
+
+    <div class="row">
+        <button data-toggle="collapse" data-target="#filter-form" class="btn btn-info" style="float:left">Filter
+            Results
+        </button>
+        <form action="/user_clear_filter" method="POST" style="float:left; margin-left: 5px">
+            <input type="submit" value="Clear Filter" class="btn btn-info">
+        </form>
+        <div style="float:right">
+            <form action="/download_timesheet" method="POST">
+                {% for event in generation_events %}
+                    <input type="hidden" name="event" value="{{ event }}">
+                {% endfor %}
+                <input type="submit" value="Generate Timesheet" class="btn btn-success">
+            </form>
+        </div>
+        <div style="float:right; margin-right:5px">
+            <form action="/download_invoice" method="POST">
+                {% for event in generation_events %}
+                    <input type="hidden" name="event" value="{{ event }}">
+                {% endfor %}
+                <input type="submit" value="Generate Invoice" class="btn btn-success">
+            </form>
+        </div>
+    </div>
+
+    {#  Collapsible form for filter options  #}
+    <div id="filter-form" class="collapse">
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-8 col-md-offset-2">
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+
+        {% if query_has_results %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Clocked</th>
+                    <th>Division</th>
+                    <th>Tag</th>
+                    <th>Time</th>
+
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.user.email }}</td>
+                        <td>{{ event.user.first_name }}</td>
+                        <td>{{ event.user.last_name }}</td>
+                        <td>{% if event.type %}
+                            <span style="color:green">IN</span>
+                        {% else %}
+                            <span style="color:orange">OUT</span>
+                        {% endif %}
+                        </td>
+                        <td>{{ event.user.division }}</td>
+                        {#                    Use tag_id to find corresponding name in tag table #}
+                        {% for tag in tags %}
+                            {% if tag.id==event.user.tag_id %}
+                                <td>{{ tag.name }}</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if event.user.tag_id==None %}
+                            <td>None</td>
+                        {% endif %}
+                        <td>{{ event.time.strftime("%b %d, %Y %H:%M") }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="col-md-8 col-md-offset-4">
+                {{ macros.pagination_widget(pagination, '.history') }}
+            </div>
+        {% else %}
+            {% include 'includes/empty_query.html' %}
+        {% endif %}
+
+    </div>
+{% endblock %}

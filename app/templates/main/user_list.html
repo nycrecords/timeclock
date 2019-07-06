@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TimeClock - History{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Division</th>
+                <th>Tag</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {#                list out the users without a division#}
+            {% for user in nondivision_users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td> None</td>
+                    {#                    Use tag_id to find corresponding name in tag table #}
+                    {% for tag in tags %}
+                        {% if tag.id==user.tag_id %}
+                            <td>{{ tag.name }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% if user.tag_id==None %}
+                        <td>None</td>
+                    {% endif %}
+                    <td><a class="btn btn-success" style="font-size:12px"
+                           href="{{ url_for('auth.user_profile', username=user) }}">Edit</a></td>
+                </tr>
+            {% endfor %}
+            {#followed by users who do have division, sorted by their divison#}
+            {% for user in list_of_users|sort(attribute='division') %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.division }}</td>
+                    {#                    Use tag_id to find corresponding name in tag table #}
+                    {% for tag in tags %}
+                        {% if tag.id==user.tag_id %}
+                            <td>{{ tag.name }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% if user.tag_id==None %}
+                        <td>None</td>
+                    {% endif %}
+                    <td><a class="btn btn-success" style="font-size:12px"
+                           href="{{ url_for('auth.user_profile', username=user.email[:user.email.find('@')]) }}">Edit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+{% endblock %}
