@@ -64,6 +64,7 @@ from .requests import (
 from .. import db
 from ..decorators import admin_required
 from ..models import Pay, User, Vacation
+from app.utils import eval_request_bool
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -598,16 +599,17 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+    active = eval_request_bool(request.args.get('active', True), True)
     nondivision_users = []
     tags = get_all_tags()
-    list_of_users = User.query.filter_by(is_active=True).all()
+    list_of_users = User.query.filter_by(is_active=active).all()
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
-                           nondivision_users=nondivision_users)
+                           nondivision_users=nondivision_users, active_users=active)
 
 
 @main.route('/export_events', methods=['GET', 'POST'])
