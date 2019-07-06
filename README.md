@@ -9,12 +9,9 @@ The objective is to make TimeClock as encompassing as possible, to provide a con
 
 TimeClock is developed and maintained by the New York City Department of Records.
 
-
-Official Production Version: 1.0 (stable)
+Official Production Version: 2.0 (stable)
 
 Current Development Version: 2.0
-
-
 
 ## Get Started ##
 
