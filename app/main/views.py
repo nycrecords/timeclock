@@ -599,7 +599,7 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
-    active = eval_request_bool(request.args.get('active', True), True)
+    active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = User.query.filter_by(is_active=active).all()
