@@ -8,9 +8,9 @@ import sqlalchemy
 from flask import current_app, flash
 from flask_login import current_user
 
-from .. import db
-from ..email_notification import send_email
-from ..models import User, Event, Vacation
+from app import db
+from app.email_notification import send_email
+from app.models import User, Event, Vacation
 
 
 def create_timepunch(punch_type, punch_time, reason):
