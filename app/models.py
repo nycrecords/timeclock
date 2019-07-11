@@ -226,8 +226,7 @@ class User(UserMixin, db.Model):
                      password= 'test', #forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
                      first_name=first,
                      last_name=last,
-                     tag=t,
-                     divsion= ''
+                     tag=t
                      )
             db.session.add(u)
             try:
