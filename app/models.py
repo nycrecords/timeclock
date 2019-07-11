@@ -223,10 +223,11 @@ class User(UserMixin, db.Model):
             last = forgery_py.name.last_name()
             e = (first[:1] + last + '@records.nyc.gov').lower()
             u = User(email=e,
-                     password=forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
+                     password= 'test', #forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
                      first_name=first,
                      last_name=last,
-                     tag=t
+                     tag=t,
+                     divsion= ''
                      )
             db.session.add(u)
             try:

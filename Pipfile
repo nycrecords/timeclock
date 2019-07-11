@@ -55,6 +55,7 @@ WeasyPrint = "*"
 Werkzeug = "*"
 WTForms = "*"
 psycopg2-binary = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.7"
