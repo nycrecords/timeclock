@@ -408,7 +408,7 @@ def user_profile(user_id):
     if not user:
         flash('No user with id {} was found'.format(user_id), category='error')
         return redirect(url_for('main.user_list_page'))
-    elif user.role.name == 'Administrator' and u == current_user:
+    elif user.role.name == 'Administrator' and user == current_user:
         # If user is admin, redirect to index and flash a message,
         # as admin should not be allowed to edit their own info through frontend.
         # This also avoids the issue that comes with the fact that admins don't have
