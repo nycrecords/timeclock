@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, date
-
+from dateutil.relativedelta import *
 import dateutil.relativedelta
 import sqlalchemy
 from flask import session, current_app, send_file, make_response
@@ -207,6 +207,7 @@ def get_time_period(period='d'):
         m (this month)
         ld (last day i.e. yesterday)
         lw (last week)
+        l2w (last 2 weeks i.e This week and last week)
         lm (last month)
     :return: A two-element array containing a start and end date
     """
@@ -230,6 +231,11 @@ def get_time_period(period='d'):
         dt = today + timedelta(days=-7)
         start = dt - timedelta(days=dt.weekday())
         end = start + timedelta(days=6)
+        interval = [start, end]
+    elif period == 'l2w':
+        dt = today+relativedelta(weeks=-1) 
+        start= dt - timedelta(days=dt.weekday())
+        end = start + timedelta(days=13)
         interval = [start, end]
     elif period == 'lm':
         interval = [first_of_last_month, end_of_last_month]
@@ -271,6 +277,10 @@ def process_time_periods(form):
         if form.last_week.data:
             current_app.logger.info('Time period is: last week')
             time_period = get_time_period('lw')
+    if 'last_2weeks' in form:
+        if form.last_2weeks.data:
+            current_app.logger.info('Time period is: last 2 weeks')
+            time_period = get_time_period('l2w')
     if 'last_month' in form:
         if form.last_month.data:
             current_app.logger.info('Time period is: last_month')
