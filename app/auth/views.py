@@ -420,7 +420,7 @@ def user_profile(username):
         return redirect(url_for('main.user_list_page'))
 
     if form.validate_on_submit():
-        if u.email == form.supervisor_email.data:
+        if u.id == form.supervisor_email.data:
             flash('A user cannot be their own supervisor. Please revise your supervisor '
                   'field.', category='error')
         else:
@@ -438,6 +438,7 @@ def user_profile(username):
         form.last_name.data = u.last_name
         form.division.data = u.division
         form.tag.data = u.tag_id
+        form.is_supervisor.data=u.is_supervisor
         form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
         form.role.data = u.role.name
         form.budget_code.data = u.budget_code

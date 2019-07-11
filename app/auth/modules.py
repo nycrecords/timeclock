@@ -216,7 +216,7 @@ def update_user_information(user,
         db.session.commit()
         user.supervisor = sup
 
-    if is_supervisor_input and (user.is_supervisor != is_supervisor_input):
+    if is_supervisor_input is not None and (user.is_supervisor != is_supervisor_input):
         change = ChangeLog(changer_id=current_user.id,
                            user_id=user.id,
                            timestamp=datetime.now(),
