@@ -5,6 +5,13 @@
 {% block title %}TimeClock - History{% endblock %}
 
 {% block page_content %}
+<div class="row">
+    {% if active_users %}
+        <a href="{{ url_for('main.user_list_page') }}?active=False">View Inactive Users</a>
+    {% else %}
+        <a href="{{ url_for('main.user_list_page') }}?active=True">View Active Users</a>
+    {% endif %}
+</div>
     <div class="row">
         <table class="table">
             <thead>
@@ -35,7 +42,7 @@
                         <td>None</td>
                     {% endif %}
                     <td><a class="btn btn-success" style="font-size:12px"
-                           href="{{ url_for('auth.user_profile', username=user) }}">Edit</a></td>
+                           href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a></td>
                 </tr>
             {% endfor %}
             {#followed by users who do have division, sorted by their divison#}
@@ -55,7 +62,7 @@
                         <td>None</td>
                     {% endif %}
                     <td><a class="btn btn-success" style="font-size:12px"
-                           href="{{ url_for('auth.user_profile', username=user.email[:user.email.find('@')]) }}">Edit</a>
+                           href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a>
                     </td>
                 </tr>
             {% endfor %}
