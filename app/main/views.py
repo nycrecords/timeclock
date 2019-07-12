@@ -478,6 +478,7 @@ def request_timepunch():
     :return: A page users can implement to request the addition of a clock event.
     """
     current_app.logger.info('Start function request_timepunch()')
+    today=datetime.today()
     form = TimePunchForm()
     vacform = RequestVacationForm()
     if form.validate_on_submit() and form.submit.data:
@@ -493,8 +494,14 @@ def request_timepunch():
             date_string = form.punch_date.data.strftime('%m/%d/%Y ')
             time_string = form.punch_time.data
             datetime_str = date_string + time_string
+            
             try:
                 datetime_obj = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
+                if (datetime_obj > today):
+                   flash("Your cannot request a future time punch", category='error') 
+                   return redirect(url_for('main.request_timepunch'))
+                print("Hello"+ str(datetime_obj))
+                print(datetime.today())
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
@@ -514,9 +521,15 @@ def request_timepunch():
             flash("You must have a supervisor to request a timepunch. If you believe a supervisor "
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
+        elif vacform.vac_start.data > vacform.vac_end.data:
+            flash("The vacation start data must be before the vacation end date", category='error')
+        elif today.date() > vacform.vac_start.data:
+            flash("The vacation start data must be in the future", category='error')
         else:
             v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
                          approved=False, pending=True)
+            print("start"+str(vacform.vac_start.data))
+            print("end"+str(vacform.vac_end.data))
             db.session.add(v)
             db.session.commit()
             flash('Your vacation request has been successfully submitted and is pending approval', 'success')
