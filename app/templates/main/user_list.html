@@ -6,7 +6,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Search" id="txtSearch" action='Search' />
                     <div class="input-group-btn">
-                        <button class="btn btn-success" action="" type="submit">Search</button>
+                        <button class="btn btn-success" action="{{ url_for('auth.user_search')}}" type="submit">Search</button>
                     </div>
                 </div>
             </div>

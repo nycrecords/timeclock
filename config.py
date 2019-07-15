@@ -14,7 +14,7 @@ class Config:
     MAIL_SENDER = 'Records Timeclock <RTimeclock@records.nyc.gov>'
     WTF_CSRF_ENABLED = True
     ADMIN = os.environ.get('ADMIN') or 'admin@records.nyc.gov'
-
+    # ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     @staticmethod
     def init_app(app):
         pass
@@ -24,6 +24,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://timeclock_db@127.0.0.1:5432/timeclock_dev'
+    # ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
 
 
 class TestingConfig(Config):

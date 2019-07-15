@@ -101,6 +101,7 @@ class User(UserMixin, db.Model):
     """
     Specifies properties and functions of a TimeClock User.
     """
+    # __searchable__ = ['first_name', 'last_name', 'email', 'division', 'tag_id']
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64), index=True)
@@ -233,6 +234,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
 
 
 class AnonymousUser(AnonymousUserMixin):

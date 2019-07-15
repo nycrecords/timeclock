@@ -14,6 +14,7 @@ from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from simplekv.db.sql import SQLAlchemyStore
+from elasticsearch import Elasticsearch
 
 from config import config
 
@@ -22,6 +23,7 @@ mail = Mail()
 moment = Moment()
 migrate = Migrate()
 db = SQLAlchemy()
+# es = Elasticsearch()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
@@ -32,9 +34,13 @@ def load_db(db):
     db.create_all()
 
 
-def create_app(config_name):  # App Factory
+def create_app(config_name = 'default'):  # App Factory
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+
+
+    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
+        if app.config['ELASTICSEARCH_URL'] else None
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[
@@ -49,6 +55,7 @@ def create_app(config_name):  # App Factory
     moment.init_app(app)
     migrate.init_app(app, db)
     db.init_app(app)
+    # es.init_app(app)
     with app.app_context():
         # load_db(db)
         store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
