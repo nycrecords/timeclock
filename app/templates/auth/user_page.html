@@ -2,12 +2,12 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 
-{% block title %}TimeClock User Page - {{ username }}{% endblock %}
+{% block title %}TimeClock User Page - {{ user.first_name }} {{ user.last_name }} {% endblock %}
 
 {% block page_content %}
     <div class="page-header">
         <h1 style="font-family:'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">
-            User Info: {{ u.first_name }} {{ u.last_name }} ({{ u.email }})
+            User Info: {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
         </h1>
     </div>
 

@@ -1,4 +1,8 @@
 {
+<<<<<<< HEAD
     "workbench.colorCustomizations": {},
     "python.pythonPath": "/Users/psherpa/.virtualenvs/timeclock-c2W761nn/bin/python"
+=======
+    "python.pythonPath": "/Users/jocastillo/.local/share/virtualenvs/timeclock-LXWprQek/bin/python"
+>>>>>>> master
 }
