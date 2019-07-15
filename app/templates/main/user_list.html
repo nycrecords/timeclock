@@ -1,4 +1,19 @@
 {% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% import "_macros.html" as macros %} {% block title %}TimeClock - History{% endblock %} {% block page_content %}
+<div clas="row">
+    <form method="GET">
+        <div class="row">
+            <div class="col-xs-6 col-md-4 pull-right">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" id="txtSearch" action='Search' />
+                    <div class="input-group-btn">
+                        <button class="btn btn-success" action="" type="submit">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<br>
 <div class="row">
     <table class="table">
         <thead>

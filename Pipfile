@@ -56,6 +56,7 @@ Werkzeug = "*"
 WTForms = "*"
 psycopg2-binary = "*"
 ipython = "*"
+elasticsearch = "*"
 
 [requires]
 python_version = "3.7"
