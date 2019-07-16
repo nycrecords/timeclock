@@ -418,11 +418,7 @@ def user_profile(user_id):
         return redirect(url_for('main.user_list_page'))
 
     if form.validate_on_submit():
-<<<<<<< HEAD
-        if u.id == form.supervisor_email.data:
-=======
-        if user.email == form.supervisor_email.data:
->>>>>>> master
+        if user.id == form.supervisor_email.data:
             flash('A user cannot be their own supervisor. Please revise your supervisor '
                   'field.', category='error')
         else:
@@ -436,29 +432,17 @@ def user_profile(user_id):
             return redirect(url_for('auth.user_profile', user_id=user.id))
     else:
         # Pre-populate the form with current values
-<<<<<<< HEAD
-        form.first_name.data = u.first_name
-        form.last_name.data = u.last_name
-        form.division.data = u.division
-        form.tag.data = u.tag_id
-        form.is_supervisor.data=u.is_supervisor
-        form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
-        form.role.data = u.role.name
-        form.budget_code.data = u.budget_code
-        form.object_code.data = u.object_code
-        form.object_name.data = u.object_name
-=======
         form.first_name.data = user.first_name
         form.last_name.data = user.last_name
         form.division.data = user.division
         form.tag.data = user.tag_id
+        form.is_supervisor.data=user.is_supervisor
         form.supervisor_email.data = user.supervisor.email if user.supervisor else 'admin@records.nyc.gov'
         form.is_active.data = user.is_active
         form.role.data = user.role.name
         form.budget_code.data = user.budget_code
         form.object_code.data = user.object_code
         form.object_name.data = user.object_name
->>>>>>> master
 
     current_app.logger.info('End function user_profile')
 
