@@ -39,8 +39,8 @@ def create_app(config_name = 'default'):  # App Factory
     app.config.from_object(config[config_name])
 
 
-    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
-        if app.config['ELASTICSEARCH_URL'] else None
+    # app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
+    #     if app.config['ELASTICSEARCH_URL'] else None
 
     if os.environ.get('DATABASE_URL') is None:
         app.config[

@@ -458,9 +458,3 @@ def user_profile(username):
     return render_template('auth/user_page.html', username=username, u=u, form=form, changes=changes,
                            pagination=pagination)
 
-
-@auth.route('/user_search', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def user_search(entry):
-    

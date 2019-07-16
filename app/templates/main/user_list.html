@@ -4,9 +4,9 @@
         <div class="row">
             <div class="col-xs-6 col-md-4 pull-right">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search" id="txtSearch" action='Search' />
+                    <input type="text" class="form-control" placeholder="Search" name="search_input" />
                     <div class="input-group-btn">
-                        <button class="btn btn-success" action="{{ url_for('auth.user_search')}}" type="submit">Search</button>
+                        <button class="btn btn-success" type="submit" value="Send">Search</button>
                     </div>
                 </div>
             </div>
@@ -27,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-            {# list out the users without a division#} {% for user in nondivision_users %}
+            {# list out the users without a division#} {% if list_of_users|length == 0 %}{% for user in nondivision_users %}
             <tr>
                 <td>{{ user.email }}</td>
                 <td>{{ user.first_name }}</td>
@@ -40,7 +40,7 @@
                 {% endif %}
                 <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', username=user) }}">Edit</a></td>
             </tr>
-            {% endfor %} {#followed by users who do have division, sorted by their divison#} {% for user in list_of_users|sort(attribute='id') %}
+            {% endfor %} {% endif %} {#followed by users who do have division, sorted by their divison#} {% for user in list_of_users|sort(attribute='id') %}
             <tr>
                 <td>{{ user.email }}</td>
                 <td>{{ user.first_name }}</td>

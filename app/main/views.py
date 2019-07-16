@@ -605,6 +605,13 @@ def user_list_page():
         if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
+    #   Search results     
+    if request.method == 'GET':
+        entry = request.args.get('search_input', '')
+        search_result = User.query.filter(User.email.like('%' + entry + '%')).all()
+        list_of_users = search_result
+        if not list_of_users:
+            flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users)
@@ -682,3 +689,18 @@ def review_vacations():
                            clear=clear_form,
                            query_has_results=query_has_results)
 
+
+# @main.route('/edit_user_list', methods=['GET', 'POST'])
+# @login_required
+# @admin_required
+# def user_search():
+#     print(1231231231231231231231231231231)
+#     current_app.logger.info('SKJFALKDHFLAKJSDKLAJHSKDJHALDJHALKJSHALKSD')
+#     if request.method == 'POST':
+#         print("asdkfjahskfjahskdfaskdj")
+#         entry == request.form("search_input")
+#     search_result = User.query.filter(User.email.like('%entry%')).all()
+#
+#     for result in search_result:
+#         print(result.email)
+#     return render_template('app/templates/main/user_list.html', search_result = search_result)
