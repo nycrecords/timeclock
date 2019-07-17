@@ -5,7 +5,7 @@
    timeclock application
 """
 import sqlalchemy
-from flask import current_app
+from flask import current_app, flash
 from flask_login import current_user
 
 from .. import db
@@ -44,20 +44,22 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
-    u = User.query.filter_by(email=user_email).first()
+    s= User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for timepunches submitted to {}'.format(user_email))
-    timepunch_query = Event.query.join(User).filter_by(supervisor=u).filter(Event.timepunch == True).order_by(Event.id)
+    timepunch_query = Event.query.join(User).filter_by(supervisor=s).filter(Event.timepunch == True).order_by(Event.id)
     current_app.logger.info('Finished querying for timepunches')
 
     # Filter by emails if user provides an email
     if filter_by_email and filter_by_email != '':
         u = User.query.filter_by(email=filter_by_email).first()
         if u:
-            timepunch_query = timepunch_query.filter(Event.user_id == u.id)
+            if s != u.supervisor:
+                current_app.logger.error('Tried to filter timepunches from {} but you are not a supervisor for this account'
+                                    .format(filter_by_email))
+            else: timepunch_query = timepunch_query.filter(Event.user_id == u.id)
         else:
             current_app.logger.error('Tried to filter timepunches from {} but no such account'
                                      'exists'.format(filter_by_email))
-
     # Filter by status if user provides a status
     if status == 'Pending':
         timepunch_query = timepunch_query.filter(Event.pending == True).filter(Event.approved == False)
@@ -108,16 +110,19 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     :return: A query of all vacation requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
-    u = User.query.filter_by(email=user_email).first()
+    s = User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for vacations submitted to {}'.format(user_email))
-    vacation_query = Vacation.query.join(User).filter_by(supervisor=u).order_by(Vacation.id)
+    vacation_query = Vacation.query.join(User).filter_by(supervisor=s).order_by(Vacation.id)
     current_app.logger.info('Finished querying for vacations')
 
     # Filter by emails if user provides an email
     if filter_by_email and filter_by_email != '':
-        u = User.query.filter_by(email=filter_by_email).first()
+        u = User.query.filter_by(email=filter_by_email).first()    
         if u:
-            vacation_query = vacation_query.filter(Vacation.user_id == u.id)
+            if s != u.supervisor:
+                current_app.logger.error('Tried to filter vacations from {} but you are not a supervisor for this account'
+                                    .format(filter_by_email))
+            else: vacation_query = vacation_query.filter(Vacation.user_id == u.id)
         else:
             current_app.logger.error('Tried to filter vacations from {} but no such account'
                                      'exists'.format(filter_by_email))
