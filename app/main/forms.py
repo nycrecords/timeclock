@@ -73,7 +73,7 @@ class AdminFilterEventsForm(Form):
         :param email: The filtered email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -105,7 +105,7 @@ class CreatePayRateForm(Form):
         :param email: The filtered email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -136,7 +136,7 @@ class AddEventForm(Form):
         :param email: The supervisor's email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -167,7 +167,7 @@ class FilterTimePunchForm(Form):
         :param email: The email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -198,7 +198,7 @@ class FilterVacationForm(Form):
         :param email: The email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 

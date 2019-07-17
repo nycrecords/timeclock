@@ -170,9 +170,9 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
 
     # User processing
     if email_input is not None:
-        if User.query.filter_by(email=email_input).first() is not None:
+        if User.query.filter_by(email=email_input.lower()).first() is not None:
             current_app.logger.info('Querying for events with given user: {}'.format(email_input))
-            user_id = User.query.filter_by(email=email_input).first().id
+            user_id = User.query.filter_by(email=email_input.lower()).first().id
             events_query = events_query.filter(Event.user_id == user_id)
             current_app.logger.info('Finished querying for events with given user.')
         elif email_input != '':
