@@ -83,8 +83,10 @@
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="history-dropdown">
                                     <li><a href="{{ url_for('main.request_timepunch') }}">Request Timepunch/Vacation</a></li>
+                                    {% if current_user.is_supervisor %}
                                     <li><a href="{{ url_for('main.review_timepunch') }}">Review Timepunches</a></li>
                                     <li><a href="{{ url_for('main.review_vacations') }}">Review Vacations</a></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </li>
