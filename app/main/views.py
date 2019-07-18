@@ -604,16 +604,19 @@ def user_list_page():
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
-    list_of_users = User.query.filter_by(is_active=active).all()
+    list_of_users=[]
+    list_of_users_all  = User.query.filter_by(is_active=active).all()
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
             nondivision_users.append(user)
     #   Search results     
     if request.method == 'GET':
-        entry = request.args.get('search_input', '')
-        search_result = User.query.filter(User.email.like('%' + entry + '%')).all()
-        list_of_users = search_result
+        entry = request.args.get('search_input', '').lower()
+        search_result_email = User.query.filter(User.email.like('%' + entry + '%')).all()
+        search_result_fname = User.query.filter(User.first_name.like('%' + entry.title() + '%')).all()
+        search_result_lname = User.query.filter(User.last_name.like('%' + entry.title() + '%')).all()
+        
         if not list_of_users:
             flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
