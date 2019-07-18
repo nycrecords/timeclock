@@ -1,93 +1,79 @@
-# -*- coding: utf-8 -*-
-"""The app module, containing the app factory function."""
 import logging
-import sys
+import os
+import time
+from datetime import timedelta
+from logging import Formatter
+from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template
+from flask import Flask, session
+from flask_bootstrap import Bootstrap
+from flask_kvsession import KVSessionExtension
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_migrate import Migrate
+from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+from simplekv.db.sql import SQLAlchemyStore
 
-from timeclock import commands, public, user
-from timeclock.extensions import (
-    bcrypt,
-    cache,
-    csrf_protect,
-    db,
-    debug_toolbar,
-    login_manager,
-    migrate,
-    webpack,
-)
+from config import config
 
+bootstrap = Bootstrap()
+mail = Mail()
+moment = Moment()
+migrate = Migrate()
+db = SQLAlchemy()
 
-def create_app(config_object="timeclock.settings"):
-    """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
-
-    :param config_object: The configuration object to use.
-    """
-    app = Flask(__name__.split(".")[0])
-    app.config.from_object(config_object)
-    register_extensions(app)
-    register_blueprints(app)
-    register_errorhandlers(app)
-    register_shellcontext(app)
-    register_commands(app)
-    configure_logger(app)
-    return app
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'  # strong: track IP address and browser agent
+login_manager.login_view = 'auth.login'
 
 
-def register_extensions(app):
-    """Register Flask extensions."""
-    bcrypt.init_app(app)
-    cache.init_app(app)
-    db.init_app(app)
-    csrf_protect.init_app(app)
-    login_manager.init_app(app)
-    debug_toolbar.init_app(app)
+def load_db(db):
+    db.create_all()
+
+
+def create_app(config_name):  # App Factory
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+
+    if os.environ.get('DATABASE_URL') is None:
+        app.config[
+            'SQLALCHEMY_DATABASE_URI'] = \
+            app.config.get('SQLALCHEMY_DATABASE_URI')
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+
+    config[config_name].init_app(app)
+    bootstrap.init_app(app)
+    mail.init_app(app)
+    moment.init_app(app)
     migrate.init_app(app, db)
-    webpack.init_app(app)
-    return None
-
-
-def register_blueprints(app):
-    """Register Flask blueprints."""
-    app.register_blueprint(public.views.blueprint)
-    app.register_blueprint(user.views.blueprint)
-    return None
-
-
-def register_errorhandlers(app):
-    """Register error handlers."""
-
-    def render_error(error):
-        """Render error template."""
-        # If a HTTPException, pull the `code` attribute; default to 500
-        error_code = getattr(error, "code", 500)
-        return render_template("{0}.html".format(error_code)), error_code
-
-    for errcode in [401, 404, 500]:
-        app.errorhandler(errcode)(render_error)
-    return None
-
-
-def register_shellcontext(app):
-    """Register shell context objects."""
-
-    def shell_context():
-        """Shell context objects."""
-        return {"db": db, "User": user.models.User}
-
-    app.shell_context_processor(shell_context)
-
-
-def register_commands(app):
-    """Register Click commands."""
-    app.cli.add_command(commands.test)
-    app.cli.add_command(commands.lint)
-    app.cli.add_command(commands.clean)
-    app.cli.add_command(commands.urls)
-
-
-def configure_logger(app):
-    """Configure loggers."""
-    handler = logging.StreamHandler(sys.stdout)
-    if not app.logger.handlers:
+    db.init_app(app)
+    with app.app_context():
+        # load_db(db)
+        store = SQLAlchemyStore(db.engine, db.metadata, 'sessions')
+        kvsession = KVSessionExtension(store, app)
+        logfile_name = 'logfile_directory' + \
+                       "Timeclock" + \
+                       time.strftime("%Y%m%d-%H%M%S") + \
+                       ".log"
+        handler = RotatingFileHandler('LogFile', maxBytes=10000, backupCount=1)
+        handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s '
+                                       '[in %(pathname)s:%(lineno)d]'))
+        handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
+    login_manager.init_app(app)
+
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix="/auth")
+
+    app.permanent_session_lifetime = timedelta(minutes=15)
+
+    @app.before_request
+    def func():
+        session.modified = True
+
+    return app
