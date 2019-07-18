@@ -544,7 +544,9 @@ def review_timepunch():
     u=User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or u:
-            if current_user != u.supervisor:
+            if not filter_form.email.data:
+                flash('Please put an email, if you wish to filter for specific user', 'warning')
+            elif current_user != u.supervisor:
                 flash('Sorry you are not a supervisor for this account', 'error')
             else: 
                 flash('Successfully filtered', 'success')
@@ -643,7 +645,9 @@ def review_vacations():
     u=User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
         if not filter_form.email.data or u:
-            if current_user != u.supervisor:
+            if not filter_form.email.data:
+                flash('Please put an email, if you wish to filter for specific user', 'warning')
+            elif current_user != u.supervisor:
                 flash('Sorry you are not a supervisor for this account', 'error')
             else: 
                 flash('Successfully filtered', 'success')
