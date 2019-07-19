@@ -305,7 +305,7 @@ def download():
 
     if not (check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate a timesheet. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + (request.referrer).split('/')[3]))
     if errors:
@@ -392,7 +392,7 @@ def download_invoice():
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
     if not all_info:
         current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate an invoice. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + last_page))
     day_events_list = all_info['days_list']
