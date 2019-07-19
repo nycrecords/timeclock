@@ -613,6 +613,12 @@ def user_list_page():
     #   Search results     
     if request.method == 'GET':
         entry = request.args.get('search_input', '')
+        print('list\n', list_of_users_all)
+        print(type(active))
+        
+        # remember the db stores bool as t f
+
+
         search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
         print('email\n', search_result_email)
         search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
@@ -622,13 +628,8 @@ def user_list_page():
         list_of_users = list(set(list_of_users_all) & set(search_result_email+search_result_fname+search_result_lname))
         print('result\n', list_of_users)
 
-# how to run a double quesry 
-
-
-    for user in list_of_users:
-        
-        if not list_of_users:
-            flash('No results found', category = 'error')
+    if not list_of_users:
+        flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users, active_users=active)
