@@ -73,10 +73,9 @@ class AdminFilterEventsForm(Form):
         :param email: The filtered email
         :return:
         """
-        if email.data.find('@') > 0:
-            user = User.query.filter_by(email=email.data).first()
-        else:
-            user = User.query.filter_by(email=email.data+"@records.nyc.gov").first()
+        if email.data and email.data .find('@') <= 0:
+            email.data += '@records.nyc.gov'
+        user = User.query.filter_by(email=email.data).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
