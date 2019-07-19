@@ -612,12 +612,12 @@ def user_list_page():
             nondivision_users.append(user)
     #   Search results     
     if request.method == 'GET':
-        entry = request.args.get('search_input', '').lower()
-        search_result_email = User.query.filter(User.email.like('%' + entry + '%')).all()
+        entry = request.args.get('search_input', '')
+        search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
         print('email\n', search_result_email)
-        search_result_fname = User.query.filter(User.first_name.like('%' + entry.title())).all()
+        search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
         print('fname\n', search_result_fname)
-        search_result_lname = User.query.filter(User.last_name.like('%' + entry.title() + '%')).all()
+        search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
         print('lname\n', search_result_lname)
         list_of_users = list(set(list_of_users_all) & set(search_result_email+search_result_fname+search_result_lname))
         print('result\n', list_of_users)
