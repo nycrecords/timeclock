@@ -265,9 +265,12 @@ def history():
     current_app.logger.info('Finished querying')
 
     query_has_results = True if events_query.first() else False
-
+    all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
+    total_hours = all_info['total_hours'] if all_info else "Each clock in must have corresponding clock out"
     return render_template('main/history.html',
                            events=events,
+                           all_info=all_info,
+                           total_hours=total_hours,
                            form=form,
                            pagination=pagination,
                            generation_events=events_query.all(),
