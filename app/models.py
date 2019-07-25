@@ -169,7 +169,7 @@ class User(UserMixin, db.Model):
         :return: True if operation is successful, false otherwise.
         """
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
-        if len(new_password) <8:
+        if len(new_password) < 8:
             return False
         score = 0
         if re.search('\d+', new_password):
