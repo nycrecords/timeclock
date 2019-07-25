@@ -618,7 +618,6 @@ def user_list_page():
         
         # remember the db stores bool as t f
 
-
         search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
         print('email\n', search_result_email)
         search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
