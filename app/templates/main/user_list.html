@@ -1,11 +1,14 @@
 {% extends "base.html" %} {% import "bootstrap/wtf.html" as wtf %} {% import "_macros.html" as macros %} {% block title %}TimeClock - History{% endblock %} {% block page_content %}
 <div class="row">
     {% if active_users %}
-    <a href="{{ url_for('main.user_list_page') }}?active=False">View Inactive Users</a> {% else %}
-    <a href="{{ url_for('main.user_list_page') }}?active=True">View Active Users</a> {% endif %}
+        <a href="{{ url_for('main.user_list_page') }}?active=False">View Inactive Users</a> 
+    {% else %}
+        <a href="{{ url_for('main.user_list_page') }}?active=True">View Active Users</a>
+    {% endif %}
 </div>
 <div clas="row">
     <form method="GET">
+        <input type="hidden" name="active" value="{% if active_users %}True{% else %}False{% endif %}" />
         <div class="row">
             <div class="col-xs-6 col-md-4 pull-right">
                 <div class="input-group">

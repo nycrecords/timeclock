@@ -601,11 +601,14 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = []
+    print('\nactive\n', active)
     list_of_users_all  = User.query.filter_by(is_active=active).all()
+    print('\nactive\n', active)
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
@@ -616,8 +619,6 @@ def user_list_page():
         print('list\n', list_of_users_all)
         print(type(active))
         
-        # remember the db stores bool as t f
-
         search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
         print('email\n', search_result_email)
         search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
