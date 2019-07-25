@@ -180,7 +180,7 @@ class User(UserMixin, db.Model):
             score += 1
         if score < 2:
             return False
-            # If the password has been changed within the last second, the token is invalid.
+        # If the password has been changed within the last second, the token is invalid.
         if (datetime.now() - self.password_list.last_changed).seconds < 1:
             current_app.logger.error('User {} tried to re-use a token.'.format(self.email))
             raise InvalidResetToken
