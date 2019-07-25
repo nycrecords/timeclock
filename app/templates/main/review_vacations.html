@@ -47,11 +47,11 @@
                         <td>{{ vacation.start.strftime("%b %d, %Y") }}</td>
                         <td>{{ vacation.end.strftime("%b %d, %Y") }}</td>
                         <td>{% if vacation.pending %}
-                            <span style="color: #8b0000;">Pending</span>
+                            <span style="color:orange">Pending</span>
                         {% elif vacation.approved %}
                             <span style="color:green">Approved</span>
                         {% else %}
-                            <span style="color:orange">Unapproved</span>
+                            <span style="color: #8b0000;">Unapproved</span>
                         {% endif %}
                             <br>
                         </td>
