@@ -39,26 +39,26 @@
             </tr>
         </thead>
         <tbody>
-            {# list out the users without a division#} 
+            {# list out the users without a division #} 
             {% if list_of_users|length == 0 %}
-            {% for user in nondivision_users %}
-            <tr>
-                <td>{{ user.email }}</td>
-                <td>{{ user.first_name }}</td>
-                <td>{{ user.last_name }}</td>
-                <td> None</td>
-                {# Use tag_id to find corresponding name in tag table #} 
-                {% for tag in tags %} 
-                {% if tag.id==user.tag_id %}
-                <td>{{ tag.name }}</td>
-                {% endif %} 
+                {% for user in nondivision_users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>None</td>
+                    {# Use tag_id to find corresponding name in tag table #} 
+                    {% for tag in tags %} 
+                        {% if tag.id == user.tag_id %}
+                        <td>{{ tag.name }}</td>
+                        {% endif %} 
+                    {% endfor %} 
+                    {% if user.tag_id == None %}
+                        <td>None</td>
+                    {% endif %}
+                    <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a></td>
+                </tr>
                 {% endfor %} 
-                {% if user.tag_id==None %}
-                <td>None</td>
-                {% endif %}
-                <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a></td>
-            </tr>
-            {% endfor %} 
             {% endif %} 
             {#followed by users who do have division, sorted by their divison#} 
             {% for user in list_of_users|sort(attribute='id') %}
@@ -68,13 +68,13 @@
                 <td>{{ user.last_name }}</td>
                 <td>{{ user.division }}</td>
                 {# Use tag_id to find corresponding name in tag table #}
-                 {% for tag in tags %} 
-                 {% if tag.id==user.tag_id %}
-                <td>{{ tag.name }}</td>
-                {% endif %} 
+                {% for tag in tags %} 
+                    {% if tag.id == user.tag_id %}
+                        <td>{{ tag.name }}</td>
+                    {% endif %} 
                 {% endfor %} 
-                {% if user.tag_id==None %}
-                <td>None</td>
+                {% if user.tag_id == None %}
+                    <td>None</td>
                 {% endif %}
                 <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a>
                 </td>
