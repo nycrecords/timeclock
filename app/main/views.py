@@ -590,8 +590,6 @@ def review_timepunch():
                            query_has_results=query_has_results)
 
 
-
-
 @main.route('/edit_user_list', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -601,7 +599,6 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
-
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
@@ -612,21 +609,13 @@ def user_list_page():
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
-            nondivision_users.append(user)
-    #   Search results     
+            nondivision_users.append(user)   
     if request.method == 'GET':
         entry = request.args.get('search_input', '')
-        print('list\n', list_of_users_all)
-        print(type(active))
-        
         search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
-        print('email\n', search_result_email)
         search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
-        print('fname\n', search_result_fname)
         search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
-        print('lname\n', search_result_lname)
         list_of_users = list(set(list_of_users_all) & set(search_result_email+search_result_fname+search_result_lname))
-        print('result\n', list_of_users)
 
     if not list_of_users:
         flash('No results found', category = 'error')
