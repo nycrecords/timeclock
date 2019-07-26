@@ -603,9 +603,7 @@ def user_list_page():
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = []
-    print('\nactive\n', active)
     list_of_users_all  = User.query.filter_by(is_active=active).all()
-    print('\nactive\n', active)
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
@@ -622,7 +620,6 @@ def user_list_page():
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users, active_users=active)
-
 
 
 @main.route('/export_events', methods=['GET', 'POST'])
