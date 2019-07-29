@@ -204,7 +204,7 @@ def update_user_information(user,
         db.session.commit()
         user.tag_id = tag_input
 
-    if supervisor_email_input is not None and supervisor_email_input != '' and (user.supervisor_id is not None or user.supervisor_id != supervisor_email_input):
+    if supervisor_email_input is not None and (user.supervisor_id is not None or user.supervisor_id != supervisor_email_input):
         oldsup=User.query.filter_by(id=user.supervisor_id).first()
         sup = User.query.filter_by(id=supervisor_email_input).first()
         change = ChangeLog(changer_id=current_user.id,
@@ -212,7 +212,7 @@ def update_user_information(user,
                            timestamp=datetime.now(),
                            category='SUPERVISOR',
                            old= None if (user.supervisor_id is None) else oldsup.email,
-                           new=sup.email)
+                           new= None if supervisor_email_input==0 else sup.email)
         db.session.add(change)
         db.session.commit()
         user.supervisor = sup

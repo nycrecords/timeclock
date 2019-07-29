@@ -41,7 +41,7 @@ def admin_register():
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
     form = AdminRegistrationForm()
-    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
+    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
         email = create_user(form.email.data.lower(),
@@ -404,7 +404,7 @@ def user_profile(user_id):
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     user = User.query.filter_by(id=user_id).first()
     form = ChangeUserDataForm()
-    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
+    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
     if not user:
         flash('No user with id {} was found'.format(user_id), category='error')
         return redirect(url_for('main.user_list_page'))
