@@ -6,7 +6,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from . import db
+from . import db, Model
 from . import login_manager
 from .utils import InvalidResetToken
 
@@ -97,7 +97,7 @@ class Role(db.Model):
 #         return '<Object %r>' % self.object_name
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin, Model):
     """
     Specifies properties and functions of a TimeClock User.
     """
