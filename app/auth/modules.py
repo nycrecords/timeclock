@@ -18,6 +18,16 @@ from ..email_notification import send_email
 from ..models import User, Role, ChangeLog
 from ..utils import tags
 
+class TimePassed: #Just a time for Login form
+    def __init__(self):
+        self._started_at = datetime.utcnow()
+
+    def __call__(self):
+        time_passed = datetime.utcnow() - self._started_at
+        return time_passed
+        # if time_passed.total_seconds() > x:
+        #     return True
+        # return False
 
 def check_password_requirements(email, old_password, password, password_confirmation):
     """

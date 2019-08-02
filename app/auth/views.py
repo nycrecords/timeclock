@@ -5,7 +5,7 @@
    TimeClock application
 """
 from datetime import datetime
-
+import time
 from flask import current_app, jsonify
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
@@ -22,7 +22,7 @@ from .forms import (
     ChangePasswordForm,
     ChangeUserDataForm
 )
-from .modules import check_password_requirements, get_supervisors_for_division, create_user, get_changelog_by_user_id, update_user_information
+from .modules import check_password_requirements, get_supervisors_for_division, create_user, get_changelog_by_user_id, update_user_information, TimePassed
 from .. import db
 from ..decorators import admin_required
 from ..email_notification import send_email
@@ -30,6 +30,8 @@ from ..models import User, Role
 from ..utils import InvalidResetToken
 
 
+still_locked=TimePassed()
+time_to_wait = 60
 @auth.route('/admin_register', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -74,7 +76,8 @@ def login():
     :return: Login page.
     """
     current_app.logger.info('Start function login() [VIEW]')
-
+    global still_locked
+    global time_to_wait
     # Redirect to index if already logged in
     if current_user.is_authenticated:
         current_app.logger.info('{} is already authenticated: redirecting to index'.format(current_user.email))
@@ -87,15 +90,20 @@ def login():
         print(user)
 
         if user:
-            if user.login_attempts > 2:
-                # Too many invalid attempts
+            if user.login_attempts > 2 and still_locked().seconds <= time_to_wait:
                 current_app.logger.info('{} has been locked out'.format(user.email))
-                flash('You have too many invalid login attempts. You must reset your password.',
+                if time_to_wait > 300: #must reset if wait time is more than 5 minutes
+                    flash('You have too many invalid login attempts. You must reset your password.',
                       category='error')
-                current_app.logger.info('End function login() [VIEW]')
-                return redirect(url_for('auth.password_reset_request'))
-
-            elif user.verify_password(form.password.data):
+                    return redirect(url_for('auth.password_reset_request'))
+                    current_app.logger.info('End function login() [VIEW]')
+                elif time_to_wait > 60:
+                    flash('You have too many invalid login attempts. You may try again after five minutes',
+                    category='error')
+                else:
+                    flash('You have too many invalid login attempts. You may try again after one minute',
+                    category='error')  
+            elif user.verify_password(form.password.data) and still_locked().seconds > time_to_wait:
                 # Credentials successfully submitted: log the user in and set their login_attempts to 0
                 login_user(user)
                 user.login_attempts = 0
@@ -121,15 +129,22 @@ def login():
                     flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
+                still_locked=TimePassed() 
+                time_to_wait = 60  
                 return redirect(request.args.get('next') or url_for('main.index'))
-
+            elif (user.login_attempts > 2) and (still_locked().seconds > time_to_wait):
+                still_locked=TimePassed()
+                time_to_wait = time_to_wait*5 if time_to_wait==60 else 301 #Make waiting time 5 minutes or more.
+                db.session.add(user)
+                db.session.commit()
             else:
                 # If the user exists in the database but entered incorrect information
                 current_app.logger.info('{} failed to log in: Invalid username or password'.format(user.email))
                 user.login_attempts += 1
+                still_locked=TimePassed()
                 db.session.add(user)
                 db.session.commit()
-        flash('Invalid username or password', category='error')
+        flash('Invalid Login', category='error')
     current_app.logger.info('End function login() [VIEW]')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
