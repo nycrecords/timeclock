@@ -30,8 +30,7 @@ from ..models import User, Role
 from ..utils import InvalidResetToken
 
 
-still_locked=TimePassed()
-time_to_wait = 60
+still_locked=TimePassed() #Just a timer
 @auth.route('/admin_register', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -77,7 +76,6 @@ def login():
     """
     current_app.logger.info('Start function login() [VIEW]')
     global still_locked
-    global time_to_wait
     # Redirect to index if already logged in
     if current_user.is_authenticated:
         current_app.logger.info('{} is already authenticated: redirecting to index'.format(current_user.email))
@@ -90,20 +88,20 @@ def login():
         print(user)
 
         if user:
-            if user.login_attempts > 2 and still_locked().seconds <= time_to_wait:
+            if user.login_attempts > 2 and still_locked().seconds <= user.time_to_wait:
                 current_app.logger.info('{} has been locked out'.format(user.email))
-                if time_to_wait > 300: #must reset if wait time is more than 5 minutes
+                if user.time_to_wait > 300: #must reset if wait time is more than 5 minutes
                     flash('You have too many invalid login attempts. You must reset your password.',
                       category='error')
                     return redirect(url_for('auth.password_reset_request'))
                     current_app.logger.info('End function login() [VIEW]')
-                elif time_to_wait > 60:
+                elif user.time_to_wait > 60:
                     flash('You have too many invalid login attempts. You may try again after five minutes',
                     category='error')
                 else:
                     flash('You have too many invalid login attempts. You may try again after one minute',
                     category='error')  
-            elif user.verify_password(form.password.data) and still_locked().seconds > time_to_wait:
+            elif user.verify_password(form.password.data) and (still_locked().seconds > user.time_to_wait or user.login_attempts < 3):
                 # Credentials successfully submitted: log the user in and set their login_attempts to 0
                 login_user(user)
                 user.login_attempts = 0
@@ -130,11 +128,11 @@ def login():
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
                 still_locked=TimePassed() 
-                time_to_wait = 60  
+                user.time_to_wait = 60  
                 return redirect(request.args.get('next') or url_for('main.index'))
-            elif (user.login_attempts > 2) and (still_locked().seconds > time_to_wait):
+            elif (user.login_attempts > 2) and (still_locked().seconds > user.time_to_wait):
                 still_locked=TimePassed()
-                time_to_wait = time_to_wait*5 if time_to_wait==60 else 301 #Make waiting time 5 minutes or more.
+                user.time_to_wait = user.time_to_wait*5 if user.time_to_wait==60 else 301 #Make waiting time 5 minutes or more.
                 db.session.add(user)
                 db.session.commit()
             else:
