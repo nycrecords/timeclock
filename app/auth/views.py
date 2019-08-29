@@ -118,7 +118,7 @@ def login():
                 elif (datetime.today() - current_user.password_list.last_changed).days > 75:
                     # If user's password is about to expire (not updated in 75 days)
                     days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
-                    flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
+                    flash('Your password will expire in {} days.'.format(95-days_to_expire), category='warning')
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
                 return redirect(request.args.get('next') or url_for('main.index'))
