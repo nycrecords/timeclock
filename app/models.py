@@ -103,6 +103,7 @@ class User(UserMixin, db.Model):
     """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    is_active = db.Column(db.Boolean, default=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
@@ -169,7 +170,16 @@ class User(UserMixin, db.Model):
         :return: True if operation is successful, false otherwise.
         """
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
-        if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
+        if len(new_password) < 8:
+            return False
+        score = 0
+        if re.search('\d+', new_password):
+            # If the new password contains a digit, increment score
+            score += 1
+        if re.search('[a-z]', new_password) and re.search('[A-Z]', new_password):
+            # If the new password contains lowercase and uppercase letters, increment score
+            score += 1
+        if score < 2:
             return False
         # If the password has been changed within the last second, the token is invalid.
         if (datetime.now() - self.password_list.last_changed).seconds < 1:

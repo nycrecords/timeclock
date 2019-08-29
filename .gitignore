@@ -7,5 +7,5 @@ log/
 venv/*
 .vagrant/
 Vargrantfile
-
 .vscode/
+LogFile*

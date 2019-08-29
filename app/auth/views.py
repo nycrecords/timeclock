@@ -84,6 +84,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
+        print(user)
 
         if user:
             if user.login_attempts > 2:
@@ -301,8 +302,7 @@ def password_reset(token):
             return render_template("auth/reset_password.html", form=form)
         else:
             try:
-                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token,
-                                                                                                        form.password.data):
+                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
                     # If the token has not been used and the user submits a proper new password, reset users password
                     # and login attempts
                     user.login_attempts = 0
@@ -323,11 +323,14 @@ def password_reset(token):
                     return render_template('auth/reset_password.html', form=form)
 
                 else:
-                    # New password didn't meet minimum security criteria
-                    current_app.logger.error(
-                        'Entered invalid new password for {}'.format(user.email))
-                    flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
-                          category='error')
+                    if not 'reset_token' in session: 
+                        flash('The reset token is timed out. Please generate a new reset token.', category='error')
+                    # Then the token is valid but the new password didn't meet minimum security criteria
+                    else:
+                        current_app.logger.error(
+                            'Entered invalid new password for {}'.format(user.email))
+                        flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
+                              category='error')
                     current_app.logger.info('End function password_reset')
                     return render_template('auth/reset_password.html', form=form)
 
@@ -352,7 +355,7 @@ def get_sups():
         choices = get_supervisors_for_division(request.args['division'])
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
-        choices = [(u.id, u.email) for u in sups]
+        choices = [(user.id, user.email) for u in sups]
     return jsonify(choices)
 
 
@@ -389,28 +392,25 @@ def register():
     return render_template('auth/register.html', form=form)
 
 
-@auth.route('/user/<username>', methods=['GET', 'POST'])
+@auth.route('/user/<user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
-def user_profile(username):
+def user_profile(user_id):
     """
     Generates an editable user profile page for admins.
     :param username: The username of the user whose page is viewed/edited.
     :return: HTML page containing user information and a form to edit it.
     """
-    current_app.logger.info('Start function user_profile() for user {}'.format(username))
+    current_app.logger.info('Start function user_profile() for user {}'.format(user_id))
     # Usernames are everything in the email before the @ symbol
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
-    if '@records.nyc.gov' in username:
-        u = User.query.filter_by(email=(username)).first()
-    else:
-        u = User.query.filter_by(email=(username + '@records.nyc.gov')).first()
+    user = User.query.filter_by(id=user_id).first()
     form = ChangeUserDataForm()
     form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()]
-    if not u:
-        flash('No user with username {} was found'.format(username), category='error')
+    if not user:
+        flash('No user with id {} was found'.format(user_id), category='error')
         return redirect(url_for('main.user_list_page'))
-    elif u.role.name == 'Administrator' and u == current_user:
+    elif user.role.name == 'Administrator' and user == current_user:
         # If user is admin, redirect to index and flash a message,
         # as admin should not be allowed to edit their own info through frontend.
         # This also avoids the issue that comes with the fact that admins don't have
@@ -420,34 +420,35 @@ def user_profile(username):
         return redirect(url_for('main.user_list_page'))
 
     if form.validate_on_submit():
-        if u.email == form.supervisor_email.data:
+        if user.email == form.supervisor_email.data:
             flash('A user cannot be their own supervisor. Please revise your supervisor '
                   'field.', category='error')
         else:
             flash('User information has been updated', category='success')
-            update_user_information(u, form.first_name.data, form.last_name.data,
+            update_user_information(user, form.first_name.data, form.last_name.data,
                                     form.division.data, form.tag.data, form.supervisor_email.data,
-                                    form.is_supervisor.data,
+                                    form.is_supervisor.data, form.is_active.data,
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
-            current_app.logger.info('{} update information for {}'.format(current_user.email, u.email))
+            current_app.logger.info('{} update information for {}'.format(current_user.email, user.email))
             current_app.logger.info('End function user_profile')
-            return redirect(url_for('auth.user_profile', username=username))
+            return redirect(url_for('auth.user_profile', user_id=user.id))
     else:
         # Pre-populate the form with current values
-        form.first_name.data = u.first_name
-        form.last_name.data = u.last_name
-        form.division.data = u.division
-        form.tag.data = u.tag_id
-        form.supervisor_email.data = u.supervisor.email if u.supervisor else 'admin@records.nyc.gov'
-        form.role.data = u.role.name
-        form.budget_code.data = u.budget_code
-        form.object_code.data = u.object_code
-        form.object_name.data = u.object_name
+        form.first_name.data = user.first_name
+        form.last_name.data = user.last_name
+        form.division.data = user.division
+        form.tag.data = user.tag_id
+        form.supervisor_email.data = user.supervisor.email if user.supervisor else 'admin@records.nyc.gov'
+        form.is_active.data = user.is_active
+        form.role.data = user.role.name
+        form.budget_code.data = user.budget_code
+        form.object_code.data = user.object_code
+        form.object_name.data = user.object_name
 
     current_app.logger.info('End function user_profile')
 
     # For ChangeLog Table
-    changes = get_changelog_by_user_id(u.id)
+    changes = get_changelog_by_user_id(user.id)
 
     page = request.args.get('page', 1, type=int)
     pagination = changes.paginate(
@@ -455,5 +456,5 @@ def user_profile(username):
         error_out=False)
     changes = pagination.items
 
-    return render_template('auth/user_page.html', username=username, u=u, form=form, changes=changes,
+    return render_template('auth/user_page.html', user=user, form=form, changes=changes,
                            pagination=pagination)
