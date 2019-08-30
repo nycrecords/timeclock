@@ -231,14 +231,8 @@ def password_reset_request():
                        user=user,
                        token=token,
                        next=request.args.get('next'))
-
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
-            flash('An email with instructions to reset your password has been sent to you.', category='success')
-        else:
-            # If the user doesn't exist in the database
-            current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
-                                    form.email.data)
-            flash('An account with this email was not found in the system.', category='error')
+        flash('If this account is in the system, an email with instructions to reset your password has been sent to you.', category='success')
         current_app.logger.info('Redirecting to /auth/login...')
         current_app.logger.info('End function password_reset_request() [VIEW]')
         return redirect(url_for('auth.login'))
