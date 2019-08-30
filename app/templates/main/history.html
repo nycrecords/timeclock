@@ -87,11 +87,7 @@
                 </tbody>
             </table>
             <div> 
-            {% if all_info %} 
-            Total Hours: {{ "{0:.2f}".format(total_hours) }}
-            {% else %}
             Total Hours: {{total_hours}}
-            {% endif %}
             </div>
             <div class="col-md-8 col-md-offset-4">
                 {{ macros.pagination_widget(pagination, '.history') }}
@@ -99,6 +95,5 @@
         {% else %}
             {% include 'includes/empty_query.html' %}
         {% endif %}
-
     </div>
 {% endblock %}
