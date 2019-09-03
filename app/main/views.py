@@ -355,7 +355,7 @@ def download_invoice():
                                  'did not specify a user'
                                  .format(current_user.email)
                                  )
-        errors.append('You must specify aser.')
+        errors.append('You must specify a user.')
 
     if (session['last_date'] - session['first_date']).days > 8:
         # If the time period is over a week, flash an error. We use days > 8
