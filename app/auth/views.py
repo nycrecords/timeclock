@@ -102,7 +102,6 @@ def login():
                 db.session.add(user)
                 db.session.commit()
                 current_app.logger.info('{} successfully logged in'.format(current_user.email))
-
                 # Check to ensure password isn't outdated
                 if (datetime.today() - current_user.password_list.last_changed).days > 90:
                     # If user's password has expired (not update in 90 days)
@@ -117,8 +116,8 @@ def login():
                     return redirect(url_for('auth.change_password'))
                 elif (datetime.today() - current_user.password_list.last_changed).days > 75:
                     # If user's password is about to expire (not updated in 75 days)
-                    days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
-                    flash('Your password will expire in {} days.'.format(95-days_to_expire), category='warning')
+                    days_to_expire = 90-((datetime.today() - current_user.password_list.last_changed).days)
+                    flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
                 return redirect(request.args.get('next') or url_for('main.index'))
