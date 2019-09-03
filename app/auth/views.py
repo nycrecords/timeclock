@@ -41,7 +41,7 @@ def admin_register():
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
     form = AdminRegistrationForm()
-    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
+    form.supervisor_id.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
         email = create_user(form.email.data.lower(),
@@ -52,7 +52,7 @@ def admin_register():
                     form.role.data,
                     form.tag.data,
                     form.is_supervisor.data,
-                    form.supervisor_email.data,
+                    form.supervisor_id.data,
                     form.budget_code.data,
                     form.object_code.data,
                     form.object_name.data,
@@ -404,7 +404,7 @@ def user_profile(user_id):
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     user = User.query.filter_by(id=user_id).first()
     form = ChangeUserDataForm()
-    form.supervisor_email.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
+    form.supervisor_id.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
     if not user:
         flash('No user with id {} was found'.format(user_id), category='error')
         return redirect(url_for('main.user_list_page'))
@@ -418,13 +418,13 @@ def user_profile(user_id):
         return redirect(url_for('main.user_list_page'))
 
     if form.validate_on_submit():
-        if user.id == form.supervisor_email.data:
+        if user.id == form.supervisor_id.data:
             flash('A user cannot be their own supervisor. Please revise your supervisor '
                   'field.', category='error')
         else:
             flash('User information has been updated', category='success')
             update_user_information(user, form.first_name.data, form.last_name.data,
-                                    form.division.data, form.tag.data, form.supervisor_email.data,
+                                    form.division.data, form.tag.data, form.supervisor_id.data,
                                     form.is_supervisor.data, form.is_active.data,
                                     form.role.data, form.budget_code.data, form.object_code.data, form.object_name.data)
             current_app.logger.info('{} update information for {}'.format(current_user.email, user.email))
@@ -437,7 +437,7 @@ def user_profile(user_id):
         form.division.data = user.division
         form.tag.data = user.tag_id
         form.is_supervisor.data=user.is_supervisor
-        form.supervisor_email.data = user.supervisor.email if user.supervisor else 'admin@records.nyc.gov'
+        form.supervisor_id.data = user.supervisor.email if user.supervisor else 'admin@records.nyc.gov'
         form.is_active.data = user.is_active
         form.role.data = user.role.name
         form.budget_code.data = user.budget_code
