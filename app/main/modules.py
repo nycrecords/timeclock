@@ -339,6 +339,7 @@ def check_total_clock_count(events):
     clock_out_list = []
     # loop through all events and count the number of clock-ins and clock-outs in separate lists
     for event in events:
+        event=str(event)
         if 'OUT' in event:
             clock_out_list.append(event)
         elif 'IN' in event:
