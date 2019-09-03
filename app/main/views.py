@@ -157,7 +157,7 @@ def all_history():
 
     addform = AddEventForm()
     if addform.validate_on_submit() and addform.add.data:
-        if addform.addemail.data == current_user.email:
+        if addform.addemail.data.lower() == current_user.email:
             flash('Administrators cannot edit their own clock events', 'error')
             return redirect(url_for('main.clear'))
         date_string = addform.add_date.data.strftime('%m/%d/%Y ')
@@ -168,7 +168,7 @@ def all_history():
         except ValueError:
             flash('Please make sure your time input is in the format HH:MM', category='error')
             return redirect(url_for('main.all_history'))
-        u = User.query.filter_by(email=addform.addemail.data).first()
+        u = User.query.filter_by(email=addform.addemail.data.lower()).first()
         add_event(u.id, datetime_obj, (addform.addpunch_type.data == "In"))
         flash("Clock event successfully processed", 'success')
         return redirect(url_for('main.clear'))
@@ -316,7 +316,7 @@ def download():
 
     if not (check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate a timesheet. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + (request.referrer).split('/')[3]))
     if errors:
@@ -389,9 +389,9 @@ def download_invoice():
         session['email'] += '@records.nyc.gov'
 
     if session['email'] is None or session['email'] == '':
-        u = User.query.filter_by(email=current_user.email).first()
+        u = User.query.filter_by(email=current_user.email.lower()).first()
     else:
-        u = User.query.filter_by(email=session['email']).first()
+        u = User.query.filter_by(email=session['email'].lower()).first()
 
     # Check for payrate
     if get_payrate_before_or_after(session['email'], session['first_date'], True) is None:
@@ -403,7 +403,7 @@ def download_invoice():
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
     if not all_info:
         current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate an invoice. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + last_page))
     day_events_list = all_info['days_list']
@@ -464,7 +464,7 @@ def pay():
     form = CreatePayRateForm()
     if form.validate_on_submit():
         current_app.logger.info('Querying for user with email {}'.format(form.email.data))
-        u = User.query.filter_by(email=form.email.data).first()
+        u = User.query.filter_by(email=form.email.data.lower()).first()
         current_app.logger.info('Finished querying for user')
         if not u:
             current_app.logger.error('Tried creating pay for {}. A user with this email does not exist.'.
@@ -553,7 +553,7 @@ def review_timepunch():
     clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
+        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data.lower()).first():
             flash('Successfully filtered', 'success')
         else:
             flash('Invalid email', 'error')
@@ -613,11 +613,21 @@ def user_list_page():
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
-    list_of_users = User.query.filter_by(is_active=active).all()
+    list_of_users = []
+    list_of_users_all  = User.query.filter_by(is_active=active).all()
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
-            nondivision_users.append(user)
+            nondivision_users.append(user)   
+    if request.method == 'GET':
+        entry = request.args.get('search_input', '')
+        search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
+        search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
+        search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
+        list_of_users = list(set(list_of_users_all) & set(search_result_email + search_result_fname + search_result_lname))
+
+    if not list_of_users:
+        flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users, active_users=active)
@@ -648,7 +658,7 @@ def review_vacations():
     clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data).first():
+        if not filter_form.email.data or User.query.filter_by(email=filter_form.email.data.lower()).first():
             flash('Successfully filtered', 'success')
         else:
             flash('Invalid email', 'error')

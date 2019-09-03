@@ -1,5 +1,5 @@
 from datetime import date, datetime
-
+from flask import current_app
 from flask_wtf import Form
 from wtforms import StringField, SubmitField, DateField, SelectField, FloatField, BooleanField, SelectMultipleField, \
     ValidationError
@@ -73,7 +73,9 @@ class AdminFilterEventsForm(Form):
         :param email: The filtered email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        if email.data and email.data.find('@') <= 0:
+            email.data += '@' + current_app.config['EMAIL_DOMAIN']
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -105,7 +107,7 @@ class CreatePayRateForm(Form):
         :param email: The filtered email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -136,7 +138,7 @@ class AddEventForm(Form):
         :param email: The supervisor's email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -167,7 +169,7 @@ class FilterTimePunchForm(Form):
         :param email: The email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 
@@ -198,7 +200,7 @@ class FilterVacationForm(Form):
         :param email: The email
         :return:
         """
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data.lower()).first()
         if not user:
             raise ValidationError('No account with that email exists')
 

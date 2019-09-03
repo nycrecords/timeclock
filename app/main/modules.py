@@ -170,9 +170,9 @@ def get_events_by_date(email=None, first_date_input=None, last_date_input=None, 
 
     # User processing
     if email_input is not None:
-        if User.query.filter_by(email=email_input).first() is not None:
+        if User.query.filter_by(email=email_input.lower()).first() is not None:
             current_app.logger.info('Querying for events with given user: {}'.format(email_input))
-            user_id = User.query.filter_by(email=email_input).first().id
+            user_id = User.query.filter_by(email=email_input.lower()).first().id
             events_query = events_query.filter(Event.user_id == user_id)
             current_app.logger.info('Finished querying for events with given user.')
         elif email_input != '':
@@ -335,23 +335,17 @@ def check_total_clock_count(events):
     :return: True if there are matching clock outs for each clock in, otherwise False
     """
     current_app.logger.info('Start function check_total_clock_count()')
-    clock_in_list = []
-    clock_out_list = []
-    # loop through all events and count the number of clock-ins and clock-outs in separate lists
-    for event in events:
-        event=str(event)
-        if 'OUT' in event:
-            clock_out_list.append(event)
-        elif 'IN' in event:
-            clock_in_list.append(event)
-        else:
-            continue
-    if len(clock_out_list) == len(clock_in_list):
-        return True
-    else:
+    if len(events) % 2 != 0:
         return False
-
-
+    #Each clock in must have corresponding clock out i.e There should be no two consecutive ones of the same type.
+    last_type_clock="IN"
+    for event in events:
+        if last_type_clock in event:
+            return False
+        elif last_type_clock=="OUT":
+            last_type_clock="IN"
+        else: last_type_clock="OUT"
+    return True
 def add_event(user_id, time, type):
     """
     Adds an event to the database

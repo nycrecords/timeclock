@@ -231,14 +231,8 @@ def password_reset_request():
                        user=user,
                        token=token,
                        next=request.args.get('next'))
-
             current_app.logger.info('Sent password reset instructions to {}'.format(form.email.data))
-            flash('An email with instructions to reset your password has been sent to you.', category='success')
-        else:
-            # If the user doesn't exist in the database
-            current_app.logger.info('Requested password reset for e-mail %s but no such account exists' %
-                                    form.email.data)
-            flash('An account with this email was not found in the system.', category='error')
+        flash('If this account is in the system, an email with instructions to reset your password has been sent to you.', category='success')
         current_app.logger.info('Redirecting to /auth/login...')
         current_app.logger.info('End function password_reset_request() [VIEW]')
         return redirect(url_for('auth.login'))
@@ -302,8 +296,7 @@ def password_reset(token):
             return render_template("auth/reset_password.html", form=form)
         else:
             try:
-                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token,
-                                                                                                        form.password.data):
+                if 'reset_token' in session and session['reset_token']['valid'] and user.reset_password(token, form.password.data):
                     # If the token has not been used and the user submits a proper new password, reset users password
                     # and login attempts
                     user.login_attempts = 0
@@ -324,11 +317,14 @@ def password_reset(token):
                     return render_template('auth/reset_password.html', form=form)
 
                 else:
-                    # New password didn't meet minimum security criteria
-                    current_app.logger.error(
-                        'Entered invalid new password for {}'.format(user.email))
-                    flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
-                          category='error')
+                    if not 'reset_token' in session: 
+                        flash('The reset token is timed out. Please generate a new reset token.', category='error')
+                    # Then the token is valid but the new password didn't meet minimum security criteria
+                    else:
+                        current_app.logger.error(
+                            'Entered invalid new password for {}'.format(user.email))
+                        flash('Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number',
+                              category='error')
                     current_app.logger.info('End function password_reset')
                     return render_template('auth/reset_password.html', form=form)
 
