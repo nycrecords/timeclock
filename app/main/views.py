@@ -503,8 +503,6 @@ def request_timepunch():
                 if (datetime_obj > today):
                    flash("You cannot request a future time punch", category='error') 
                    return redirect(url_for('main.request_timepunch'))
-                print("Hello"+ str(datetime_obj))
-                print(datetime.today())
             except ValueError:
                 flash('Please make sure your time input is in the format HH:MM', category='error')
                 return redirect(url_for('main.request_timepunch'))
@@ -526,13 +524,9 @@ def request_timepunch():
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         elif vacform.vac_start.data > vacform.vac_end.data:
             flash("The vacation start data must be before the vacation end date", category='error')
-        elif today.date() > vacform.vac_start.data:
-            flash("The vacation start data must be in the future", category='error')
         else:
             v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
                          approved=False, pending=True)
-            print("start"+str(vacform.vac_start.data))
-            print("end"+str(vacform.vac_end.data))
             db.session.add(v)
             db.session.commit()
             flash('Your vacation request has been successfully submitted and is pending approval', 'success')
