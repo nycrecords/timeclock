@@ -44,7 +44,7 @@
                         </thead>
                         <tbody>
                         {% for user in clocked_in_users %}
-                        {% if user.supervisor_id == current_user.id %}
+                        {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
                             <tr>
                                 <td>{{ user.division }}</td>
                                 <td>{{ user.email }}</td>

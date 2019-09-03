@@ -355,7 +355,7 @@ def download_invoice():
                                  'did not specify a user'
                                  .format(current_user.email)
                                  )
-        errors.append('You must specify a user.')
+        errors.append('You must specify aser.')
 
     if (session['last_date'] - session['first_date']).days > 8:
         # If the time period is over a week, flash an error. We use days > 8
@@ -541,13 +541,13 @@ def review_timepunch():
     filter_form = FilterTimePunchForm()
     clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
-    u=User.query.filter_by(email=filter_form.email.data).first()
+    user=User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if not filter_form.email.data or u:
+        if not filter_form.email.data or user:
             if not filter_form.email.data:
                 flash('Please put an email, if you wish to filter for specific user', 'warning')
-            elif current_user != u.supervisor:
-                flash('Sorry you are not a supervisor for this account', 'error')
+            elif current_user != user.supervisor:
+                flash('Sorry you are not a supervisor for this account.', 'error')
             else: 
                 flash('Successfully filtered', 'success')
         else:
@@ -642,13 +642,13 @@ def review_vacations():
     filter_form = FilterVacationForm()
     clear_form = ClearForm()
     page = request.args.get('page', 1, type=int)
-    u=User.query.filter_by(email=filter_form.email.data).first()
+    user=User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if not filter_form.email.data or u:
+        if not filter_form.email.data or user:
             if not filter_form.email.data:
                 flash('Please put an email, if you wish to filter for specific user', 'warning')
-            elif current_user != u.supervisor:
-                flash('Sorry you are not a supervisor for this account', 'error')
+            elif current_user != user.supervisor:
+                flash('Sorry you are not a supervisor for this account.', 'error')
             else: 
                 flash('Successfully filtered', 'success')
         else:

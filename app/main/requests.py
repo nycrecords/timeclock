@@ -44,19 +44,19 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
     :return: A query of all timepunch requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
-    s= User.query.filter_by(email=user_email).first()
+    sup= User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for timepunches submitted to {}'.format(user_email))
-    timepunch_query = Event.query.join(User).filter_by(supervisor=s).filter(Event.timepunch == True).order_by(Event.id)
+    timepunch_query = Event.query.join(User).filter_by(supervisor=sup).filter(Event.timepunch == True).order_by(Event.id)
     current_app.logger.info('Finished querying for timepunches')
 
     # Filter by emails if user provides an email
     if filter_by_email and filter_by_email != '':
-        u = User.query.filter_by(email=filter_by_email).first()
-        if u:
-            if s != u.supervisor:
+        user = User.query.filter_by(email=filter_by_email).first()
+        if user:
+            if sup != user.supervisor:
                 current_app.logger.error('Tried to filter timepunches from {} but you are not a supervisor for this account'
                                     .format(filter_by_email))
-            else: timepunch_query = timepunch_query.filter(Event.user_id == u.id)
+            else: timepunch_query = timepunch_query.filter(Event.user_id == user.id)
         else:
             current_app.logger.error('Tried to filter timepunches from {} but no such account'
                                      'exists'.format(filter_by_email))
@@ -110,19 +110,19 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     :return: A query of all vacation requests for the given user
     """
     current_app.logger.info('Start function get_timepunches_for_review()')
-    s = User.query.filter_by(email=user_email).first()
+    sup = User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for vacations submitted to {}'.format(user_email))
     vacation_query = Vacation.query.join(User).filter_by(supervisor=s).order_by(Vacation.id)
     current_app.logger.info('Finished querying for vacations')
 
     # Filter by emails if user provides an email
     if filter_by_email and filter_by_email != '':
-        u = User.query.filter_by(email=filter_by_email).first()    
-        if u:
-            if s != u.supervisor:
+        user = User.query.filter_by(email=filter_by_email).first()    
+        if user:
+            if sup != user.supervisor:
                 current_app.logger.error('Tried to filter vacations from {} but you are not a supervisor for this account'
                                     .format(filter_by_email))
-            else: vacation_query = vacation_query.filter(Vacation.user_id == u.id)
+            else: vacation_query = vacation_query.filter(Vacation.user_id == user.id)
         else:
             current_app.logger.error('Tried to filter vacations from {} but no such account'
                                      'exists'.format(filter_by_email))
