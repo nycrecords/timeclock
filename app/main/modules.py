@@ -340,6 +340,7 @@ def check_total_clock_count(events):
     #Each clock in must have corresponding clock out i.e There should be no two consecutive ones of the same type.
     last_type_clock="IN"
     for event in events:
+        event=str(event)
         if last_type_clock in event:
             return False
         elif last_type_clock=="OUT":
