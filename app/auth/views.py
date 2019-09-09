@@ -84,11 +84,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
-        print(user)
         if user:
             if not user.is_active :
                 current_app.logger.info('Inactive User {} trying to login'.format(current_user))
-                flash('Your account is inactive, you should contact your supervisor.', category='error')
+                flash( "Invalid username or password. Please contact HR for assistance", category='error')
                 current_app.logger.info('End function login() [VIEW]')
             elif user.login_attempts > 2:
                 # Too many invalid attempts
