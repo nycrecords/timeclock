@@ -84,10 +84,12 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
-        print(user)
-
         if user:
-            if user.login_attempts > 2:
+            if not user.is_active :
+                current_app.logger.info('Inactive User {} trying to login'.format(current_user))
+                flash( "Invalid username or password. Please contact HR for assistance", category='error')
+                current_app.logger.info('End function login() [VIEW]')
+            elif user.login_attempts > 2:
                 # Too many invalid attempts
                 current_app.logger.info('{} has been locked out'.format(user.email))
                 flash('You have too many invalid login attempts. You must reset your password.',
@@ -129,7 +131,7 @@ def login():
                 user.login_attempts += 1
                 db.session.add(user)
                 db.session.commit()
-        flash('Invalid username or password', category='error')
+            if user.is_active: flash('Invalid username or password', category='error')
     current_app.logger.info('End function login() [VIEW]')
     return render_template('auth/login.html', form=form, reset_url=url_for('auth.password_reset_request'))
 
