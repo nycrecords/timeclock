@@ -204,10 +204,12 @@ def update_user_information(user,
         db.session.commit()
         user.tag_id = tag_input
 
-    ##None type error when there isn't any supervisor at first
-    if user.supervisor is None:  old_email = None
-    else: old_email = user.supervisor.email,
-                                                                ##supervisor.id
+    #<None type error when there isn't any supervisor at first>
+    if user.supervisor is None:  
+        old_email = None
+    else: 
+        old_email = user.supervisor.email,
+                                                                
     if supervisor_email_input and supervisor_email_input != '' and user.supervisor_id != supervisor_email_input:
         sup = User.query.filter_by(id=supervisor_email_input).first()
         change = ChangeLog(changer_id=current_user.id,

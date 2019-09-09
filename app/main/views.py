@@ -17,6 +17,7 @@ from flask import (
     make_response
 )
 from flask_login import login_required, current_user
+from sqlalchemy.orm import sessionmaker
 
 from . import main
 from .forms import (
@@ -599,12 +600,15 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+    Session = sessionmaker(bind = db.engine)
+    session = Session()
+
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = []
     list_of_users_all  = User.query.filter_by(is_active=active).all()
-    tag_dict = {'intern':1, 'contractor':2, 'syep':3, 'pencil':4, 'employee':5, 'volunteer':6, 'other':7}
+
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
@@ -616,12 +620,11 @@ def user_list_page():
         search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
         search_result_division = User.query.filter(User.division.ilike('%' + entry.title() + '%')).all()
 
-        tag_name = entry.lower()
-        search_result_tag = []
-        if tag_name in tag_dict.keys():
-            search_result_tag = User.query.filter_by(tag_id=tag_dict[tag_name]).all()
-
-        list_of_users = list(set(list_of_users_all) & set(search_result_email + search_result_fname + search_result_lname + search_result_division + search_result_tag))
+        list_of_users = list(set(list_of_users_all) & set(search_result_email + search_result_fname + search_result_lname + search_result_division))
+        
+        ##<Join the table User and tag in order to search with the tag name and link it with the User>
+        search_result_tag = session.query(User).join(Tag).filter(Tag.name.ilike('%' + entry.title() + '%')).all()
+        list_of_users = list(set(list_of_users + search_result_tag))
 
     if not list_of_users:
         flash('No results found', category = 'error')
