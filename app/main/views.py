@@ -263,11 +263,22 @@ def history():
     current_app.logger.info('Querying (calling get_all_tags)')
     tags = get_all_tags()
     current_app.logger.info('Finished querying')
-
     query_has_results = True if events_query.first() else False
-
+    if check_total_clock_count(events):
+        hours_worked=0
+        for x in range(0, len(events), 2):
+            next_event = events[x]
+            event = events[x + 1]
+            time_in = event.time
+            time_out = next_event.time
+            hours_this_day = (time_out - time_in).seconds / float(3600)
+            hours_this_day = hours_this_day - 1 if hours_this_day >= 5 else hours_this_day
+            hours_worked += hours_this_day
+        total_hours = str(round(hours_worked, 2)) 
+    else: total_hours = 'Each "clock in" must have corresponding "clock out"'
     return render_template('main/history.html',
                            events=events,
+                           total_hours=total_hours,
                            form=form,
                            pagination=pagination,
                            generation_events=events_query.all(),
