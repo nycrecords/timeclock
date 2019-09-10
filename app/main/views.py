@@ -304,12 +304,12 @@ def download():
                                  .format(current_user.email)
                                  )
         errors.append('You must specify a user.')
-    if (session['last_date'] - session['first_date']).days > 8:
+    if (session['last_date'] - session['first_date']).days > 15:
         current_app.logger.error('User {} tried to generate a timesheet but '
-                                 'exceeded maximum duration (one week)'
+                                 'exceeded maximum duration (two weeks)'
                                  .format(current_user.email)
                                  )
-        errors.append('Maximum timesheet duration is a week. '
+        errors.append('Maximum timesheet duration is two weeks. '
                       'Please refine your filters')
 
     events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
