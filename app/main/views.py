@@ -620,12 +620,14 @@ def user_list_page():
         search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
         search_result_division = User.query.filter(User.division.ilike('%' + entry.title() + '%')).all()
 
-        list_of_users = list(set(list_of_users_all) & set(search_result_email + search_result_fname + search_result_lname + search_result_division))
-        
         ##<Join the table User and tag in order to search with the tag name and link it with the User>
         search_result_tag = session.query(User).join(Tag).filter(Tag.name.ilike('%' + entry.title() + '%')).all()
-        list_of_users = list(set(list_of_users + search_result_tag))
 
+        if not entry:
+            list_of_users = list_of_users_all
+        else:
+            list_of_users = list(set(search_result_email + search_result_fname + search_result_lname + search_result_division + search_result_tag))
+        
     if not list_of_users:
         flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
