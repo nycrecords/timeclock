@@ -17,6 +17,7 @@ from flask import (
     make_response
 )
 from flask_login import login_required, current_user
+from sqlalchemy.orm import sessionmaker
 
 from . import main
 from .forms import (
@@ -63,7 +64,7 @@ from .requests import (
 )
 from .. import db
 from ..decorators import admin_required
-from ..models import Pay, User, Vacation
+from ..models import Pay, User, Vacation, Tag
 from app.utils import eval_request_bool
 
 
@@ -610,11 +611,15 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+    Session = sessionmaker(bind = db.engine)
+    session = Session()
+
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
     list_of_users = []
     list_of_users_all  = User.query.filter_by(is_active=active).all()
+
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
@@ -624,8 +629,16 @@ def user_list_page():
         search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
         search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
         search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
-        list_of_users = list(set(list_of_users_all) & set(search_result_email + search_result_fname + search_result_lname))
+        search_result_division = User.query.filter(User.division.ilike('%' + entry.title() + '%')).all()
 
+        ##<Join the table User and tag in order to search with the tag name and link it with the User>
+        search_result_tag = session.query(User).join(Tag).filter(Tag.name.ilike('%' + entry.title() + '%')).all()
+
+        if not entry:
+            list_of_users = list_of_users_all
+        else:
+            list_of_users = list(set(search_result_email + search_result_fname + search_result_lname + search_result_division + search_result_tag))
+        
     if not list_of_users:
         flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
