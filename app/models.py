@@ -170,7 +170,16 @@ class User(UserMixin, db.Model):
         :return: True if operation is successful, false otherwise.
         """
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
-        if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
+        if len(new_password) < 8:
+            return False
+        score = 0
+        if re.search('\d+', new_password):
+            # If the new password contains a digit, increment score
+            score += 1
+        if re.search('[a-z]', new_password) and re.search('[A-Z]', new_password):
+            # If the new password contains lowercase and uppercase letters, increment score
+            score += 1
+        if score < 2:
             return False
         # If the password has been changed within the last second, the token is invalid.
         if (datetime.now() - self.password_list.last_changed).seconds < 1:
@@ -227,7 +236,8 @@ class User(UserMixin, db.Model):
                      password=forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
                      first_name=first,
                      last_name=last,
-                     tag=t
+                     tag=t,
+                     division=''
                      )
             db.session.add(u)
             try:

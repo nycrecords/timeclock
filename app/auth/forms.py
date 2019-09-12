@@ -40,7 +40,7 @@ class RegistrationForm(Form):
         :param email_field:
         :return:
         """
-        if User.query.filter_by(email=email_field.data).first():
+        if User.query.filter_by(email=email_field.data.lower()).first():
             raise ValidationError('An account with this email address already exists')
         return True
 
@@ -120,7 +120,7 @@ class AdminRegistrationForm(Form):
         :param email_field:
         :return:
         """
-        if User.query.filter_by(email=email_field.data).first():
+        if User.query.filter_by(email=email_field.data.lower()).first():
             # raise ValidationError
             # flash('An account with this email address already exists', 'error')
             self.email.errors = 'An account with this email address already exists',
@@ -225,7 +225,7 @@ class PasswordResetForm(Form):
     submit = SubmitField('Reset Password')
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first() is None:
+        if User.query.filter_by(email=field.data.lower()).first() is None:
             raise ValidationError('Unknown email address.')
 
 
