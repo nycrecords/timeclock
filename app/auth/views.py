@@ -350,7 +350,7 @@ def get_sups():
     """
     choices = []
     if request.args['division']:
-        choices = get_supervisors_for_division(request.args['division'])
+        choices = get_supervisors_for_division(request.args['division']) + [(0, "No Supervisor")]
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
         choices = [(user.id, user.email) for u in sups]
