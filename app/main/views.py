@@ -523,7 +523,7 @@ def request_timepunch():
                   "should be assigned to you, please contact the system administrator.", category='error')
             current_app.logger.error('Does not have a supervisor'.format(current_user.email))
         elif vacform.vac_start.data > vacform.vac_end.data:
-            flash("The vacation start data must be before the vacation end date", category='error')
+            flash("The vacation's start date must be before the vacation's end date", category='error')
         else:
             v = Vacation(user_id=current_user.id, start=vacform.vac_start.data, end=vacform.vac_end.data,
                          approved=False, pending=True)
