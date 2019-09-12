@@ -41,7 +41,7 @@ def admin_register():
     """
     current_app.logger.info('Start function admin_register() [VIEW]')
     form = AdminRegistrationForm()
-    form.supervisor_id.choices = [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
+    form.supervisor_id.choices = [(0, "No Supervisor")] + [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] 
     if request.method == "POST" and form.validate_on_submit():
         temp_password = datetime.today().strftime('%A%-d')
         email = create_user(form.email.data.lower(),
@@ -350,7 +350,7 @@ def get_sups():
     """
     choices = []
     if request.args['division']:
-        choices = get_supervisors_for_division(request.args['division']) + [(0, "No Supervisor")]
+        choices = [(0, "No Supervisor")] + get_supervisors_for_division(request.args['division'])
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
         choices = [(user.id, user.email) for u in sups]
@@ -404,7 +404,7 @@ def user_profile(user_id):
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     user = User.query.filter_by(id=user_id).first()
     form = ChangeUserDataForm()
-    list_of_sups= [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")]
+    list_of_sups= [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")] 
     if user.supervisor:
         #If a user has asupervisor, then that supervisor should be selected by default
         list_of_sups.insert(0, list_of_sups.pop(list_of_sups.index((user.supervisor.id, user.supervisor.email))))
