@@ -34,6 +34,7 @@
                     division: $("#division").val()
                 },
                 success: function (data) {
+                    alert("The supervisor will be reset due to the change of divison");
                     var sel = $("#supervisor_id");
                     sel.empty();
                     for (var i = 0; i < data.length; i++) {

@@ -406,7 +406,7 @@ def user_profile(user_id):
     form = ChangeUserDataForm()
     list_of_sups= [(user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()] + [(0, "No Supervisor")] 
     if user.supervisor:
-        #If a user has asupervisor, then that supervisor should be selected by default
+        #If a user has a supervisor, then that supervisor should be selected by default
         list_of_sups.insert(0, list_of_sups.pop(list_of_sups.index((user.supervisor.id, user.supervisor.email))))
     form.supervisor_id.choices = list_of_sups
     if not user:
