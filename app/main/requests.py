@@ -112,7 +112,7 @@ def get_vacations_for_review(user_email, filter_by_email=None, status=None):
     current_app.logger.info('Start function get_timepunches_for_review()')
     sup = User.query.filter_by(email=user_email).first()
     current_app.logger.info('Querying for vacations submitted to {}'.format(user_email))
-    vacation_query = Vacation.query.join(User).filter_by(supervisor=s).order_by(Vacation.id)
+    vacation_query = Vacation.query.join(User).filter_by(supervisor=sup).order_by(Vacation.id)
     current_app.logger.info('Finished querying for vacations')
 
     # Filter by emails if user provides an email
