@@ -17,6 +17,7 @@ from flask import (
     make_response
 )
 from flask_login import login_required, current_user
+from sqlalchemy.orm import sessionmaker
 
 from . import main
 from .forms import (
@@ -63,7 +64,7 @@ from .requests import (
 )
 from .. import db
 from ..decorators import admin_required
-from ..models import Pay, User, Vacation
+from ..models import Pay, User, Vacation, Tag
 from app.utils import eval_request_bool
 
 
@@ -157,7 +158,7 @@ def all_history():
 
     addform = AddEventForm()
     if addform.validate_on_submit() and addform.add.data:
-        if addform.addemail.data == current_user.email:
+        if addform.addemail.data.lower() == current_user.email:
             flash('Administrators cannot edit their own clock events', 'error')
             return redirect(url_for('main.clear'))
         date_string = addform.add_date.data.strftime('%m/%d/%Y ')
@@ -168,7 +169,7 @@ def all_history():
         except ValueError:
             flash('Please make sure your time input is in the format HH:MM', category='error')
             return redirect(url_for('main.all_history'))
-        u = User.query.filter_by(email=addform.addemail.data).first()
+        u = User.query.filter_by(email=addform.addemail.data.lower()).first()
         add_event(u.id, datetime_obj, (addform.addpunch_type.data == "In"))
         flash("Clock event successfully processed", 'success')
         return redirect(url_for('main.clear'))
@@ -263,11 +264,22 @@ def history():
     current_app.logger.info('Querying (calling get_all_tags)')
     tags = get_all_tags()
     current_app.logger.info('Finished querying')
-
     query_has_results = True if events_query.first() else False
-
+    if check_total_clock_count(events):
+        hours_worked=0
+        for x in range(0, len(events), 2):
+            next_event = events[x]
+            event = events[x + 1]
+            time_in = event.time
+            time_out = next_event.time
+            hours_this_day = (time_out - time_in).seconds / float(3600)
+            hours_this_day = hours_this_day - 1 if hours_this_day >= 5 else hours_this_day
+            hours_worked += hours_this_day
+        total_hours = str(round(hours_worked, 2)) 
+    else: total_hours = 'Each "clock in" must have corresponding "clock out"'
     return render_template('main/history.html',
                            events=events,
+                           total_hours=total_hours,
                            form=form,
                            pagination=pagination,
                            generation_events=events_query.all(),
@@ -293,19 +305,19 @@ def download():
                                  .format(current_user.email)
                                  )
         errors.append('You must specify a user.')
-    if (session['last_date'] - session['first_date']).days > 8:
+    if (session['last_date'] - session['first_date']).days > 15:
         current_app.logger.error('User {} tried to generate a timesheet but '
-                                 'exceeded maximum duration (one week)'
+                                 'exceeded maximum duration (two weeks)'
                                  .format(current_user.email)
                                  )
-        errors.append('Maximum timesheet duration is a week. '
+        errors.append('Maximum timesheet duration is two weeks. '
                       'Please refine your filters')
 
     events = request.form.getlist('event')  # Gets event data from frontend - we can similarly pass in other data
 
     if not (check_total_clock_count(events)):
         current_app.logger.error('Timesheet was generated with odd number of clock ins/outs {}'.format(len(events)))
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate a timesheet. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + (request.referrer).split('/')[3]))
     if errors:
@@ -378,9 +390,9 @@ def download_invoice():
         session['email'] += '@records.nyc.gov'
 
     if session['email'] is None or session['email'] == '':
-        u = User.query.filter_by(email=current_user.email).first()
+        u = User.query.filter_by(email=current_user.email.lower()).first()
     else:
-        u = User.query.filter_by(email=session['email']).first()
+        u = User.query.filter_by(email=session['email'].lower()).first()
 
     # Check for payrate
     if get_payrate_before_or_after(session['email'], session['first_date'], True) is None:
@@ -392,7 +404,7 @@ def download_invoice():
     all_info = calculate_hours_worked(session['email'], session['first_date'], session['last_date'])
     if not all_info:
         current_app.logger.error('Invoice was generated with odd number of clock ins/outs {}')
-        flash('Each clock in must have corresponding clock out to generate a invoice. '
+        flash('Each clock in must have corresponding clock out to generate an invoice. '
               'Please submit a timepunch for missing times.', category='error')
         return redirect(url_for('main.' + last_page))
     day_events_list = all_info['days_list']
@@ -453,7 +465,7 @@ def pay():
     form = CreatePayRateForm()
     if form.validate_on_submit():
         current_app.logger.info('Querying for user with email {}'.format(form.email.data))
-        u = User.query.filter_by(email=form.email.data).first()
+        u = User.query.filter_by(email=form.email.data.lower()).first()
         current_app.logger.info('Finished querying for user')
         if not u:
             current_app.logger.error('Tried creating pay for {}. A user with this email does not exist.'.
@@ -605,14 +617,36 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+    Session = sessionmaker(bind = db.engine)
+    session = Session()
+
     active = eval_request_bool(request.args.get('active', "true"), True)
     nondivision_users = []
     tags = get_all_tags()
-    list_of_users = User.query.filter_by(is_active=active).all()
+    list_of_users = []
+    list_of_users_all  = User.query.filter_by(is_active=active).all()
+
     for user in list_of_users:
         if user.division is None:
             list_of_users.remove(user)
-            nondivision_users.append(user)
+            nondivision_users.append(user)   
+    if request.method == 'GET':
+        entry = request.args.get('search_input', '')
+        search_result_email = User.query.filter(User.email.ilike('%' + entry + '%')).all()
+        search_result_fname = User.query.filter(User.first_name.ilike('%' + entry.title()+ '%')).all()
+        search_result_lname = User.query.filter(User.last_name.ilike('%' + entry.title() + '%')).all()
+        search_result_division = User.query.filter(User.division.ilike('%' + entry.title() + '%')).all()
+
+        ##<Join the table User and tag in order to search with the tag name and link it with the User>
+        search_result_tag = session.query(User).join(Tag).filter(Tag.name.ilike('%' + entry.title() + '%')).all()
+
+        if not entry:
+            list_of_users = list_of_users_all
+        else:
+            list_of_users = list(set(search_result_email + search_result_fname + search_result_lname + search_result_division + search_result_tag))
+        
+    if not list_of_users:
+        flash('No results found', category = 'error')
     # Pass in separate list of users with and without divisions
     return render_template('main/user_list.html', list_of_users=list_of_users, tags=tags,
                            nondivision_users=nondivision_users, active_users=active)
