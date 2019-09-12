@@ -238,7 +238,7 @@ class ChangeUserDataForm(Form):
     division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
     tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
     # supervisor_id = StringField("Supervisor Email", validators=[DataRequired()])
-    supervisor_id = SelectField('Supervisor Email', choices=[], default=None, coerce=int,
+    supervisor_id = SelectField('Supervisor Email', choices=[(0, "No Supervisor")], default=0, coerce=int,
                                    validators=[Optional()])
     is_supervisor = BooleanField("User is a supervisor")
     is_active = BooleanField("User is active")

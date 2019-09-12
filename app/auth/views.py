@@ -437,7 +437,7 @@ def user_profile(user_id):
         form.division.data = user.division
         form.tag.data = user.tag_id
         form.is_supervisor.data=user.is_supervisor
-        form.supervisor_id.data = user.supervisor.email if user.supervisor else 'admin@records.nyc.gov'
+        form.supervisor_id.data = user.supervisor.email if user.supervisor else 0
         form.is_active.data = user.is_active
         form.role.data = user.role.name
         form.budget_code.data = user.budget_code
