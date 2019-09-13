@@ -15,6 +15,7 @@ class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
     """
+
     USER = 0x01  # 0b00000001
     ADMINISTER = 0x80  # 0b10000000
 
@@ -23,12 +24,13 @@ class Role(db.Model):
     """
     Specifies the roles a user can have (normal User, Department Head(Moderator), Administrator).
     """
-    __tablename__ = 'roles'
+
+    __tablename__ = "roles"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    users = db.relationship("User", backref="role", lazy="dynamic")
 
     @staticmethod
     def insert_roles():
@@ -37,9 +39,9 @@ class Role(db.Model):
         :return: None
         """
         roles = {
-            'User': (Permission.USER, True),
-            'Moderator': (Permission.ADMINISTER, False),
-            'Administrator': (0xff, False)
+            "User": (Permission.USER, True),
+            "Moderator": (Permission.ADMINISTER, False),
+            "Administrator": (0xFF, False),
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -51,7 +53,7 @@ class Role(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Role %r>' % self.name
+        return "<Role %r>" % self.name
 
 
 # class Budget(db.Model):
@@ -101,7 +103,8 @@ class User(UserMixin, db.Model):
     """
     Specifies properties and functions of a TimeClock User.
     """
-    __tablename__ = 'users'
+
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     is_active = db.Column(db.Boolean, default=True)
     first_name = db.Column(db.String(64), index=True)
@@ -111,17 +114,17 @@ class User(UserMixin, db.Model):
     validated = db.Column(db.Boolean, default=False)
     division = db.Column(db.String(128))
     login_attempts = db.Column(db.Integer, default=0)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))
-    old_passwords = db.Column(db.Integer, db.ForeignKey('passwords.id'))
-    events = db.relationship('Event', backref='user', lazy='dynamic')
-    pays = db.relationship('Pay', backref='user', lazy='dynamic')
-    vacations = db.relationship('Vacation', backref='user', lazy='dynamic')
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    tag_id = db.Column(db.Integer, db.ForeignKey("tags.id"))
+    old_passwords = db.Column(db.Integer, db.ForeignKey("passwords.id"))
+    events = db.relationship("Event", backref="user", lazy="dynamic")
+    pays = db.relationship("Pay", backref="user", lazy="dynamic")
+    vacations = db.relationship("Vacation", backref="user", lazy="dynamic")
 
     # Supervisor
     is_supervisor = db.Column(db.Boolean, default=False)
-    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    supervisor = db.relationship('User', remote_side=[id])
+    supervisor_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    supervisor = db.relationship("User", remote_side=[id])
 
     # Budget/Object Codes
     budget_code = db.Column(db.String)
@@ -131,16 +134,18 @@ class User(UserMixin, db.Model):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == current_app.config['ADMIN']:
-                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.email == current_app.config["ADMIN"]:
+                self.role = Role.query.filter_by(permissions=0xFF).first()
                 self.validated = True
             else:
                 self.role = Role.query.filter_by(default=True).first()
-        self.password_list = Password(p1='', p2='', p3='', p4='', p5='', last_changed=datetime.now())
+        self.password_list = Password(
+            p1="", p2="", p3="", p4="", p5="", last_changed=datetime.now()
+        )
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        raise AttributeError("password is not a readable attribute")
 
     @password.setter
     def password(self, password):
@@ -158,9 +163,9 @@ class User(UserMixin, db.Model):
         :param expiration: Seconds the token is valid for after being created (default one hour).
         :return: the token.
         """
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        session['reset_token'] = {'token': s, 'valid': True}
-        return s.dumps({'reset': self.id})
+        s = Serializer(current_app.config["SECRET_KEY"], expiration)
+        session["reset_token"] = {"token": s, "valid": True}
+        return s.dumps({"reset": self.id})
 
     def reset_password(self, token, new_password):
         """
@@ -170,11 +175,15 @@ class User(UserMixin, db.Model):
         :return: True if operation is successful, false otherwise.
         """
         # checks if the new password is at least 8 characters with at least 1 UPPERCASE AND 1 NUMBER
-        if not re.match(r'^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$', new_password):
+        if not re.match(
+            r"^(?=.*?\d)(?=.*?[A-Z])(?=.*?[a-z])[A-Za-z\d]{8,128}$", new_password
+        ):
             return False
         # If the password has been changed within the last second, the token is invalid.
         if (datetime.now() - self.password_list.last_changed).seconds < 1:
-            current_app.logger.error('User {} tried to re-use a token.'.format(self.email))
+            current_app.logger.error(
+                "User {} tried to re-use a token.".format(self.email)
+            )
             raise InvalidResetToken
         self.password = new_password
         self.password_list.update(self.password_hash)
@@ -195,7 +204,10 @@ class User(UserMixin, db.Model):
         :param permissions: An int that specifies the permissions we are checking to see whether or not the user has.
         :return: True if user is authorized for the given permission, False otherwise.
         """
-        return self.role is not None and (self.role.permissions & permissions) == permissions
+        return (
+            self.role is not None
+            and (self.role.permissions & permissions) == permissions
+        )
 
     def is_administrator(self):
         """
@@ -205,7 +217,7 @@ class User(UserMixin, db.Model):
         return self.can(Permission.ADMINISTER)
 
     def __repr__(self):
-        return '<User %r>' % self.email
+        return "<User %r>" % self.email
 
     @staticmethod
     def generate_fake(count=100):
@@ -216,19 +228,21 @@ class User(UserMixin, db.Model):
         from random import seed, randint
 
         import forgery_py
+
         seed()
         tag_count = Tag.query.count()
         for i in range(count):
             t = Tag.query.offset(randint(0, tag_count - 1)).first()
             first = forgery_py.name.first_name()
             last = forgery_py.name.last_name()
-            e = (first[:1] + last + '@records.nyc.gov').lower()
-            u = User(email=e,
-                     password=forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
-                     first_name=first,
-                     last_name=last,
-                     tag=t
-                     )
+            e = (first[:1] + last + "@records.nyc.gov").lower()
+            u = User(
+                email=e,
+                password=forgery_py.lorem_ipsum.word(),  # change to set a universal password for QA testing
+                first_name=first,
+                last_name=last,
+                tag=t,
+            )
             db.session.add(u)
             try:
                 db.session.commit()
@@ -254,7 +268,8 @@ class Event(db.Model):
     """
     Model for clock events (in or out).
     """
-    __tablename__ = 'events'
+
+    __tablename__ = "events"
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Boolean)  # True if clocking in, false if clocking out
     time = db.Column(db.DateTime)  # Time of clock in/out event
@@ -271,14 +286,22 @@ class Event(db.Model):
     pending = db.Column(db.Boolean, default=False)
     # True if this is a timepunch request that hasn't been approved or denied yet
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __repr__(self):
         if not self.note:
             self.note = ""
         in_or_out = "IN" if self.type else "OUT"
         time_string = self.time.strftime("%b %d, %Y %H:%M:%S %p")
-        return time_string + " | " + self.user.email + " | " + in_or_out + " | " + self.note
+        return (
+            time_string
+            + " | "
+            + self.user.email
+            + " | "
+            + in_or_out
+            + " | "
+            + self.note
+        )
 
     @staticmethod
     def generate_fake(count=100):
@@ -288,20 +311,22 @@ class Event(db.Model):
         :return: None.
         """
         from random import seed, randint
+
         seed()
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
             # u.clocked_in = not u.clocked_in
-            e = Event(user=u,
-                      time=datetime(
-                          year=randint(2004, 2016),
-                          month=randint(1, 6),
-                          day=randint(1, 28),
-                          hour=randint(0, 23),
-                          minute=randint(0, 59),
-                      )
-                      )
+            e = Event(
+                user=u,
+                time=datetime(
+                    year=randint(2004, 2016),
+                    month=randint(1, 6),
+                    day=randint(1, 28),
+                    hour=randint(0, 23),
+                    minute=randint(0, 59),
+                ),
+            )
             db.session.add_all([e, u])
             db.session.commit()
 
@@ -310,29 +335,41 @@ class Pay(db.Model):
     """
     A model for user pay rates.
     """
-    __tablename__ = 'pays'
+
+    __tablename__ = "pays"
     id = db.Column(db.Integer, primary_key=True)
     rate = db.Column(db.Float)
     start = db.Column(db.Date)
     end = db.Column(db.Date)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __repr__(self):
-        return 'User: {} with rate {} from {} to {}'.format(self.user.email, self.rate, self.start, self.end)
+        return "User: {} with rate {} from {} to {}".format(
+            self.user.email, self.rate, self.start, self.end
+        )
 
 
 class Tag(db.Model):
     """
     A model for different user tags.
     """
-    __tablename__ = 'tags'
+
+    __tablename__ = "tags"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User', backref='tag', lazy='dynamic')
+    users = db.relationship("User", backref="tag", lazy="dynamic")
 
     @staticmethod
     def insert_tags():
-        tags = ['Intern', 'Contractor', 'SYEP', 'PENCIL', 'Employee', 'Volunteer', 'Other']
+        tags = [
+            "Intern",
+            "Contractor",
+            "SYEP",
+            "PENCIL",
+            "Employee",
+            "Volunteer",
+            "Other",
+        ]
         for t in tags:
             tag = Tag.query.filter_by(name=t).first()
             if tag is None:
@@ -341,11 +378,11 @@ class Tag(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Tag %r>' % self.name
+        return "<Tag %r>" % self.name
 
 
 class Password(db.Model):
-    __tablename__ = 'passwords'
+    __tablename__ = "passwords"
     id = db.Column(db.Integer, primary_key=True)
     p1 = db.Column(db.String(128))
     p2 = db.Column(db.String(128))
@@ -353,7 +390,7 @@ class Password(db.Model):
     p4 = db.Column(db.String(128))
     p5 = db.Column(db.String(128))
     last_changed = db.Column(db.DateTime)
-    users = db.relationship('User', backref='password_list', lazy='dynamic')
+    users = db.relationship("User", backref="password_list", lazy="dynamic")
 
     def update(self, password_hash):
         self.p5 = self.p4
@@ -368,11 +405,12 @@ class ChangeLog(db.Model):
     """
     A model that contains a list of changes made to a user account.
     """
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    changer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', foreign_keys=[user_id])
-    changer = db.relationship('User', foreign_keys=[changer_id])
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    changer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user = db.relationship("User", foreign_keys=[user_id])
+    changer = db.relationship("User", foreign_keys=[changer_id])
     timestamp = db.Column(db.DateTime)
     old = db.Column(db.String(128))
     new = db.Column(db.String(128))
@@ -383,8 +421,9 @@ class Vacation(db.Model):
     """
     Model that stores vacation requests and status
     """
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     start = db.Column(db.DateTime())
     end = db.Column(db.DateTime())
     approved = db.Column(db.Boolean, default=False)
