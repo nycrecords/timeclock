@@ -204,7 +204,7 @@ def update_user_information(user,
         db.session.commit()
         user.tag_id = tag_input
 
-    if supervisor_id_input is not None and (user.supervisor_id is not None or user.supervisor_id != supervisor_id_input):
+    if (user.supervisor_id != supervisor_id_input) and (supervisor_id_input!=0 or user.supervisor):
         oldsup=User.query.filter_by(id=user.supervisor_id).first()
         sup = User.query.filter_by(id=supervisor_id_input).first()
         change = ChangeLog(changer_id=current_user.id,
