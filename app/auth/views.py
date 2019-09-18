@@ -28,6 +28,8 @@ from ..decorators import admin_required
 from ..email_notification import send_email
 from ..models import User, Role
 from ..utils import InvalidResetToken
+from app.auth.constants import passwords
+
 
 
 @auth.route('/admin_register', methods=['GET', 'POST'])
@@ -103,6 +105,7 @@ def login():
                 db.session.commit()
                 current_app.logger.info('{} successfully logged in'.format(current_user.email))
                 # Check to ensure password isn't outdated
+                print('*************PW CHANGE',current_user.password_list.last_changed)
                 if (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_TILL_EXPIRE:
                     # If user's password has expired (not update in 90 days)
                     current_app.logger.info('{}\'s password hasn\'t been updated in 90 days: account invalidated.'
