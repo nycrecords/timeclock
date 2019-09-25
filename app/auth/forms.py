@@ -1,32 +1,46 @@
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, SubmitField, ValidationError, SelectField, BooleanField
-from wtforms.validators import DataRequired, Length, Email, EqualTo
-
+from wtforms import (
+    StringField,
+    PasswordField,
+    SubmitField,
+    ValidationError,
+    SelectField,
+    BooleanField,
+)
+from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from ..models import User
 from ..utils import tags, divisions, roles
 
 
 class LoginForm(Form):
     """Used for registered users to log into the system."""
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Log In')
+
+    email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Log In")
 
 
 class RegistrationForm(Form):
     """Used to register new users into the system."""
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+
+    email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
     first_name = StringField("First name", validators=[DataRequired()])
     last_name = StringField("Last name", validators=[DataRequired()])
-    division = SelectField('Division', choices=divisions, validators=[DataRequired()])
-    tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
-    password = PasswordField('Password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
-    password2 = PasswordField('Confirm password', validators=[DataRequired()])
-    budget_code = StringField('Budget Code')
-    object_code = StringField('Object Code')
-    object_name = StringField('Object Name')
-    submit = SubmitField('Register')
+    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
+    tag = SelectField("Tag", choices=tags, coerce=int, validators=[DataRequired()])
+    password = PasswordField(
+        "Password",
+        validators=[
+            DataRequired(),
+            EqualTo("password2", message="Passwords must match"),
+            Length(min=8),
+        ],
+    )
+    password2 = PasswordField("Confirm password", validators=[DataRequired()])
+    budget_code = StringField("Budget Code")
+    object_code = StringField("Object Code")
+    object_name = StringField("Object Name")
+    submit = SubmitField("Register")
 
     def validate_email(self, email_field):
         """
@@ -36,7 +50,7 @@ class RegistrationForm(Form):
         :return:
         """
         if User.query.filter_by(email=email_field.data.lower()).first():
-            raise ValidationError('An account with this email address already exists')
+            raise ValidationError("An account with this email address already exists")
         return True
 
     def validate_tag(self, tag_field):
@@ -46,8 +60,8 @@ class RegistrationForm(Form):
         :param tag_field: Field passed in to validate (Tag)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not tag_field.data or tag_field.data == '':
-            raise ValidationError('All users must be tagged')
+        if not tag_field.data or tag_field.data == "":
+            raise ValidationError("All users must be tagged")
         return True
 
     def validate_division(self, div_field):
@@ -57,8 +71,8 @@ class RegistrationForm(Form):
         :param div_field: Field passed in to validate (Division)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not div_field.data or div_field.data == '':
-            raise ValidationError('All users must belong to a division')
+        if not div_field.data or div_field.data == "":
+            raise ValidationError("All users must belong to a division")
         return True
 
     def validate_password(self, password_field):
@@ -69,7 +83,7 @@ class RegistrationForm(Form):
         :return: A validation message if password is not secure.
         """
         if len(password_field.data) < 8:
-            raise ValidationError('Your password must be 8 or more characters')
+            raise ValidationError("Your password must be 8 or more characters")
 
         has_num = False
         has_capital = False
@@ -81,32 +95,36 @@ class RegistrationForm(Form):
                 has_capital = True
 
         if not (has_num or has_capital):
-            raise ValidationError('Passwords must contain at least one number and one capital letter')
+            raise ValidationError(
+                "Passwords must contain at least one number and one capital letter"
+            )
 
         if not has_num:
-            raise ValidationError('Password must contain at least one number')
+            raise ValidationError("Password must contain at least one number")
 
         if not has_capital:
-            raise ValidationError('Password must contain at least one capital letter')
+            raise ValidationError("Password must contain at least one capital letter")
 
 
 class AdminRegistrationForm(Form):
     """Used by admins to register new users into the system."""
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+
+    email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
     first_name = StringField("First name")
     last_name = StringField("Last name")
-    division = SelectField('Division', choices=divisions, validators=[DataRequired()])
-    tag = SelectField('Tag', choices=tags, coerce=int, validators=[DataRequired()])
+    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
+    tag = SelectField("Tag", choices=tags, coerce=int, validators=[DataRequired()])
     # SUPERVISOR EMAIL IS DYNAMICALLY ADDED IN VIEW FUNCTION
-    supervisor_email = SelectField('Supervisor Email', choices=[], coerce=int,
-                                   validators=[DataRequired()])
-    is_supervisor = BooleanField('User is supervisor')
-    # supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
-    role = SelectField('Role', choices=roles, validators=[DataRequired()])
-    budget_code = StringField('Budget Code')
-    object_code = StringField('Object Code')
-    object_name = StringField('Object Name')
-    submit = SubmitField('Register')
+    supervisor_id = SelectField(
+        "Supervisor Email", choices=[], coerce=int, validators=[DataRequired()]
+    )
+    is_supervisor = BooleanField("User is supervisor")
+    # supervisor_id = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
+    role = SelectField("Role", choices=roles, validators=[DataRequired()])
+    budget_code = StringField("Budget Code")
+    object_code = StringField("Object Code")
+    object_name = StringField("Object Name")
+    submit = SubmitField("Register")
 
     def validate_email(self, email_field):
         """
@@ -118,7 +136,7 @@ class AdminRegistrationForm(Form):
         if User.query.filter_by(email=email_field.data.lower()).first():
             # raise ValidationError
             # flash('An account with this email address already exists', 'error')
-            self.email.errors = 'An account with this email address already exists',
+            self.email.errors = ("An account with this email address already exists",)
             return False
         return True
 
@@ -129,10 +147,15 @@ class AdminRegistrationForm(Form):
         :param tag_field: Field passed in to validate (Tag)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not tag_field.data or tag_field.data == '' or int(tag_field.data) < 1 or int(tag_field.data > 7):
+        if (
+            not tag_field.data
+            or tag_field.data == ""
+            or int(tag_field.data) < 1
+            or int(tag_field.data > 7)
+        ):
             # raise ValidationError('All users must be tagged')
             # flash('All users must be tagged', 'error')
-            self.tag.errors = 'All users must have a tag',
+            self.tag.errors = ("All users must have a tag",)
             return False
         return True
 
@@ -143,25 +166,25 @@ class AdminRegistrationForm(Form):
         :param div_field: Field passed in to validate (Division)
         :return: Nothing if check passes; Raise validation error if invalid entry in field.
         """
-        if not div_field.data or div_field.data == '':
+        if not div_field.data or div_field.data == "":
             # raise ValidationError('All users must belong to a division')
             # flash('All users must belong to a division', 'error')
-            self.division.errors = 'All users must belong to a division',
+            self.division.errors = ("All users must belong to a division",)
             return False
         return True
 
-    def validate_supervisor_email(self, email_field):
+    def validate_supervisor_id(self, id_field):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that id used for supervisors exist in the system.
 
-        :param email_field:
+        :param id_field:
         :return:
         """
-        user = User.query.filter_by(id=email_field.data).first()
+        if id_field.data == 0:
+            return True
+        user = User.query.filter_by(id=id_field.data).first()
         if not user:
-            # raise ValidationError('No account with that email exists')
-            # flash('Invalid supervisor email', 'error')
-            self.supervisor_email.errors = 'Invalid supervisor',
+            self.supervisor_id.errors = ("Invalid supervisor",)
             return False
         return True
 
@@ -171,84 +194,113 @@ class AdminRegistrationForm(Form):
             (Email(self.email).__call__(self, self.email))
         except ValidationError:
             # flash("Invalid e-mail address", 'error')
-            self.email.errors = 'Invalid e-mail address',
+            self.email.errors = ("Invalid e-mail address",)
             is_email = False
 
         if self.first_name._value():
             first_name = True
         else:
             first_name = False
-            self.first_name.errors = 'User must have a first name',
+            self.first_name.errors = ("User must have a first name",)
             # flash('User must have a first name', 'error')
 
         if self.last_name._value():
             last_name = True
         else:
             last_name = False
-            self.last_name.errors = 'User must have a last name',
+            self.last_name.errors = ("User must have a last name",)
             # flash('User must have a last name', 'error')
 
         valid_email = self.validate_email(self.email)
         valid_div = self.validate_division(self.division)
         valid_tag = self.validate_tag(self.tag)
-        valid_sup = self.validate_supervisor_email(self.supervisor_email)
+        valid_sup = self.validate_supervisor_id(self.supervisor_id)
 
-        return is_email and valid_email and first_name and last_name and valid_div and valid_tag and valid_sup
+        return (
+            is_email
+            and valid_email
+            and first_name
+            and last_name
+            and valid_div
+            and valid_tag
+            and valid_sup
+        )
 
 
 class ChangePasswordForm(Form):
     """Form for changing password"""
-    old_password = PasswordField('Old password', validators=[DataRequired()])
-    password = PasswordField('New password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match'), Length(min=8)])
-    password2 = PasswordField('Confirm new password', validators=[DataRequired()])
-    submit = SubmitField('Update Password')
+
+    old_password = PasswordField("Old password", validators=[DataRequired()])
+    password = PasswordField(
+        "New password",
+        validators=[
+            DataRequired(),
+            EqualTo("password2", message="Passwords must match"),
+            Length(min=8),
+        ],
+    )
+    password2 = PasswordField("Confirm new password", validators=[DataRequired()])
+    submit = SubmitField("Update Password")
 
 
 class PasswordResetRequestForm(Form):
     """Initial request form for password reset"""
-    email = StringField('Email', validators=[DataRequired(), Length(1, 100),
-                                             Email()])
-    submit = SubmitField('Reset Password')
+
+    email = StringField("Email", validators=[DataRequired(), Length(1, 100), Email()])
+    submit = SubmitField("Reset Password")
 
 
 class PasswordResetForm(Form):
     """Password reset form after email confirmation"""
-    password = PasswordField('New Password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match')])
-    password2 = PasswordField('Confirm password', validators=[DataRequired()])
-    submit = SubmitField('Reset Password')
+
+    password = PasswordField(
+        "New Password",
+        validators=[
+            DataRequired(),
+            EqualTo("password2", message="Passwords must match"),
+        ],
+    )
+    password2 = PasswordField("Confirm password", validators=[DataRequired()])
+    submit = SubmitField("Reset Password")
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data.lower()).first() is None:
-            raise ValidationError('Unknown email address.')
+            raise ValidationError("Unknown email address.")
 
 
 class ChangeUserDataForm(Form):
     """
     Form administrators use to change a User's information.
     """
+
     first_name = StringField("First name")
     last_name = StringField("Last name")
-    division = SelectField(u'Division', choices=divisions, validators=[DataRequired()])
-    tag = SelectField(u'Tag', coerce=int, choices=tags, validators=[DataRequired()])
-    # supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
-    supervisor_email = SelectField('Supervisor Email', choices=[], coerce=int,
-                                   validators=[DataRequired()])
+    division = SelectField(u"Division", choices=divisions, validators=[DataRequired()])
+    tag = SelectField(u"Tag", coerce=int, choices=tags, validators=[DataRequired()])
+    # supervisor_id = StringField("Supervisor Email", validators=[DataRequired()])
+    supervisor_id = SelectField(
+        "Supervisor Email",
+        choices=[(0, "No Supervisor")],
+        default=0,
+        coerce=int,
+        validators=[Optional()],
+    )
     is_supervisor = BooleanField("User is a supervisor")
     is_active = BooleanField("User is active")
-    role = SelectField(u'Role', choices=roles, validators=[DataRequired()])
-    budget_code = StringField('Budget Code')
-    object_code = StringField('Object Code')
-    object_name = StringField('Object Name')
-    submit = SubmitField('Update')
+    role = SelectField(u"Role", choices=roles, validators=[DataRequired()])
+    budget_code = StringField("Budget Code")
+    object_code = StringField("Object Code")
+    object_name = StringField("Object Name")
+    submit = SubmitField("Update")
 
-    def validate_supervisor_email(self, email_field):
+    def validate_supervisor_id(self, id_field):
         """
-        Verifies that e-mails used for supervisors exist in the system.
-        :param email_field: The supervisor's email
+        Verifies that id used for supervisors exist in the system.
+        :param id_field: The supervisor's id
         :return:
         """
-        user = User.query.filter_by(id=email_field.data).first()
+        if id_field.data == 0:
+            return True
+        user = User.query.filter_by(id=id_field.data).first()
         if not user:
-            raise ValidationError('No account with that email exists')
+            raise ValidationError("No account with that id exists")
