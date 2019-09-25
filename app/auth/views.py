@@ -28,6 +28,8 @@ from ..decorators import admin_required
 from ..email_notification import send_email
 from ..models import User, Role
 from ..utils import InvalidResetToken
+from app.auth.constants import passwords
+
 
 
 @auth.route('/admin_register', methods=['GET', 'POST'])
@@ -104,9 +106,8 @@ def login():
                 db.session.add(user)
                 db.session.commit()
                 current_app.logger.info('{} successfully logged in'.format(current_user.email))
-
                 # Check to ensure password isn't outdated
-                if (datetime.today() - current_user.password_list.last_changed).days > 90:
+                if (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_TILL_EXPIRE:
                     # If user's password has expired (not update in 90 days)
                     current_app.logger.info('{}\'s password hasn\'t been updated in 90 days: account invalidated.'
                                             .format(current_user.email))
@@ -117,9 +118,9 @@ def login():
                           category='error')
                     current_app.logger.info('End function login() [VIEW]')
                     return redirect(url_for('auth.change_password'))
-                elif (datetime.today() - current_user.password_list.last_changed).days > 75:
+                elif (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_UNTIL_PW_WARNING:
                     # If user's password is about to expire (not updated in 75 days)
-                    days_to_expire = (datetime.today() - current_user.password_list.last_changed).days
+                    days_to_expire = passwords.DAYS_TILL_EXPIRE-((datetime.today() - current_user.password_list.last_changed).days)
                     flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
