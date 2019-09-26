@@ -338,13 +338,13 @@ def download():
             "did not specify a user".format(current_user.email)
         )
         errors.append("You must specify a user.")
-    if (session["last_date"] - session["first_date"]).days > 15:
+    if (session["last_date"] - session["first_date"]).days > 8:
         current_app.logger.error(
             "User {} tried to generate a timesheet but "
-            "exceeded maximum duration (two weeks)".format(current_user.email)
+            "exceeded maximum duration (one week)".format(current_user.email)
         )
         errors.append(
-            "Maximum timesheet duration is two weeks. " "Please refine your filters"
+            "Maximum timesheet duration is a week. " "Please refine your filters"
         )
 
     events = request.form.getlist(
@@ -419,11 +419,11 @@ def download_invoice():
         # If the time period is over a week, flash an error. We use days > 8
         # because we use a < as opposed to a <= in our query in modules.py
         current_app.logger.error(
-            "User {} tried to generate a timesheet but "
+            "User {} tried to generate an invoice but "
             "exceeded maximum duration (one week)".format(current_user.email)
         )
         errors.append(
-            "Maximum timesheet duration is a week. " "Please refine your filters"
+            "Maximum invoice duration is a week. " "Please refine your filters"
         )
     if errors:
         for error in errors:
