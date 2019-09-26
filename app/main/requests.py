@@ -89,6 +89,7 @@ def get_timepunches_for_review(user_email, filter_by_email=None, status=None):
                 "Tried to filter timepunches from {} but no such account"
                 "exists".format(filter_by_email)
             )
+
     # Filter by status if user provides a status
     if status == "Pending":
         timepunch_query = timepunch_query.filter(Event.pending == True).filter(

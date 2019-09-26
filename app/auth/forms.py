@@ -7,8 +7,7 @@ from wtforms import (
     SelectField,
     BooleanField,
 )
-from wtforms.validators import DataRequired, Length, Email, EqualTo
-
+from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from ..models import User
 from ..utils import tags, divisions, roles
 
@@ -116,11 +115,11 @@ class AdminRegistrationForm(Form):
     division = SelectField("Division", choices=divisions, validators=[DataRequired()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[DataRequired()])
     # SUPERVISOR EMAIL IS DYNAMICALLY ADDED IN VIEW FUNCTION
-    supervisor_email = SelectField(
+    supervisor_id = SelectField(
         "Supervisor Email", choices=[], coerce=int, validators=[DataRequired()]
     )
     is_supervisor = BooleanField("User is supervisor")
-    # supervisor_email = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
+    # supervisor_id = StringField('Supervisor Email', validators=[DataRequired(), Length(1, 64), Email()])
     role = SelectField("Role", choices=roles, validators=[DataRequired()])
     budget_code = StringField("Budget Code")
     object_code = StringField("Object Code")
@@ -174,18 +173,18 @@ class AdminRegistrationForm(Form):
             return False
         return True
 
-    def validate_supervisor_email(self, email_field):
+    def validate_supervisor_id(self, id_field):
         """
-        Verifies that e-mails used for supervisors exist in the system.
+        Verifies that id used for supervisors exist in the system.
 
-        :param email_field:
+        :param id_field:
         :return:
         """
-        user = User.query.filter_by(id=email_field.data).first()
+        if id_field.data == 0:
+            return True
+        user = User.query.filter_by(id=id_field.data).first()
         if not user:
-            # raise ValidationError('No account with that email exists')
-            # flash('Invalid supervisor email', 'error')
-            self.supervisor_email.errors = ("Invalid supervisor",)
+            self.supervisor_id.errors = ("Invalid supervisor",)
             return False
         return True
 
@@ -215,7 +214,7 @@ class AdminRegistrationForm(Form):
         valid_email = self.validate_email(self.email)
         valid_div = self.validate_division(self.division)
         valid_tag = self.validate_tag(self.tag)
-        valid_sup = self.validate_supervisor_email(self.supervisor_email)
+        valid_sup = self.validate_supervisor_id(self.supervisor_id)
 
         return (
             is_email
@@ -278,9 +277,13 @@ class ChangeUserDataForm(Form):
     last_name = StringField("Last name")
     division = SelectField(u"Division", choices=divisions, validators=[DataRequired()])
     tag = SelectField(u"Tag", coerce=int, choices=tags, validators=[DataRequired()])
-    # supervisor_email = StringField("Supervisor Email", validators=[DataRequired()])
-    supervisor_email = SelectField(
-        "Supervisor Email", choices=[], coerce=int, validators=[DataRequired()]
+    # supervisor_id = StringField("Supervisor Email", validators=[DataRequired()])
+    supervisor_id = SelectField(
+        "Supervisor Email",
+        choices=[(0, "No Supervisor")],
+        default=0,
+        coerce=int,
+        validators=[Optional()],
     )
     is_supervisor = BooleanField("User is a supervisor")
     is_active = BooleanField("User is active")
@@ -290,12 +293,14 @@ class ChangeUserDataForm(Form):
     object_name = StringField("Object Name")
     submit = SubmitField("Update")
 
-    def validate_supervisor_email(self, email_field):
+    def validate_supervisor_id(self, id_field):
         """
-        Verifies that e-mails used for supervisors exist in the system.
-        :param email_field: The supervisor's email
+        Verifies that id used for supervisors exist in the system.
+        :param id_field: The supervisor's id
         :return:
         """
-        user = User.query.filter_by(id=email_field.data).first()
+        if id_field.data == 0:
+            return True
+        user = User.query.filter_by(id=id_field.data).first()
         if not user:
-            raise ValidationError("No account with that email exists")
+            raise ValidationError("No account with that id exists")

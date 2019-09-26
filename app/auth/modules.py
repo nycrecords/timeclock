@@ -178,7 +178,7 @@ def update_user_information(
     last_name_input,
     division_input,
     tag_input,
-    supervisor_email_input,
+    supervisor_id_input,
     is_supervisor_input,
     is_active_input,
     role_input,
@@ -193,7 +193,7 @@ def update_user_information(
     :param last_name_input: New last name for user.
     :param division_input: New division for user.
     :param tag_input: New tag for user.
-    :param supervisor_email_input: Email of the user's new supervisor.
+    :param supervisor_id_input: Id of the user's new supervisor.
     :param is_supervisor_input: Whether or not the user is a supervisor
     :return: None
     """
@@ -263,33 +263,23 @@ def update_user_information(
         db.session.add(change)
         db.session.commit()
         user.tag_id = tag_input
-
-    # <None type error when there isn't any supervisor at first>
-    if user.supervisor is None:
-        old_email = None
-    else:
-        old_email = (user.supervisor.email,)
-
-    if (
-        supervisor_email_input
-        and supervisor_email_input != ""
-        and user.supervisor_id != supervisor_email_input
+    if (user.supervisor_id != supervisor_id_input) and (
+        supervisor_id_input != 0 or user.supervisor
     ):
-        sup = User.query.filter_by(id=supervisor_email_input).first()
+        oldsup = User.query.filter_by(id=user.supervisor_id).first()
+        sup = User.query.filter_by(id=supervisor_id_input).first()
         change = ChangeLog(
             changer_id=current_user.id,
             user_id=user.id,
             timestamp=datetime.now(),
             category="SUPERVISOR",
-            old=old_email,
-            new=sup.email,
+            old=None if (user.supervisor_id is None) else oldsup.email,
+            new=None if supervisor_id_input == 0 else sup.email,
         )
         db.session.add(change)
         db.session.commit()
-        sup = User.query.filter_by(id=supervisor_email_input).first()
         user.supervisor = sup
-
-    if is_supervisor_input and (user.is_supervisor != is_supervisor_input):
+    if is_supervisor_input is not None and (user.is_supervisor != is_supervisor_input):
         change = ChangeLog(
             changer_id=current_user.id,
             user_id=user.id,

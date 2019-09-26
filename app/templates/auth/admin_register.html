@@ -22,7 +22,7 @@
                     division: $("#division").val()
                 },
                 success: function (data) {
-                    var sel = $("#supervisor_email");
+                    var sel = $("#supervisor_id");
                     sel.empty();
                     for (var i = 0; i < data.length; i++) {
                         var opt = document.createElement("option");
