@@ -18,7 +18,7 @@ def get_payrate_before_or_after(email_input, start, before_or_after):
     current_app.logger.info(
         "Querying for user with given e-mail: {}".format(email_input)
     )
-    user = User.query.filter_by(email=email_input).first()
+    user = User.query.filter_by(email=email_input.lower()).first()
     current_app.logger.info("Finished querying for user with given e-mail")
     if user:
         current_app.logger.info("User {} was found in database".format(email_input))

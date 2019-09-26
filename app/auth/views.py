@@ -34,6 +34,8 @@ from ..decorators import admin_required
 from ..email_notification import send_email
 from ..models import User, Role
 from ..utils import InvalidResetToken
+from app.auth.constants import passwords
+
 
 
 @auth.route("/admin_register", methods=["GET", "POST"])
@@ -47,7 +49,7 @@ def admin_register():
     """
     current_app.logger.info("Start function admin_register() [VIEW]")
     form = AdminRegistrationForm()
-    form.supervisor_email.choices = [
+    form.supervisor_id.choices = [(0, "No Supervisor")] + [
         (user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()
     ]
     if request.method == "POST" and form.validate_on_submit():
@@ -61,7 +63,7 @@ def admin_register():
             form.role.data,
             form.tag.data,
             form.is_supervisor.data,
-            form.supervisor_email.data,
+            form.supervisor_id.data,
             form.budget_code.data,
             form.object_code.data,
             form.object_name.data,
@@ -101,10 +103,17 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
-        print(user)
-
         if user:
-            if user.login_attempts > 2:
+            if not user.is_active:
+                current_app.logger.info(
+                    "Inactive User {} trying to login".format(current_user)
+                )
+                flash(
+                    "Invalid username or password. Please contact HR for assistance",
+                    category="error",
+                )
+                current_app.logger.info("End function login() [VIEW]")
+            elif user.login_attempts > 2:
                 # Too many invalid attempts
                 current_app.logger.info("{} has been locked out".format(user.email))
                 flash(
@@ -120,14 +129,9 @@ def login():
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
-                current_app.logger.info(
-                    "{} successfully logged in".format(current_user.email)
-                )
-
+                current_app.logger.info('{} successfully logged in'.format(current_user.email))
                 # Check to ensure password isn't outdated
-                if (
-                    datetime.today() - current_user.password_list.last_changed
-                ).days > 90:
+                if (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_TILL_EXPIRE:
                     # If user's password has expired (not update in 90 days)
                     current_app.logger.info(
                         "{}'s password hasn't been updated in 90 days: account invalidated.".format(
@@ -137,31 +141,17 @@ def login():
                     current_user.validated = False
                     db.session.add(current_user)
                     db.session.commit()
-                    flash(
-                        "You haven't changed your password in 90 days. You must re-validate your account",
-                        category="error",
-                    )
-                    current_app.logger.info("End function login() [VIEW]")
-                    return redirect(url_for("auth.change_password"))
-                elif (
-                    datetime.today() - current_user.password_list.last_changed
-                ).days > 75:
+                    flash('You haven\'t changed your password in 90 days. You must re-validate your account',
+                          category='error')
+                    current_app.logger.info('End function login() [VIEW]')
+                    return redirect(url_for('auth.change_password'))
+                elif (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_UNTIL_PW_WARNING:
                     # If user's password is about to expire (not updated in 75 days)
-                    days_to_expire = (
-                        datetime.today() - current_user.password_list.last_changed
-                    ).days
-                    flash(
-                        "Your password will expire in {} days.".format(days_to_expire),
-                        category="warning",
-                    )
-                current_app.logger.error(
-                    "{} is already logged in. Redirecting to main.index".format(
-                        current_user.email
-                    )
-                )
-                current_app.logger.info("End function login() [VIEW]")
-                return redirect(request.args.get("next") or url_for("main.index"))
-
+                    days_to_expire = passwords.DAYS_TILL_EXPIRE-((datetime.today() - current_user.password_list.last_changed).days)
+                    flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
+                current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
+                current_app.logger.info('End function login() [VIEW]')
+                return redirect(request.args.get('next') or url_for('main.index'))
             else:
                 # If the user exists in the database but entered incorrect information
                 current_app.logger.info(
@@ -172,7 +162,8 @@ def login():
                 user.login_attempts += 1
                 db.session.add(user)
                 db.session.commit()
-        flash("Invalid username or password", category="error")
+            if user.is_active:
+                flash("Invalid username or password", category="error")
     current_app.logger.info("End function login() [VIEW]")
     return render_template(
         "auth/login.html", form=form, reset_url=url_for("auth.password_reset_request")
@@ -300,24 +291,13 @@ def password_reset_request():
                 token=token,
                 next=request.args.get("next"),
             )
-
             current_app.logger.info(
                 "Sent password reset instructions to {}".format(form.email.data)
             )
-            flash(
-                "An email with instructions to reset your password has been sent to you.",
-                category="success",
-            )
-        else:
-            # If the user doesn't exist in the database
-            current_app.logger.info(
-                "Requested password reset for e-mail %s but no such account exists"
-                % form.email.data
-            )
-            flash(
-                "An account with this email was not found in the system.",
-                category="error",
-            )
+        flash(
+            "If this account is in the system, an email with instructions to reset your password has been sent to you.",
+            category="success",
+        )
         current_app.logger.info("Redirecting to /auth/login...")
         current_app.logger.info("End function password_reset_request() [VIEW]")
         return redirect(url_for("auth.login"))
@@ -433,14 +413,20 @@ def password_reset(token):
                     return render_template("auth/reset_password.html", form=form)
 
                 else:
-                    # New password didn't meet minimum security criteria
-                    current_app.logger.error(
-                        "Entered invalid new password for {}".format(user.email)
-                    )
-                    flash(
-                        "Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number",
-                        category="error",
-                    )
+                    if not "reset_token" in session:
+                        flash(
+                            "The reset token is timed out. Please generate a new reset token.",
+                            category="error",
+                        )
+                    # Then the token is valid but the new password didn't meet minimum security criteria
+                    else:
+                        current_app.logger.error(
+                            "Entered invalid new password for {}".format(user.email)
+                        )
+                        flash(
+                            "Password must be at least 8 characters with at least 1 Uppercase Letter and 1 Number",
+                            category="error",
+                        )
                     current_app.logger.info("End function password_reset")
                     return render_template("auth/reset_password.html", form=form)
 
@@ -464,7 +450,9 @@ def get_sups():
     """
     choices = []
     if request.args["division"]:
-        choices = get_supervisors_for_division(request.args["division"])
+        choices = [(0, "No Supervisor")] + get_supervisors_for_division(
+            request.args["division"]
+        )
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
         choices = [(user.id, user.email) for u in sups]
@@ -520,9 +508,18 @@ def user_profile(user_id):
     # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     user = User.query.filter_by(id=user_id).first()
     form = ChangeUserDataForm()
-    form.supervisor_email.choices = [
+    list_of_sups = [
         (user.id, user.email) for user in User.query.filter_by(is_supervisor=True).all()
-    ]
+    ] + [(0, "No Supervisor")]
+    if user.supervisor:
+        # If a user has a supervisor, then that supervisor should be selected by default
+        list_of_sups.insert(
+            0,
+            list_of_sups.pop(
+                list_of_sups.index((user.supervisor.id, user.supervisor.email))
+            ),
+        )
+    form.supervisor_id.choices = list_of_sups
     if not user:
         flash("No user with id {} was found".format(user_id), category="error")
         return redirect(url_for("main.user_list_page"))
@@ -536,7 +533,7 @@ def user_profile(user_id):
         return redirect(url_for("main.user_list_page"))
 
     if form.validate_on_submit():
-        if user.email == form.supervisor_email.data:
+        if user.id == form.supervisor_id.data:
             flash(
                 "A user cannot be their own supervisor. Please revise your supervisor "
                 "field.",
@@ -550,7 +547,7 @@ def user_profile(user_id):
                 form.last_name.data,
                 form.division.data,
                 form.tag.data,
-                form.supervisor_email.data,
+                form.supervisor_id.data,
                 form.is_supervisor.data,
                 form.is_active.data,
                 form.role.data,
@@ -569,9 +566,8 @@ def user_profile(user_id):
         form.last_name.data = user.last_name
         form.division.data = user.division
         form.tag.data = user.tag_id
-        form.supervisor_email.data = (
-            user.supervisor.email if user.supervisor else "admin@records.nyc.gov"
-        )
+        form.is_supervisor.data = user.is_supervisor
+        form.supervisor_id.data = user.supervisor.email if user.supervisor else 0
         form.is_active.data = user.is_active
         form.role.data = user.role.name
         form.budget_code.data = user.budget_code
