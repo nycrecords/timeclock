@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db
 from . import login_manager
-from .utils import InvalidResetToken
+from app.utils import InvalidResetToken
 
 
 class Permission:

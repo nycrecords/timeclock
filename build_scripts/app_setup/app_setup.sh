@@ -26,6 +26,8 @@ yum -y install lcms2-devel
 yum -y install libwebp-devel
 yum -y install tcl-devel
 yum -y install tk-devel
+yum -y install xmlsec1-devel
+yum -y install xmlsec1-openssl-devel
 
 # 5. Install Developer Tools
 yum -y groupinstall "Development Tools"

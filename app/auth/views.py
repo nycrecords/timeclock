@@ -9,6 +9,7 @@ from datetime import datetime
 from flask import current_app, jsonify
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
+from app.auth.utils import get_self_url, init_saml_auth, ldap_authentication, prepare_saml_request
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash
 
@@ -80,6 +81,76 @@ def admin_register():
     current_app.logger.info("End function admin_register() [VIEW]")
     return render_template("auth/admin_register.html", form=form)
 
+@auth.route('/saml', methods=['GET', 'POST'])
+def saml():
+    """
+    View function to login users using SAML
+    """
+    req = prepare_saml_request(request)
+    onelogin_saml_auth = init_saml_auth(req)
+
+    if 'sso' in request.args:
+        return redirect(onelogin_saml_auth.login(return_to=url_for('main.index', _external=True)))
+    elif 'sso2' in request.args or 'next' in request.args:
+        return_to = '{host_url}{next}'.format(host_url=request.host_url,
+                                              next='/'.join(request.args['next'].split('/')[1:]))
+        return redirect(onelogin_saml_auth.login(return_to))
+    elif 'slo' in request.args:
+        
+        name_id = None
+        session_index = None
+        if 'samlNameId' in session:
+            name_id = session['samlNameId']
+        if 'samlSessionIndex' in session:
+            session_index = session['samlSessionIndex']
+        return redirect(onelogin_saml_auth.logout(name_id=name_id, session_index=session_index))
+    elif 'acs' in request.args:
+        onelogin_request = prepare_saml_request(request)
+        onelogin_saml_auth = init_saml_auth(onelogin_request)
+        onelogin_saml_auth.process_response()
+        errors = onelogin_saml_auth.get_errors()
+        if len(errors) == 0:
+            session['samlUserdata'] = onelogin_saml_auth.get_attributes()
+            session['samlNameId'] = onelogin_saml_auth.get_nameid()
+            session['samlSessionIndex'] = onelogin_saml_auth.get_session_index()
+            email=session['samlUserdata']['mail'][0]
+            user = User.query.filter_by(email=email.lower()).first()
+            if user is None and email.find("records.nyc.gov") >= 0:     
+                user = User(
+                email=session['samlUserdata']['mail'][0],
+                password="Change4me",
+                first_name=session['samlUserdata']['givenName'][0],
+                last_name=session['samlUserdata']['sn'][0],
+                validated= True
+                )
+                db.session.add(user)
+                db.session.commit()
+                self_url = get_self_url(onelogin_request)
+                login_user(user)
+                return redirect((url_for('main.index')))
+            elif user:
+                self_url = get_self_url(onelogin_request)
+                login_user(user)
+                return redirect((url_for('main.index')))
+            else:
+                flash('Sorry, we couldn\'t find your account. Please send an email to <a href="mailto:appsupport@records.nyc.gov">appsupport@records.nyc.gov</a> for assistance.', category='danger')
+                self_url = get_self_url(onelogin_request)
+                
+            if 'RelayState' in request.form and self_url != request.form['RelayState'] and self_url in request.form[
+                'RelayState']:
+                return redirect(request.form['RelayState'])
+            return redirect(url_for('main.index'))
+    elif 'sls' in request.args:
+        dscb = lambda: session.clear()
+        url = onelogin_saml_auth.process_slo(delete_session_cb=dscb)
+        errors = onelogin_saml_auth.get_errors()
+        if len(errors) == 0: #['invalid_logout_response_signature', 'Signature validation failed. Logout Response rejected']
+            if url is not None:
+                return redirect(url)
+            else:
+                return render_template( "auth/logout.html")
+        logout_user()
+        return render_template( "auth/logout.html")
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -91,7 +162,7 @@ def login():
     current_app.logger.info("Start function login() [VIEW]")
 
     # Redirect to index if already logged in
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and not current_app.config['USE_SAML']:
         current_app.logger.info(
             "{} is already authenticated: redirecting to index".format(
                 current_user.email
@@ -101,7 +172,22 @@ def login():
         return redirect(url_for("main.index"))
 
     form = LoginForm()
-    if form.validate_on_submit():
+    if current_app.config['USE_SAML'] and 'acs' in request.args:
+            onelogin_request = prepare_saml_request(request)
+            onelogin_saml_auth = init_saml_auth(onelogin_request)
+            onelogin_saml_auth.process_response()
+            errors = onelogin_saml_auth.get_errors()
+            not_auth_warn = not onelogin_saml_auth.is_authenticated()
+
+            if len(errors) == 0:
+                session['samlUserdata'] = onelogin_saml_auth.get_attributes()
+                session['samlNameId'] = onelogin_saml_auth.get_nameid()
+                session['samlSessionIndex'] = onelogin_saml_auth.get_session_index()
+
+                user = Users.query.filter_by(email=session['samlUserdata']['mail'][0]).first()
+                authenticated = True
+        
+    elif form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user:
             if not user.is_active:
@@ -165,6 +251,39 @@ def login():
                 db.session.commit()
             if user.is_active:
                 flash("Invalid username or password", category="error")
+    if current_app.config['USE_SAML']:
+        onelogin_request = prepare_saml_request(request)
+
+        onelogin_saml_auth = init_saml_auth(onelogin_request)
+
+        errors = []
+        not_auth_warn = False
+        success_slo = False
+        attributes = False
+        paint_logout = False
+
+        if 'sso' in request.args:
+            return redirect(onelogin_saml_auth.login())
+        elif 'sso2' in request.args:
+            return_to = '{host_url}/attrs'.format(host_url=request.host_url)
+            return redirect(onelogin_saml_auth.login(return_to))
+        elif 'slo' in request.args:
+            name_id = None
+            session_index = None
+            if 'samlNameId' in session:
+                name_id = session['samlNameId']
+            if 'samlSessionIndex' in session:
+                session_index = session['samlSessionIndex']
+            return redirect(onelogin_saml_auth.logout(name_id=name_id, session_index=session_index))
+        elif 'sls' in request.args:
+            dscb = lambda: session.clear()
+            url = onelogin_saml_auth.process_slo(delete_session_cb=dscb)
+            errors = onelogin_saml_auth.get_errors()
+            if len(errors) == 0:
+                if url is not None:
+                    return redirect(url)
+                else:
+                    return redirect(url_for('main.index'))
     current_app.logger.info("End function login() [VIEW]")
     return render_template(
         "auth/login.html", form=form, reset_url=url_for("auth.password_reset_request")
