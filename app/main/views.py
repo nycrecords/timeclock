@@ -376,7 +376,8 @@ def download():
         return redirect(url_for("main." + last_page))
 
     response = make_response(generate_timesheet(events))
-    response.headers["Content-Disposition"] = "attachment; filename='timesheet.pdf"
+    filename = "{date}-{user_email}.pdf".format(date=datetime.now().strftime("%Y-%M-%D-%H-%M"), user_email=current_user.email)
+    response.headers["Content-Disposition"] = "attachment; filename={filename}".format(filename=filename)
     response.mimetype = "application/pdf"
     current_app.logger.info(
         "%s downloaded timesheet for user %s "
