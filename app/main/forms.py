@@ -122,7 +122,7 @@ class UserFilterEventsForm(Form):
 
     last_month = SubmitField("Last Month")
     this_month = SubmitField("This Month")
-    last_2weeks = SubmitField("Biweekly")
+    last_2weeks = SubmitField("Last Two Weeks")
     last_week = SubmitField("Last Week")
     this_week = SubmitField("This Week")
 
