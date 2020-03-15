@@ -6,10 +6,6 @@
 Welcome to NYC Department of Records Timeclock's documentation!
 ===============================================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 =================
 Getting Started
 =================
@@ -31,7 +27,6 @@ Upon your first login you will need to choose a new password. Passwords must be 
 
 .. image:: _static/first_login.png
    :width: 600
-
 
 ==================
 Forgotten Password
@@ -85,10 +80,3 @@ Getting Help
 =================
 
 If you need assistance, please contact submit a ticket to the DORIS IT Service Desk and CC the Application Support team at appsupport at nycrecords dot atlassian dot net.
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

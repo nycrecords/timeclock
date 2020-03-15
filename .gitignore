@@ -9,3 +9,4 @@ venv/*
 Vargrantfile
 .vscode/
 LogFile*
+docs/_build/*
