@@ -688,12 +688,18 @@ def review_timepunch():
     filter_form = FilterTimePunchForm()
     clear_form = ClearForm()
     page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if (
-            not filter_form.email.data
-            or User.query.filter_by(email=filter_form.email.data.lower()).first()
-        ):
-            flash("Successfully filtered", "success")
+        if not filter_form.email.data or user:
+            if not filter_form.email.data:
+                flash(
+                    "Please put an email, if you wish to filter for specific user",
+                    "warning",
+                )
+            elif current_user != user.supervisor:
+                flash("Sorry you are not a supervisor for this account.", "error")
+            else:
+                flash("Successfully filtered", "success")
         else:
             flash("Invalid email", "error")
         # User submits a filter
@@ -840,12 +846,18 @@ def review_vacations():
     filter_form = FilterVacationForm()
     clear_form = ClearForm()
     page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if (
-            not filter_form.email.data
-            or User.query.filter_by(email=filter_form.email.data.lower()).first()
-        ):
-            flash("Successfully filtered", "success")
+        if not filter_form.email.data or user:
+            if not filter_form.email.data:
+                flash(
+                    "Please put an email, if you wish to filter for specific user",
+                    "warning",
+                )
+            elif current_user != user.supervisor:
+                flash("Sorry you are not a supervisor for this account.", "error")
+            else:
+                flash("Successfully filtered", "success")
         else:
             flash("Invalid email", "error")
         # User submits a filter
