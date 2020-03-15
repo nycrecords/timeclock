@@ -30,7 +30,7 @@
             </div>
 
 
-            {% if current_user.is_administrator() %}
+            {% if current_user.is_administrator() or current_user.is_supervisor %}
                 <div class="col-md-8" style="height:300px; overflow: auto">
                     <p>Currently clocked in:</p>
                     <table class="table" style="padding:4px">
@@ -44,12 +44,14 @@
                         </thead>
                         <tbody>
                         {% for user in clocked_in_users %}
+                        {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
                             <tr>
                                 <td>{{ user.division }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>{{ user.first_name }}</td>
                                 <td>{{ user.last_name }}</td>
                             </tr>
+                        {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>

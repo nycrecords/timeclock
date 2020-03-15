@@ -251,7 +251,7 @@ def get_time_period(period="d"):
         m (this month)
         ld (last day i.e. yesterday)
         lw (last week)
-        l2w (last 2 weeks i.e This week and last week)
+        l2w (last 2 weeks i.e last week and the week before)
         lm (last month)
     :return: A two-element array containing a start and end date
     """
@@ -279,7 +279,7 @@ def get_time_period(period="d"):
         end = start + timedelta(days=6)
         interval = [start, end]
     elif period == "l2w":
-        dt = today + relativedelta(weeks=-1)
+        dt = today + relativedelta(weeks=-2)
         start = dt - timedelta(days=dt.weekday())
         end = start + timedelta(days=13)
         interval = [start, end]

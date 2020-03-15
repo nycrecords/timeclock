@@ -263,7 +263,6 @@ def update_user_information(
         db.session.add(change)
         db.session.commit()
         user.tag_id = tag_input
-
     if (user.supervisor_id != supervisor_id_input) and (
         supervisor_id_input != 0 or user.supervisor
     ):
@@ -280,7 +279,6 @@ def update_user_information(
         db.session.add(change)
         db.session.commit()
         user.supervisor = sup
-
     if is_supervisor_input is not None and (user.is_supervisor != is_supervisor_input):
         change = ChangeLog(
             changer_id=current_user.id,

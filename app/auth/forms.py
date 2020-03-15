@@ -7,7 +7,9 @@ from wtforms import (
     SelectField,
     BooleanField,
 )
+
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
+
 from ..models import User
 from ..utils import tags, divisions, roles
 
@@ -49,6 +51,7 @@ class RegistrationForm(Form):
         :param email_field:
         :return:
         """
+
         if User.query.filter_by(email=email_field.data.lower()).first():
             raise ValidationError("An account with this email address already exists")
         return True

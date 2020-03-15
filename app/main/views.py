@@ -176,6 +176,7 @@ def all_history():
         page = 1
 
     addform = AddEventForm()
+    today = datetime.today()
     if addform.validate_on_submit() and addform.add.data:
         if addform.addemail.data.lower() == current_user.email:
             flash("Administrators cannot edit their own clock events", "error")
@@ -185,6 +186,9 @@ def all_history():
         datetime_str = date_string + time_string
         try:
             datetime_obj = datetime.strptime(datetime_str, "%m/%d/%Y %H:%M")
+            if datetime_obj > today:
+                flash("You cannot add a future event", category="error")
+                return redirect(url_for("main.all_history"))
         except ValueError:
             flash(
                 "Please make sure your time input is in the format HH:MM",
@@ -338,13 +342,13 @@ def download():
             "did not specify a user".format(current_user.email)
         )
         errors.append("You must specify a user.")
-    if (session["last_date"] - session["first_date"]).days > 15:
+    if (session["last_date"] - session["first_date"]).days > 8:
         current_app.logger.error(
             "User {} tried to generate a timesheet but "
-            "exceeded maximum duration (two weeks)".format(current_user.email)
+            "exceeded maximum duration (one week)".format(current_user.email)
         )
         errors.append(
-            "Maximum timesheet duration is two weeks. " "Please refine your filters"
+            "Maximum timesheet duration is a week. " "Please refine your filters"
         )
 
     events = request.form.getlist(
@@ -420,11 +424,11 @@ def download_invoice():
         # If the time period is over a week, flash an error. We use days > 8
         # because we use a < as opposed to a <= in our query in modules.py
         current_app.logger.error(
-            "User {} tried to generate a timesheet but "
+            "User {} tried to generate an invoice but "
             "exceeded maximum duration (one week)".format(current_user.email)
         )
         errors.append(
-            "Maximum timesheet duration is a week. " "Please refine your filters"
+            "Maximum invoice duration is a week. " "Please refine your filters"
         )
     if errors:
         for error in errors:
@@ -443,7 +447,6 @@ def download_invoice():
         u = User.query.filter_by(email=current_user.email.lower()).first()
     else:
         u = User.query.filter_by(email=session["email"].lower()).first()
-
     # Check for payrate
     if (
         get_payrate_before_or_after(session["email"], session["first_date"], True)
@@ -581,6 +584,7 @@ def request_timepunch():
     :return: A page users can implement to request the addition of a clock event.
     """
     current_app.logger.info("Start function request_timepunch()")
+    today = datetime.today()
     form = TimePunchForm()
     vacform = RequestVacationForm()
     if form.validate_on_submit() and form.submit.data:
@@ -607,6 +611,9 @@ def request_timepunch():
             datetime_str = date_string + time_string
             try:
                 datetime_obj = datetime.strptime(datetime_str, "%m/%d/%Y %H:%M")
+                if datetime_obj > today:
+                    flash("You cannot request a future time punch", category="error")
+                    return redirect(url_for("main.request_timepunch"))
             except ValueError:
                 flash(
                     "Please make sure your time input is in the format HH:MM",
@@ -641,6 +648,11 @@ def request_timepunch():
             )
             current_app.logger.error(
                 "Does not have a supervisor".format(current_user.email)
+            )
+        elif vacform.vac_start.data > vacform.vac_end.data:
+            flash(
+                "The vacation's start date must be before the vacation's end date",
+                category="error",
             )
         else:
             v = Vacation(
@@ -677,12 +689,18 @@ def review_timepunch():
     filter_form = FilterTimePunchForm()
     clear_form = ClearForm()
     page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if (
-            not filter_form.email.data
-            or User.query.filter_by(email=filter_form.email.data.lower()).first()
-        ):
-            flash("Successfully filtered", "success")
+        if not filter_form.email.data or user:
+            if not filter_form.email.data:
+                flash(
+                    "Please put an email, if you wish to filter for specific user",
+                    "warning",
+                )
+            elif current_user != user.supervisor:
+                flash("Sorry you are not a supervisor for this account.", "error")
+            else:
+                flash("Successfully filtered", "success")
         else:
             flash("Invalid email", "error")
         # User submits a filter
@@ -744,9 +762,9 @@ def user_list_page():
     edit user page
     :return: user_list.html which lists all the users in the application
     """
+
     Session = sessionmaker(bind=db.engine)
     session = Session()
-
     active = eval_request_bool(request.args.get("active", "true"), True)
     nondivision_users = []
     tags = get_all_tags()
@@ -829,12 +847,18 @@ def review_vacations():
     filter_form = FilterVacationForm()
     clear_form = ClearForm()
     page = request.args.get("page", 1, type=int)
+    user = User.query.filter_by(email=filter_form.email.data).first()
     if filter_form.validate_on_submit and filter_form.filter.data:
-        if (
-            not filter_form.email.data
-            or User.query.filter_by(email=filter_form.email.data.lower()).first()
-        ):
-            flash("Successfully filtered", "success")
+        if not filter_form.email.data or user:
+            if not filter_form.email.data:
+                flash(
+                    "Please put an email, if you wish to filter for specific user",
+                    "warning",
+                )
+            elif current_user != user.supervisor:
+                flash("Sorry you are not a supervisor for this account.", "error")
+            else:
+                flash("Successfully filtered", "success")
         else:
             flash("Invalid email", "error")
         # User submits a filter
