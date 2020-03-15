@@ -57,7 +57,10 @@ WeasyPrint = "*"
 Werkzeug = "*"
 WTForms = "*"
 psycopg2-binary = "*"
-black = "*"
+sphinx = "*"
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
