@@ -52,7 +52,6 @@ def generate_employee_info(canvas_field):
         u = User.query.filter_by(email=current_user.email.lower()).first()
     else:
         u = User.query.filter_by(email=session["email"].lower()).first()
-
     first_date = session["first_date"]
     last_date = session["last_date"]
 

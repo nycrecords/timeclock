@@ -152,7 +152,6 @@ def login():
                 current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
                 current_app.logger.info('End function login() [VIEW]')
                 return redirect(request.args.get('next') or url_for('main.index'))
-
             else:
                 # If the user exists in the database but entered incorrect information
                 current_app.logger.info(
