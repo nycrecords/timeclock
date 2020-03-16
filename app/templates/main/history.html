@@ -21,14 +21,16 @@
                 <input type="submit" value="Generate Timesheet" class="btn btn-success">
             </form>
         </div>
-        <div style="float:right; margin-right:5px">
-            <form action="/download_invoice" method="POST">
-                {% for event in generation_events %}
-                    <input type="hidden" name="event" value="{{ event }}">
-                {% endfor %}
-                <input type="submit" value="Generate Invoice" class="btn btn-success">
-            </form>
-        </div>
+        {% if current_user.is_contractor %}
+            <div style="float:right; margin-right:5px">
+                <form action="/download_invoice" method="POST">
+                    {% for event in generation_events %}
+                        <input type="hidden" name="event" value="{{ event }}">
+                    {% endfor %}
+                    <input type="submit" value="Generate Invoice" class="btn btn-success">
+                </form>
+            </div>
+        {% endif %}
     </div>
 
     {#  Collapsible form for filter options  #}

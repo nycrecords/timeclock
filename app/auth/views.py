@@ -450,12 +450,14 @@ def get_sups():
     """
     choices = []
     if request.args["division"]:
-        choices = [(0, "No Supervisor")] + get_supervisors_for_division(
+        choices = get_supervisors_for_division(
             request.args["division"]
         )
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
         choices = [(user.id, user.email) for u in sups]
+
+    choices.insert(0, (0, "No Supervisor"))
     return jsonify(choices)
 
 
