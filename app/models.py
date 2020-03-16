@@ -197,6 +197,10 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    @property
+    def is_contractor(self):
+        return self.tag_id == Tag.query.filter_by(name='Contractor').one().id
+
     def verify_password(self, password):
         """
         Checks user-entered passwords against hashes stored in the database.
