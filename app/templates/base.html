@@ -33,6 +33,8 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
+                    <li><a href="https://records-timeclock.readthedocs.io/en/latest/" target="_blank"
+                           style="color:white">Instructions</a></li>
                     {% if current_user.is_authenticated %}
                         {% if current_user.is_administrator() %}
                             <li>
