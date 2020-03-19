@@ -199,7 +199,7 @@ class User(UserMixin, db.Model):
 
     @property
     def is_contractor(self):
-        return self.tag_id == Tag.query.filter_by(name='Contractor').one().id
+        return self.tag_id == Tag.query.filter_by(name="Contractor").one().id
 
     def verify_password(self, password):
         """
