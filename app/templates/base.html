@@ -48,8 +48,18 @@
                                 </li>
                                 <li>
                                     <a href="{{ url_for('static', filename="files/DORIS Remote Access Instructions.pdf") }}"
-                                       target="_blank">DORIS Remote Access Instructions</a></li>
+                                       target="_blank">Remote Access Instructions</a></li>
                                 </li>
+                                {% if current_user.is_authenticated %}
+                                <li>
+                                    <a href="{{ url_for('static', filename="files/DORIS VM Quick Reference.pdf") }}"
+                                       target="_blank">Voicemail Quick Reference Guide</a></li>
+                                </li>
+                                <li>
+                                    <a href="{{ url_for('static', filename="files/DORIS - Guidelines for Teleworking Employees.pdf") }}"
+                                       target="_blank">Guidelines for Teleworking </a></li>
+                                </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </li>
