@@ -67,6 +67,11 @@ def create_app(config_name):  # App Factory
         handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
     login_manager.init_app(app)
+    
+    if app.config['USE_SAML']:
+        login_manager.login_view = 'auth.saml'
+    else:
+        login_manager.login_view = 'auth.login'
 
     from .main import main as main_blueprint
 

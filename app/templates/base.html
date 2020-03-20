@@ -93,10 +93,19 @@
                             </div>
                         </li>
 
-                        <li><a href="{{ url_for('auth.change_password') }}" style="color:white">Change Password</a></li>
-                        <li><a href="{{ url_for('auth.logout') }}" style="color:white">Sign Out</a></li>
+                        
+                        {% if config['USE_SAML'] %}
+                            <li><a href="{{ url_for('auth.saml') }}?slo" style="color:white">Sign Out</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('auth.change_password') }}" style="color:white">Change Password</a></li>
+                            <li><a href="{{ url_for('auth.logout') }}" style="color:white">Sign Out</a></li>
+                        {% endif %}
+                    {% else %}
+                    {% if config['USE_SAML'] %}
+                    <li><a href="{{ url_for('auth.saml') }}?sso" style="color:white">Sign In</a></li>
                     {% else %}
                         <li><a href="{{ url_for('auth.login') }}" style="color:white">Sign In</a></li>
+                    {% endif %}
                     {% endif %}
                 </ul>
             </div>

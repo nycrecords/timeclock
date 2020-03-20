@@ -15,7 +15,9 @@ class Config:
     WTF_CSRF_ENABLED = True
     ADMIN = os.environ.get('ADMIN') or 'admin@records.nyc.gov'
     EMAIL_DOMAIN = 'records.nyc.gov'
-
+    USE_SAML = os.environ.get('USE_SAML') == "True"
+    SAML_PATH = os.environ.get('SAML_PATH') or None
+    
     @staticmethod
     def init_app(app):
         pass

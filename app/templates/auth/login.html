@@ -4,6 +4,10 @@
 {% block title %}TimeClock - Login{% endblock %}
 
 {% block page_content %}
+{% if config['USE_SAML'] %}
+<meta http-equiv="Refresh" content="0; url=saml?sso" />
+
+{% else %}
     <div class="page-header">
         <h1 style="font-family:'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">Login</h1>
     </div>
@@ -11,4 +15,5 @@
         {{ wtf.quick_form(form) }}
         <a href="{{ reset_url }}" style="float:right">Forgot your password?</a>
     </div>
+{% endif %}
 {% endblock %}
