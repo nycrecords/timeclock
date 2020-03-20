@@ -36,6 +36,7 @@
                 <th>Division</th>
                 <th>Tag</th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -57,6 +58,7 @@
                         <td>None</td>
                     {% endif %}
                     <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a></td>
+                    <td><a class="btn btn-info" style="font-size:12px" href="{{ url_for('auth.admin_reset', user_id=user.id) }}">Reset</a></td>
                 </tr>
                 {% endfor %}
             {% endif %}
@@ -77,6 +79,7 @@
                     <td>None</td>
                 {% endif %}
                 <td><a class="btn btn-success" style="font-size:12px" href="{{ url_for('auth.user_profile', user_id=user.id) }}">Edit</a>
+                <td><a class="btn btn-info" style="font-size:12px" href="{{ url_for('auth.admin_reset', user_id=user.id) }}">Reset</a></td>
                 </td>
             </tr>
             {% endfor %}

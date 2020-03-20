@@ -608,3 +608,34 @@ def user_profile(user_id):
         changes=changes,
         pagination=pagination,
     )
+@auth.route("/user/reset/<user_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_reset(user_id):
+    """
+    Generates a reset password page for admins to reset user's password.
+    :param username: The username of the user whose password is edited.
+    :return: HTML page to reset user's password.
+    """
+    current_app.logger.info("Start function admin_reset() for user {}".format(user_id))
+    user = User.query.filter_by(id=user_id).first()
+    form = PasswordResetForm()
+    if not user:
+        flash("No user with id {} was found".format(user_id), category="error")
+        return redirect(url_for("main.user_list_page"))
+    if form.validate_on_submit():
+        user.password_list.update(current_user.password_hash)
+        user.password = form.password.data
+        user.validated = True
+        db.session.add(user)
+        db.session.commit()
+        current_app.logger.info(
+            "{} changed their password.".format(user.email)
+        )
+        flash("{} password has been updated.".format(
+                user.email)
+            ,category="success")
+        return render_template("auth/reset_password.html", form=form)
+    else :
+        return render_template("auth/reset_password.html", form=form)
+
