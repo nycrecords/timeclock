@@ -10,8 +10,8 @@ from wtforms import (
 
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 
-from ..models import User
-from ..utils import tags, divisions, roles
+from app.models import User
+from app.utils import tags, divisions, roles
 
 
 class LoginForm(Form):

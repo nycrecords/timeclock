@@ -13,10 +13,10 @@ from flask_login import current_user
 from werkzeug.security import check_password_hash
 from datetime import datetime
 
-from .. import db
-from ..email_notification import send_email
-from ..models import User, Role, ChangeLog
-from ..utils import tags
+from app import db
+from app.email_notification import send_email
+from app.models import User, Role, ChangeLog
+from app.utils import tags
 
 
 def check_password_requirements(email, old_password, password, password_confirmation):

@@ -2,7 +2,7 @@ from flask import Blueprint, session
 
 main = Blueprint("main", __name__)
 
-from . import views, errors
+from app.main import views, errors
 from app.models import Permission
 
 

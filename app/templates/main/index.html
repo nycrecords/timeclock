@@ -5,15 +5,11 @@
 
 {% block page_content %}
     {% if current_user.is_authenticated %}
-        {% if current_user.is_administrator() %}
-            <span style="float:right">
-                            {% include 'includes/export_data_button.html' %}
-                        </span>
-        {% endif %}
-        <p>Welcome, <br><br>Name: {{ current_user.first_name }} {{ current_user.last_name }}</p>
-        <p>Email: {{ current_user.email }}</p>
-        <div class="row" style="padding-bottom:10px">
+        <div class="row">
             <div class="col-md-4" style="height:300px">
+                <p>Welcome, <br><br>Name: {{ current_user.first_name }} {{ current_user.last_name }}</p>
+                <p>Email: {{ current_user.email }}</p>
+
                 <div>
                     {{ wtf.quick_form(form) }}
                 </div>
@@ -26,40 +22,70 @@
                         {% endif %}
                     {% endif %}
                 </div>
-
             </div>
-
-
-            {% if current_user.is_administrator() or current_user.is_supervisor %}
-                <div class="col-md-8" style="height:300px; overflow: auto">
-                    <p>Currently clocked in:</p>
-                    <table class="table" style="padding:4px">
-                        <thead>
-                        <tr>
-                            <th>Division</th>
-                            <th>Email</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for user in clocked_in_users %}
-                        {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
+            <div class="col-md-8">
+                <div class="row">
+                    <h1>IT Support Instructions</h1>
+                    <p>For assistance with IT Support please call (718) 403-8888 to open a ticket with the Citywide
+                        Service Desk. Once you have received your ticket number, please send it via email to <a
+                                href="mailto:itsupport@records.nyc.gov">itsupport@records.nyc.gov</a>.</p>
+                </div>
+                <div class="row">
+                    <h1>Password Reset Procedures</h1>
+                    <p>In order to get help with resetting your CSC domain password (for access to Outlook, Teams, and
+                        OneDrive) please follow either of the steps below in the order of priority</p>
+                    <p>Call either Mir Mohammad at (212) 788-8606, Praveen Panchal at (212) 341-6023 or Joel Castillo at
+                        (212) 788-8657</p>
+                    <p>Email <a href="mailto:itsupport@records.nyc.gov">itsupport@records.nyc.gov</a> (if you have
+                        access to email other than DORIS email)</p>
+                    <p>Contact any staff member within DORIS to send an email or call one of the phone numbers in step 1
+                        on your behalf (this is the least preferred step due to security). We will call you back to
+                        verify your identity</p>
+                    <p>For help resetting your password for Vital Records Printing, ArchivesSpace, ePayments, and
+                        TimeClock please email <a
+                                href="mailto:appsupport@records.nyc.gov">appsupport@records.nyc.gov</a></p>
+                    <p>For help resetting your CityTime or NYCAPS password please email Naomi Pacheco
+                        (<a href="mailto:napacheco@records.nyc.gov">napacheco@records.nyc.gov</a>) and Julie Chau (<a
+                                href="mailto:wchau@records.nyc.gov">wchau@records.nyc.gov</a>)</p>
+                </div>
+                <div class="row">
+                    {% if current_user.is_administrator() %}
+                        <span style="float:right">
+                            {% include 'includes/export_data_button.html' %}
+                        </span>
+                    {% endif %}
+                </div>
+                {% if current_user.is_administrator() or current_user.is_supervisor %}
+                    <div class="row">
+                        <p>Currently clocked in:</p>
+                        <table class="table" style="padding:4px">
+                            <thead>
                             <tr>
-                                <td>{{ user.division }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.first_name }}</td>
-                                <td>{{ user.last_name }}</td>
+                                <th>Division</th>
+                                <th>Email</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
                             </tr>
-                        {% endif %}
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                </div>
-                <hr>
+                            </thead>
+                            <tbody>
+                            {% for user in clocked_in_users %}
+                                {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
+                                    <tr>
+                                        <td>{{ user.division }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.first_name }}</td>
+                                        <td>{{ user.last_name }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    </div>
+                    <hr>
 
-            {% endif %}
+                {% endif %}
     {% endif %}
 
 
