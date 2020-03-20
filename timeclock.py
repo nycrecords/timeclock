@@ -22,6 +22,8 @@ def make_shell_context():
         Password=Password,
         ChangeLog=ChangeLog,
         Vacation=Vacation,
+        Role=Role,
+        Tag=Tag,
     )
 
 
