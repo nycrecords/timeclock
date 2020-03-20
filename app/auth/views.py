@@ -597,62 +597,29 @@ def user_profile(user_id):
 @admin_required
 def admin_reset(user_id):
     """
-    Generates an editable user profile page for admins.
-    :param username: The username of the user whose page is viewed/edited.
-    :return: HTML page containing user information and a form to edit it.
+    Generates a reset password page for admins to reset user's password.
+    :param username: The username of the user whose password is edited.
+    :return: HTML page to reset user's password.
     """
     current_app.logger.info("Start function admin_reset() for user {}".format(user_id))
-    # Usernames are everything in the email before the @ symbol
-    # i.e. for sdhillon@records.nyc.gov, username is sdhillon
     user = User.query.filter_by(id=user_id).first()
     form = PasswordResetForm()
     if not user:
         flash("No user with id {} was found".format(user_id), category="error")
         return redirect(url_for("main.user_list_page"))
     if form.validate_on_submit():
-        print("Hello1")
-        if (
-            check_password_hash(
-                pwhash=user.password_list.p1, password=form.password.data
-            )
-            or check_password_hash(
-                pwhash=user.password_list.p2, password=form.password.data
-            )
-            or check_password_hash(
-                pwhash=user.password_list.p3, password=form.password.data
-            )
-            or check_password_hash(
-                pwhash=user.password_list.p4, password=form.password.data
-            )
-            or check_password_hash(
-                pwhash=user.password_list.p5, password=form.password.data
-            )
-        ):
-            print("hi")
-            # If user tries to set password to one of last five passwords, flash an error and reset the form
-            current_app.logger.error(
-                "{} tried to change password. Failed: Used old password.".format(
-                    user.email
-                )
-            )
-            flash(
-                "Your password cannot be the same as the last 5 passwords",
-                category="error",
-            )
-            return render_template("auth/reset_password.html", form=form)
-        else:
-            user.password_list.update(current_user.password_hash)
-            user.password = form.password.data
-            user.validated = True
-            db.session.add(user)
-            db.session.commit()
-            current_app.logger.info(
-                "{} changed their password.".format(user.email)
-            )
-            flash("{} password has been updated.".format(
-                    user.email)
-                ,category="success")
-            return render_template("auth/reset_password.html", form=form)
+        user.password_list.update(current_user.password_hash)
+        user.password = form.password.data
+        user.validated = True
+        db.session.add(user)
+        db.session.commit()
+        current_app.logger.info(
+            "{} changed their password.".format(user.email)
+        )
+        flash("{} password has been updated.".format(
+                user.email)
+            ,category="success")
+        return render_template("auth/reset_password.html", form=form)
     else :
         return render_template("auth/reset_password.html", form=form)
 
