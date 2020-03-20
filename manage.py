@@ -112,7 +112,7 @@ def create_users():
             division=divisions[faker.random_int(0, 9)],
             role=Role.query.filter_by(name='User').first(),
             # tag_id=tags[faker.random_int(0,7)]
-            tag_id = 1,
+            tag_id = 0,
             is_supervisor=False
         )
         db.session.add(u)
