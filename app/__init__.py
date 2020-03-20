@@ -25,8 +25,8 @@ db = SQLAlchemy()
 
 login_manager = LoginManager()
 login_manager.session_protection = (
-    "strong"
-)  # strong: track IP address and browser agent
+    "strong"  # strong: track IP address and browser agent
+)
 login_manager.login_view = "auth.login"
 
 

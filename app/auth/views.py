@@ -37,7 +37,6 @@ from ..utils import InvalidResetToken
 from app.auth.constants import passwords
 
 
-
 @auth.route("/admin_register", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -129,9 +128,13 @@ def login():
                 user.login_attempts = 0
                 db.session.add(user)
                 db.session.commit()
-                current_app.logger.info('{} successfully logged in'.format(current_user.email))
+                current_app.logger.info(
+                    "{} successfully logged in".format(current_user.email)
+                )
                 # Check to ensure password isn't outdated
-                if (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_TILL_EXPIRE:
+                if (
+                    datetime.today() - current_user.password_list.last_changed
+                ).days > passwords.DAYS_TILL_EXPIRE:
                     # If user's password has expired (not update in 90 days)
                     current_app.logger.info(
                         "{}'s password hasn't been updated in 90 days: account invalidated.".format(
@@ -141,17 +144,32 @@ def login():
                     current_user.validated = False
                     db.session.add(current_user)
                     db.session.commit()
-                    flash('You haven\'t changed your password in 90 days. You must re-validate your account',
-                          category='error')
-                    current_app.logger.info('End function login() [VIEW]')
-                    return redirect(url_for('auth.change_password'))
-                elif (datetime.today() - current_user.password_list.last_changed).days > passwords.DAYS_UNTIL_PW_WARNING:
+                    flash(
+                        "You haven't changed your password in 90 days. You must re-validate your account",
+                        category="error",
+                    )
+                    current_app.logger.info("End function login() [VIEW]")
+                    return redirect(url_for("auth.change_password"))
+                elif (
+                    datetime.today() - current_user.password_list.last_changed
+                ).days > passwords.DAYS_UNTIL_PW_WARNING:
                     # If user's password is about to expire (not updated in 75 days)
-                    days_to_expire = passwords.DAYS_TILL_EXPIRE-((datetime.today() - current_user.password_list.last_changed).days)
-                    flash('Your password will expire in {} days.'.format(days_to_expire), category='warning')
-                current_app.logger.error('{} is already logged in. Redirecting to main.index'.format(current_user.email))
-                current_app.logger.info('End function login() [VIEW]')
-                return redirect(request.args.get('next') or url_for('main.index'))
+                    days_to_expire = passwords.DAYS_TILL_EXPIRE - (
+                        (
+                            datetime.today() - current_user.password_list.last_changed
+                        ).days
+                    )
+                    flash(
+                        "Your password will expire in {} days.".format(days_to_expire),
+                        category="warning",
+                    )
+                current_app.logger.error(
+                    "{} is already logged in. Redirecting to main.index".format(
+                        current_user.email
+                    )
+                )
+                current_app.logger.info("End function login() [VIEW]")
+                return redirect(request.args.get("next") or url_for("main.index"))
             else:
                 # If the user exists in the database but entered incorrect information
                 current_app.logger.info(
@@ -450,9 +468,7 @@ def get_sups():
     """
     choices = []
     if request.args["division"]:
-        choices = get_supervisors_for_division(
-            request.args["division"]
-        )
+        choices = get_supervisors_for_division(request.args["division"])
     if not choices:
         sups = User.query.filter_by(is_supervisor=True).all()
         choices = [(user.id, user.email) for u in sups]
@@ -592,3 +608,34 @@ def user_profile(user_id):
         changes=changes,
         pagination=pagination,
     )
+@auth.route("/user/reset/<user_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_reset(user_id):
+    """
+    Generates a reset password page for admins to reset user's password.
+    :param username: The username of the user whose password is edited.
+    :return: HTML page to reset user's password.
+    """
+    current_app.logger.info("Start function admin_reset() for user {}".format(user_id))
+    user = User.query.filter_by(id=user_id).first()
+    form = PasswordResetForm()
+    if not user:
+        flash("No user with id {} was found".format(user_id), category="error")
+        return redirect(url_for("main.user_list_page"))
+    if form.validate_on_submit():
+        user.password_list.update(current_user.password_hash)
+        user.password = form.password.data
+        user.validated = True
+        db.session.add(user)
+        db.session.commit()
+        current_app.logger.info(
+            "{} changed their password.".format(user.email)
+        )
+        flash("{} password has been updated.".format(
+                user.email)
+            ,category="success")
+        return render_template("auth/reset_password.html", form=form)
+    else :
+        return render_template("auth/reset_password.html", form=form)
+

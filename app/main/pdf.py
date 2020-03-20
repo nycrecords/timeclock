@@ -7,7 +7,7 @@ from flask import session, current_app
 from flask_login import current_user
 from reportlab.lib.pagesizes import letter
 
-from ..models import User
+from app.models import User
 
 # Global: Set width and length to values corresponding to normal paper size
 width, length = letter

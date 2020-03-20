@@ -6,9 +6,9 @@ from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from . import db
-from . import login_manager
-from .utils import InvalidResetToken
+from app import db
+from app import login_manager
+from app.utils import InvalidResetToken
 
 
 class Permission:
@@ -199,7 +199,7 @@ class User(UserMixin, db.Model):
 
     @property
     def is_contractor(self):
-        return self.tag_id == Tag.query.filter_by(name='Contractor').one().id
+        return self.tag_id == Tag.query.filter_by(name="Contractor").one().id
 
     def verify_password(self, password):
         """

@@ -33,8 +33,37 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="https://records-timeclock.readthedocs.io/en/latest/" target="_blank"
-                           style="color:white">Instructions</a></li>
+                    <li>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button"
+                                    id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                                Telework Instructions
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                                <li><a href="https://records-timeclock.readthedocs.io/en/latest/" target="_blank">TimeClock
+                                    Help</a></li>
+                                </li>
+                                <li>
+                                    <a href="{{ url_for('static', filename="files/DORIS Remote Access Instructions.pdf") }}"
+                                       target="_blank">Remote Access Instructions</a></li>
+                                </li>
+                                {% if current_user.is_authenticated %}
+                                <li>
+                                    <a href="{{ url_for('static', filename="files/DORIS VM Quick Reference.pdf") }}"
+                                       target="_blank">Voicemail Quick Reference Guide</a></li>
+                                </li>
+                                <li>
+                                    <a href="{{ url_for('static', filename="files/DORIS - Guidelines for Teleworking Employees.pdf") }}"
+                                       target="_blank">Guidelines for Teleworking </a></li>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </li>
+
                     {% if current_user.is_authenticated %}
                         {% if current_user.is_administrator() %}
                             <li>
@@ -84,11 +113,12 @@
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="history-dropdown">
-                                    <li><a href="{{ url_for('main.request_timepunch') }}">Request Timepunch/Vacation</a></li>
-                                        {% if current_user.is_supervisor %}
-                                            <li><a href="{{ url_for('main.review_timepunch') }}">Review Timepunches</a></li>
-                                            <li><a href="{{ url_for('main.review_vacations') }}">Review Vacations</a></li>
-                                        {% endif %}
+                                    <li><a href="{{ url_for('main.request_timepunch') }}">Request Timepunch/Vacation</a>
+                                    </li>
+                                    {% if current_user.is_supervisor %}
+                                        <li><a href="{{ url_for('main.review_timepunch') }}">Review Timepunches</a></li>
+                                        <li><a href="{{ url_for('main.review_vacations') }}">Review Vacations</a></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </li>
