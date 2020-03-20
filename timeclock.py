@@ -4,7 +4,7 @@ import click
 from flask_migrate import Migrate
 
 from app import create_app, db
-from app.models import User, Permission, Event, Pay, Password, ChangeLog, Vacation
+from app.models import User, Permission, Event, Pay, Password, ChangeLog, Vacation, Role, Tag
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app, db)
@@ -46,7 +46,9 @@ def db_setup():
 def reset_db():
     """Reset the database."""
     db.drop_all()
-    db_setup()
+    db.create_all()
+    Role.insert_roles()
+    Tag.insert_tags()
 
 
 @app.cli.command()
@@ -56,7 +58,7 @@ def setup_roles():
     user = Role(name="User", permissions=0x01, id=1)
     moderator = Role(name="Moderator", permissions=0x80, id=2)
     administrator = Role(name="Administrator", permissions=0xFF, id=3)
-    db.session.add(u)
-    db.session.add(m)
-    db.session.add(a)
+    db.session.add(user)
+    db.session.add(moderator)
+    db.session.add(administrator)
     db.session.commit()
