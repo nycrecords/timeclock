@@ -10,6 +10,9 @@ from app import create_app, db
 from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog, Vacation
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
+from faker import Faker 
+from app.auth.modules import create_user
+from app.utils import divisions, roles, tags 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
@@ -54,6 +57,100 @@ def set_roles():
     db.session.add(m)
     db.session.add(a)
     db.session.commit()
+
+@manager.command
+def create_users():
+    # Administrator
+    faker = Faker()
+    fname = faker.first_name()
+    lname = faker.last_name()
+    u = User(
+        email=fname[0]+lname+'records.nyc.gov',
+        first_name=fname,
+        last_name=lname,
+        password='Change4me',
+        division=divisions[faker.random_int(0, 9)],
+        role=Role.query.filter_by(name='Administrator').first(),
+        # tag_id=tags[faker.random_int(0,7)]
+        tag_id = None,
+        is_supervisor=True
+    )
+    db.session.add(u)
+    db.session.commit()
+    u.password_list.update(u.password_hash)
+
+    #Supervisor 
+    faker = Faker()
+    fname = faker.first_name()
+    lname = faker.last_name()
+    u = User(
+        email=fname[0]+lname+'records.nyc.gov',
+        first_name=lname,
+        last_name=lname,
+        password='Change4me',
+        division=divisions[faker.random_int(0, 9)],
+        role=Role.query.filter_by(name='User').first(),
+        # tag_id=tags[faker.random_int(0,7)]
+        tag_id = None,
+        is_supervisor=True
+    )
+    db.session.add(u)
+    db.session.commit()
+    u.password_list.update(u.password_hash)
+    
+
+    # Users
+    for i in range(10):
+       
+        faker = Faker()
+        fname = faker.first_name()
+        lname = faker.last_name()
+        u = User(
+            email=fname[0]+lname+'records.nyc.gov',
+            first_name=lname,
+            last_name=lname,
+            password='Change4me',
+            division=divisions[faker.random_int(0, 9)],
+            role=Role.query.filter_by(name='User').first(),
+            # tag_id=tags[faker.random_int(0,7)]
+            tag_id = None,
+            is_supervisor=False
+        )
+        db.session.add(u)
+        db.session.commit()
+        u.password_list.update(u.password_hash)
+
+
+    #Supervisor 
+    # faker = Faker()
+    # fname = faker.first_name()
+    # lname = faker.last_name()
+    # create_user(
+    #         fname[0]+lname+'records.nyc.gov',
+    #         'Change4me',
+    #         faker.first_name(),
+    #         faker.last_name(),
+    #         divisions[faker.random_int(0, 9)],
+    #         'User',
+    #         None,
+    #         True,
+    #         1)
+# Users
+    # for i in range(10):
+    #     faker = Faker()
+    #     fname = faker.first_name()
+    #     lname = faker.last_name()
+    #     create_user(
+    #         fname[0]+lname+'records.nyc.gov',
+    #         'Change4me',
+    #         faker.first_name(),
+    #         faker.last_name(),
+    #         divisions[faker.random_int(0, 9)],
+    #         'User',
+    #         None,
+    #         False,
+    #         1
+    #     )
 
 if __name__ == '__main__':
     manager.run()
