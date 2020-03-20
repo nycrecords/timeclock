@@ -11,7 +11,7 @@ from app.models import User, Role, Event, Pay, Tag, Password, ChangeLog, Vacatio
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from faker import Faker 
-from app.auth.modules import create_user
+# from app.auth.modules import create_user
 from app.utils import divisions, roles, tags 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -97,7 +97,7 @@ def create_users():
     db.session.add(u)
     db.session.commit()
     u.password_list.update(u.password_hash)
-    
+
 
     # Users
     for i in range(10):
