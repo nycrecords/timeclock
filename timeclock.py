@@ -73,57 +73,65 @@ def create_users():
     faker = Faker()
     fname = faker.first_name()
     lname = faker.last_name()
+    tag_id = tags[faker.random_int(1, len(tags)-1)][0]
     u = User(
-        email=fname[0].lower()+lname.lower()+'@records.nyc.gov',
+        email="{first_initial}{last_name}{email_domain}".format(
+            first_initial=fname[0].lower(),
+            last_name=lname.lower(),
+            email_domain="@"+app.config["EMAIL_DOMAIN"],
+        ),
         first_name=fname,
         last_name=lname,
-        password='Change4me',
-        division=divisions[faker.random_int(0, 9)],
-        role=Role.query.filter_by(name='Administrator').first(),
-        # tag_id=tags[faker.random_int(0,7)]
-        tag_id = None,
-        is_supervisor=True
+        password="Change4me",
+        division=divisions[faker.random_int(0, len(divisions)-1)][0],
+        role=Role.query.filter_by(name="Administrator").first(),
+        tag_id=tag_id,
+        is_supervisor=True,
     )
     db.session.add(u)
     db.session.commit()
     u.password_list.update(u.password_hash)
-
-    #Supervisor 
+    # Supervisor
     faker = Faker()
     fname = faker.first_name()
     lname = faker.last_name()
+    tag_id = tags[faker.random_int(1, len(tags)-1)][0]
     u = User(
-        email=fname[0].lower()+lname.lower()+'@records.nyc.gov',
+        email="{first_initial}{last_name}{email_domain}".format(
+            first_initial=fname[0].lower(),
+            last_name=lname.lower(),
+            email_domain="@"+app.config["EMAIL_DOMAIN"],
+        ),
         first_name=lname,
         last_name=lname,
-        password='Change4me',
-        division=divisions[faker.random_int(0, 9)],
-        role=Role.query.filter_by(name='User').first(),
-        # tag_id=tags[faker.random_int(0,7)]
-        tag_id = None,
-        is_supervisor=True
+        password="Change4me",
+        division=divisions[faker.random_int(0, len(divisions)-1)][0],
+        role=Role.query.filter_by(name="User").first(),
+        tag_id=tag_id,
+        is_supervisor=True,
     )
     db.session.add(u)
     db.session.commit()
     u.password_list.update(u.password_hash)
-
-
     # Users
     for i in range(10):
-
         faker = Faker()
         fname = faker.first_name()
         lname = faker.last_name()
+        tag_id = tags[faker.random_int(1, len(tags)-1)][0]
         u = User(
-            email=fname[0].lower()+lname.lower()+'@records.nyc.gov',
+            email="{first_initial}{last_name}{email_domain}".format(
+                first_initial=fname[0].lower(),
+                last_name=lname.lower(),
+                email_domain="@"+app.config["EMAIL_DOMAIN"],
+            ),
             first_name=lname,
             last_name=lname,
-            password='Change4me',
-            division=divisions[faker.random_int(0, 9)],
-            role=Role.query.filter_by(name='User').first(),
-            # tag_id=tags[faker.random_int(0,7)]
-            tag_id = 0,
-            is_supervisor=False
+            password="Change4me",
+            division=divisions[faker.random_int(0, len(divisions)-1)][0],
+            role=Role.query.filter_by(name="User").first(),
+            tag_id=tag_id,
+            is_supervisor=False,
         )
         db.session.add(u)
         db.session.commit()
