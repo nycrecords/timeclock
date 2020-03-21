@@ -10,3 +10,5 @@ Vargrantfile
 .vscode/
 LogFile*
 docs/_build/*
+.env*
+!.env.example
