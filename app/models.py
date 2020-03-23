@@ -167,7 +167,7 @@ class User(UserMixin, db.Model):
         session["reset_token"] = {"token": s, "valid": True}
         return s.dumps({"reset": self.id})
 
-    def reset_password(self, token, new_password):
+    def reset_password(self, new_password):
         """
         Resets a user's password.
         :param token: The token to verify.
