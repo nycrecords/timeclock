@@ -608,6 +608,8 @@ def user_profile(user_id):
         changes=changes,
         pagination=pagination,
     )
+
+
 @auth.route("/user/reset/<user_id>", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -629,13 +631,8 @@ def admin_reset(user_id):
         user.validated = True
         db.session.add(user)
         db.session.commit()
-        current_app.logger.info(
-            "{} changed their password.".format(user.email)
-        )
-        flash("{} password has been updated.".format(
-                user.email)
-            ,category="success")
+        current_app.logger.info("{} changed their password.".format(user.email))
+        flash("{} password has been updated.".format(user.email), category="success")
         return render_template("auth/reset_password.html", form=form)
-    else :
+    else:
         return render_template("auth/reset_password.html", form=form)
-

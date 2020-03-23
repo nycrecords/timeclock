@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 ipdb = "*"
 ipython = "*"
+flask-shell-ipython = "*"
 
 [packages]
 alembic = "*"
