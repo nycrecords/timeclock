@@ -1,6 +1,5 @@
 import os
 
-import click
 from flask_migrate import Migrate
 
 from app import create_app, db
@@ -79,7 +78,7 @@ def setup_roles():
 
 
 @app.cli.command("create_dev_users")
-def create_users():
+def create_dev_users():
     """Create users for development."""
     # Administrator
     faker = Faker()
@@ -128,7 +127,6 @@ def create_users():
 
     # Users
     for i in range(10):
-        faker = Faker()
         first_name = faker.first_name()
         last_name = faker.last_name()
         tag_id = faker.random_int(min=1, max=len(tags) - 1)

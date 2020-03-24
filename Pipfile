@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+faker = "*"
 ipdb = "*"
 ipython = "*"
 
@@ -12,7 +13,6 @@ alembic = "*"
 blinker = "*"
 cairocffi = "*"
 cffi = "*"
-click = "*"
 cssselect = "*"
 gunicorn = "*"
 html5lib = "*"
@@ -59,7 +59,6 @@ psycopg2-binary = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 python-dotenv = "*"
-faker = "*"
 
 [requires]
 python_version = "3.7"
