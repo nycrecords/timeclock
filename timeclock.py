@@ -85,8 +85,8 @@ def create_users():
     faker = Faker()
     first_name = faker.first_name()
     last_name = faker.last_name()
-    tag_id = tags[faker.random_int(1, len(tags) - 1)][0]
-    division = faker.random_elements(elements=divisions, length=1)[0]
+    tag_id = faker.random_int(min=1, max=len(tags) - 1)
+    division = faker.random_elements(elements=divisions, length=1)[0][0]
     administrator = User(
         email="{first_initial}{last_name}@{email_domain}".format(
             first_initial=first_name[0].lower(),
@@ -107,8 +107,8 @@ def create_users():
     # Supervisor
     first_name = faker.first_name()
     last_name = faker.last_name()
-    tag_id = faker.random_elements(elements=tags, length=1)[0]
-    division = faker.random_elements(elements=divisions, length=1)[0]
+    tag_id = faker.random_int(min=1, max=len(tags) - 1)
+    division = faker.random_elements(elements=divisions, length=1)[0][0]
     supervisor = User(
         email="{first_initial}{last_name}@{email_domain}".format(
             first_initial=first_name[0].lower(),
@@ -131,24 +131,23 @@ def create_users():
         faker = Faker()
         first_name = faker.first_name()
         last_name = faker.last_name()
-        tag_id = tags[faker.random_int(1, len(tags) - 1)][0]
-    division = faker.random_elements(elements=divisions, length=1)[0]
-    user = User(
-        email="{first_initial}{last_name}@{email_domain}".format(
-            first_initial=first_name[0].lower(),
-            last_name=last_name.lower(),
-            email_domain=app.config["EMAIL_DOMAIN"],
-        ),
-        first_name=first_name,
-        last_name=last_name,
-        password="Change4me",
-        division=division,
-        role=Role.query.filter_by(name="User").first(),
-        tag_id=tag_id,
-        is_supervisor=False,
-    )
-    db.session.add(user)
-    user.password_list.update(user.password_hash)
+        tag_id = faker.random_int(min=1, max=len(tags) - 1)
+        division = faker.random_elements(elements=divisions, length=1)[0][0]
+        user = User(
+            email="{first_initial}{last_name}@{email_domain}".format(
+                first_initial=first_name[0].lower(),
+                last_name=last_name.lower(),
+                email_domain=app.config["EMAIL_DOMAIN"],
+            ),
+            first_name=first_name,
+            last_name=last_name,
+            password="Change4me",
+            division=division,
+            role=Role.query.filter_by(name="User").first(),
+            tag_id=tag_id,
+            is_supervisor=False,
+        )
+        db.session.add(user)
+        user.password_list.update(user.password_hash)
 
-
-db.session.commit()
+    db.session.commit()
