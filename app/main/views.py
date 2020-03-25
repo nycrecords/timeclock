@@ -107,12 +107,14 @@ def index():
     last = get_last_clock()
     last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
     last_type = last.type if last else False
+    clocked_in_users, clocked_in_users_today = get_clocked_in_users()
     current_app.logger.info("End function index")
     return render_template(
         "main/index.html",
         form=set_clock_form(),
         last_event=last_time,
-        clocked_in_users=get_clocked_in_users(),
+        clocked_in_users=clocked_in_users,
+        clocked_in_users_today=clocked_in_users_today,
         last_clock_event=last_type,
     )
 
