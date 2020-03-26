@@ -632,7 +632,7 @@ def admin_reset(user_id):
         user.validated = True
         db.session.add(user)
         db.session.commit()
-        current_app.logger.info("{} changed their password.".format(user.email))
+        current_app.logger.info(
             "{current_user_email} update the password for {updated_user}.".format(
                 current_user_email=current_user.email, updated_user=user.email
             )
