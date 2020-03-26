@@ -15,6 +15,7 @@ from .pdf import (
 from .. import db
 from ..email_notification import send_email
 from ..models import User, Event, Tag, Vacation
+from pytz import timezone
 
 
 def process_clock(note_data, ip=None):
@@ -349,7 +350,9 @@ def get_clocked_in_users():
     current_app.logger.info("Querying for all clocked in users...")
     users = User.query.order_by(User.division).all()
     current_app.logger.info("Finished querying for all clocked in users...")
+    today = datetime.now(timezone('America/New_York'))
     clocked_in_users = []
+    clocked_in_users_today = []
     for user in users:
         event = (
             Event.query.filter_by(user_id=user.id, approved=True)
@@ -358,8 +361,10 @@ def get_clocked_in_users():
         )
         if event is not None and event.type is True and user not in clocked_in_users:
             clocked_in_users.append(user)
+            if event.time.date() == today.date():
+                clocked_in_users_today.append(user)
     current_app.logger.info("End function get_clocked_in_users()")
-    return clocked_in_users
+    return clocked_in_users, clocked_in_users_today
 
 
 def get_all_tags():

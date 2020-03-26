@@ -57,29 +57,68 @@
                 </div>
                 {% if current_user.is_administrator() or current_user.is_supervisor %}
                     <div class="row">
-                        <p>Currently clocked in:</p>
-                        <table class="table" style="padding:4px">
-                            <thead>
-                            <tr>
-                                <th>Division</th>
-                                <th>Email</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for user in clocked_in_users %}
-                                {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#clocked-in-today"
+                                                                      aria-controls="clocked-in-today" role="tab"
+                                                                      data-toggle="tab">Clocked In Today</a></li>
+                            <li role="presentation"><a href="#clocked-in-all" aria-controls="clocked-in-all" role="tab"
+                                                       data-toggle="tab">Clocked In</a></li>
+                        </ul>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="clocked-in-today">
+                                <br>
+                                <table class="table" style="padding:4px">
+                                    <thead>
                                     <tr>
-                                        <td>{{ user.division }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td>{{ user.first_name }}</td>
-                                        <td>{{ user.last_name }}</td>
+                                        <th>Division</th>
+                                        <th>Email</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
                                     </tr>
-                                {% endif %}
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                    {% for user in clocked_in_users_today %}
+                                        {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
+                                            <tr>
+                                                <td>{{ user.division }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.first_name }}</td>
+                                                <td>{{ user.last_name }}</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane" id="clocked-in-all">
+                                <br>
+                                <table class="table" style="padding:4px">
+                                    <thead>
+                                    <tr>
+                                        <th>Division</th>
+                                        <th>Email</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for user in clocked_in_users %}
+                                        {% if current_user.is_administrator() or user.supervisor_id == current_user.id %}
+                                            <tr>
+                                                <td>{{ user.division }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.first_name }}</td>
+                                                <td>{{ user.last_name }}</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     </div>
                     </div>
