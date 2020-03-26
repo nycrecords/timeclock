@@ -17,6 +17,7 @@ from app.models import (
 from faker import Faker
 from app.utils import divisions, tags
 
+
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app, db)
 
