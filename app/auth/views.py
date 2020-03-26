@@ -397,7 +397,7 @@ def password_reset(token):
                 if (
                     "reset_token" in session
                     and session["reset_token"]["valid"]
-                    and user.reset_password(token, form.password.data)
+                    and user.reset_password(form.password.data)
                 ):
                     # If the token has not been used and the user submits a proper new password, reset users password
                     # and login attempts
@@ -628,10 +628,15 @@ def admin_reset(user_id):
     if form.validate_on_submit():
         user.password_list.update(current_user.password_hash)
         user.password = form.password.data
+        user.login_attempts = 0
         user.validated = True
         db.session.add(user)
         db.session.commit()
         current_app.logger.info("{} changed their password.".format(user.email))
+            "{current_user_email} update the password for {updated_user}.".format(
+                current_user_email=current_user.email, updated_user=user.email
+            )
+        )
         flash("{} password has been updated.".format(user.email), category="success")
         return render_template("auth/reset_password.html", form=form)
     else:
