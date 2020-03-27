@@ -34,10 +34,11 @@ from .forms import (
     RequestVacationForm,
     FilterVacationForm,
     ExportForm,
+    ClockForm,
 )
 from .modules import (
     process_clock,
-    set_clock_form,
+    # set_clock_form,
     get_last_clock,
     get_events_by_date,
     get_clocked_in_users,
@@ -87,7 +88,7 @@ def index():
         current_app.logger.info("End function index")
         return redirect(url_for("auth.change_password"))
 
-    form = set_clock_form()
+    form = ClockForm()
     if form.validate_on_submit():
         if form.note.data is not None and len(form.note.data) > 60:
             flash("Your note cannot exceed 60 characters", category="warning")
@@ -111,7 +112,7 @@ def index():
     current_app.logger.info("End function index")
     return render_template(
         "main/index.html",
-        form=set_clock_form(),
+        form=form,
         last_event=last_time,
         clocked_in_users=clocked_in_users,
         clocked_in_users_today=clocked_in_users_today,
