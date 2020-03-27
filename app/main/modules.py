@@ -350,7 +350,7 @@ def get_clocked_in_users():
     current_app.logger.info("Querying for all clocked in users...")
     users = User.query.order_by(User.division).all()
     current_app.logger.info("Finished querying for all clocked in users...")
-    today = datetime.now(timezone('America/New_York'))
+    today = datetime.now(timezone("America/New_York"))
     clocked_in_users = []
     clocked_in_users_today = []
     for user in users:

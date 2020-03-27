@@ -36,10 +36,46 @@
                     <li>
                         <div class="dropdown">
                             <button class="btn btn-default dropdown-toggle" type="button"
+                                    id="office365-dropdown" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                                Office 365
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="office365-dropdown">
+                                <li><a href="https://outlook.office365.com" target="_blank">Outlook Web Access</a></li>
+                                </li>
+                                <li>
+                                    <a href="https://teams.microsoft.com/"
+                                       target="_blank">Microsoft Teams (Online)</a></li>
+                                </li>
+                                <li>
+                                    <a href="https://teams.microsoft.com/"
+                                       target="_blank">Microsoft Teams (Online)</a></li>
+                                </li>
+                                <li>
+                                    <a href="https://teams.microsoft.com/download"
+                                       target="_blank">Microsoft Teams (Download for Desktop)</a></li>
+                                </li>
+
+                                <li>
+                                    <a href="https://support.office.com/en-us/article/office-quick-starts-25f909da-3e76-443d-94f4-6cdf7dedc51e"
+                                       target="_blank">Office 365 QuickStart Guids</a></li>
+                                </li>
+                                <li>
+                                    <a href="https://support.office.com/en-US/office-training-center?WT.mc_id=365AdminCSH"
+                                       target="_blank">Office 365 Training Center</a></li>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button"
                                     id="history-dropdown" data-toggle="dropdown" aria-haspopup="true"
                                     aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
                                       border: 0">
-                                Telework Instructions
+                                Telework Assistance
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="history-dropdown">
@@ -51,14 +87,14 @@
                                        target="_blank">Remote Access Instructions</a></li>
                                 </li>
                                 {% if current_user.is_authenticated %}
-                                <li>
-                                    <a href="{{ url_for('static', filename="files/DORIS VM Quick Reference.pdf") }}"
-                                       target="_blank">Voicemail Quick Reference Guide</a></li>
-                                </li>
-                                <li>
-                                    <a href="{{ url_for('static', filename="files/DORIS - Guidelines for Teleworking Employees.pdf") }}"
-                                       target="_blank">Guidelines for Teleworking </a></li>
-                                </li>
+                                    <li>
+                                        <a href="{{ url_for('static', filename="files/DORIS VM Quick Reference.pdf") }}"
+                                           target="_blank">Voicemail Quick Reference Guide</a></li>
+                                    </li>
+                                    <li>
+                                        <a href="{{ url_for('static', filename="files/DORIS - Guidelines for Teleworking Employees.pdf") }}"
+                                           target="_blank">Guidelines for Teleworking </a></li>
+                                    </li>
                                 {% endif %}
                             </ul>
                         </div>
