@@ -14,9 +14,10 @@ from app.models import (
     Role,
     Tag,
 )
-from faker import Faker
-from app.utils import divisions, tags
 
+if os.getenv('FLASK_ENV') == 'development':
+    from faker import Faker
+from app.utils import divisions, tags
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app, db)
