@@ -93,8 +93,8 @@ def admin_upload():
     :return: HTML page where admins can register new users
     """
     csv_file = UploadSet("files", ("csv",))
-    app.config["UPLOADED_FILES_DEST"] = "static/user_csv"
-    configure_uploads(app, csv_file)
+    destination = current_app.config["UPLOADED_FILES_DEST"]
+    configure_uploads(current_app, csv_file)
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])

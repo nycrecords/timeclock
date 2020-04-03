@@ -44,7 +44,8 @@ def create_app(config_name):  # App Factory
         )
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
+    
+    app.config["UPLOADED_FILES_DEST"] = "static/user_csv"
     config[config_name].init_app(app)
     bootstrap.init_app(app)
     mail.init_app(app)
