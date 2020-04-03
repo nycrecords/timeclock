@@ -93,17 +93,14 @@ def admin_upload():
     :return: HTML page where admins can register new users
     """
     csv_file = UploadSet("files", ("csv",))
-    destination = current_app.config["UPLOADED_FILES_DEST"]
     configure_uploads(current_app, csv_file)
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])
-            return redirect(url_for("auth.admin_register"))
+            flash("File accepted", "success")
+            return redirect(url_for("auth.admin_upload"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
-        else:
-            flash("File accepted", "success")
-
     return render_template("auth/admin_upload.html")
 
 
