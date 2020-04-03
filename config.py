@@ -27,7 +27,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL")
+        os.environ.get("setup_db")
         or "postgresql://timeclock_db@127.0.0.1:5432/timeclock_dev"
     )
 

@@ -11,6 +11,8 @@ from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash
+from flask_uploads import UploadSet, configure_uploads, UploadNotAllowed
+
 
 from . import auth
 from .forms import (
@@ -78,6 +80,30 @@ def admin_register():
 
     current_app.logger.info("End function admin_register() [VIEW]")
     return render_template("auth/admin_register.html", form=form)
+
+
+
+
+@auth.route("/admin_upload", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_upload():
+    """
+    View function to upload file of users.
+    :return: HTML page where admins can register new users
+    """
+    csv_file = UploadSet("files", ("csv",))
+    app.config["UPLOADED_FILES_DEST"] = "static/user_csv"
+    configure_uploads(app, csv_file)
+    if request.method == "POST" and "csv_data" in request.files:
+        try:
+            filename = csv_file.save(request.files["csv_data"])
+            return redirect(url_for("auth/admin_register.html"))
+        except UploadNotAllowed:
+            flash("Only CSV files can be uploaded, please correct", "error")
+        flash("File accepted", "success")
+
+    return render_template("auth/admin_upload.html")
 
 
 @auth.route("/login", methods=["GET", "POST"])
