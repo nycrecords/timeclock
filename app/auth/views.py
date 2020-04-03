@@ -98,7 +98,7 @@ def admin_upload():
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])
-            return redirect(url_for("auth/admin_register.html"))
+            return redirect(url_for("auth.admin_register"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
         flash("File accepted", "success")
