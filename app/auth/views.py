@@ -101,7 +101,8 @@ def admin_upload():
             return redirect(url_for("auth.admin_register"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
-        flash("File accepted", "success")
+        else:
+            flash("File accepted", "success")
 
     return render_template("auth/admin_upload.html")
 
