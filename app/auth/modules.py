@@ -16,7 +16,7 @@ from datetime import datetime
 from app import db
 from app.email_notification import send_email
 from app.models import User, Role, ChangeLog,Tag
-
+from app.utils import tags
 
 def check_password_requirements(email, old_password, password, password_confirmation):
     """
