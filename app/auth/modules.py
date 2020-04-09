@@ -377,17 +377,18 @@ def create_user_csv(filename):
     data = pd.read_csv('static/user_csv/{}'.format(filename),sep=',')
     from sqlalchemy.exc import IntegrityError
     for i in range(len(data.index)):
-        u = User(
-                email=data['email'][i],
-                password="Change4me",
-                first_name=data['first name'][i],
-                last_name=data['last name'][i],
-                tag=Tag.query.filter_by(name=data['tag'][i]).one(),
-                division=data['division'][i],
-            )
-        db.session.add(u)
-        try:
-            db.session.commit()
-        except IntegrityError:
-             db.session.rollback()
+        if not User.query.filter_by(email=data['email'][i]).first():
+            u = User(
+                    email=data['email'][i],
+                    password="Change4me",
+                    first_name=data['first name'][i],
+                    last_name=data['last name'][i],
+                    tag=Tag.query.filter_by(name=data['tag'][i]).one(),
+                    division=data['division'][i],
+                )
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
     return True
