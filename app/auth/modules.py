@@ -6,9 +6,8 @@
 """
 
 import re
-import csv
 import sqlalchemy
-
+import pandas as pd
 from flask import flash, current_app
 from flask_login import current_user
 from werkzeug.security import check_password_hash
@@ -16,8 +15,7 @@ from datetime import datetime
 
 from app import db
 from app.email_notification import send_email
-from app.models import User, Role, ChangeLog
-from app.utils import tags
+from app.models import User, Role, ChangeLog,Tag
 
 
 def check_password_requirements(email, old_password, password, password_confirmation):
@@ -376,16 +374,20 @@ def update_user_information(
     current_app.logger.info("End function update_user_information")
 
 def create_user_csv(filename):
-    with open('static/user_csv/{}'.format(filename), mode='r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        line_count = 0
-        for row in csv_reader:
-            if line_count == 0:
-                print(f'Column names are {", ".join(row)}')
-                line_count += 1
-            print(f'\t{row["name"]} works in the {row["department"]} department, and was born in {row["birthday month"]}.')
-            line_count += 1
-        print(f'Processed {line_count} lines.')
+    data = pd.read_csv('static/user_csv/{}'.format(filename),sep=',')
+    from sqlalchemy.exc import IntegrityError
+    for i in range(len(data.index)):
+        u = User(
+                email=data['email'][i],
+                password="Change4me",
+                first_name=data['first name'][i],
+                last_name=data['last name'][i],
+                tag=Tag.query.filter_by(name=data['tag'][i]).one(),
+                division=data['division'][i],
+            )
+        db.session.add(u)
+        try:
+            db.session.commit()
+        except IntegrityError:
+             db.session.rollback()
     return True
-
-    
