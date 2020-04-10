@@ -40,7 +40,6 @@ from ..models import User, Role
 from ..utils import InvalidResetToken
 from app.auth.constants import passwords
 
-
 @auth.route("/admin_register", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -92,7 +91,7 @@ def admin_upload():
     View function to upload file of users.
     :return: HTML page where admins can register new users
     """
-    filename=''
+    filename=""
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])
@@ -108,7 +107,7 @@ def admin_upload():
 @login_required
 @admin_required
 def admin_upload_timesheet():
-    filename=''
+    filename=""
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])

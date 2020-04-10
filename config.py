@@ -18,8 +18,7 @@ class Config:
     WTF_CSRF_ENABLED = True
     ADMIN = os.environ.get("ADMIN") or "admin@records.nyc.gov"
     EMAIL_DOMAIN = "records.nyc.gov"
-    UPLOADED_FILES_DEST = "static/user_csv"
-
+    UPLOADED_FILES_DEST = "static/user_csv_data"
     @staticmethod
     def init_app(app):
         pass

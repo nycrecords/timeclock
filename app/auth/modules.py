@@ -375,7 +375,7 @@ def update_user_information(
 
 def create_csv_user(filename):
     import csv
-    csv_file = csv.DictReader(open("static/user_csv/{}".format(filename)))
+    csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
     from sqlalchemy.exc import IntegrityError
     for row in csv_file:
         if not User.query.filter_by(email=row['email']).first():
@@ -396,4 +396,6 @@ def create_csv_user(filename):
     return True 
 
 def create_csv_timepunches(filename):
+    import csv
+    csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
     return True
