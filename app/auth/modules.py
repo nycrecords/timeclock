@@ -14,7 +14,7 @@ from datetime import datetime
 
 from app import db
 from app.email_notification import send_email
-from app.models import User, Role, ChangeLog,Tag
+from app.models import User, Role, ChangeLog, Tag, Event
 from app.utils import tags
 
 def check_password_requirements(email, old_password, password, password_confirmation):
@@ -386,16 +386,35 @@ def create_csv_user(filename):
                     password="Change4me",
                     role_id=Role.query.filter_by(id=1).first(),
                     tag_id=Tag.query.filter_by(name=row['tag']).one().id,
-                    division=row['division'],
+                    division=row['division']
                 )
             db.session.add(u)
             try:
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+        else:
+            return False
     return True 
 
 def create_csv_timepunches(filename):
     import csv
     csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
+    csv_file = sorted(csv_file, key=lambda k: k['id']) 
+    for row in csv_file:
+        if not Event.query.filter(email=row['email']).filter(time=row['time']).first():
+            e = Event(
+                type=row['type'],
+                time=row['time'],
+                note=row['note'],
+                ip=row['ip'],
+                user_id=User.query.filter_by(email=row['email']).first()
+            )
+            db.session.add(e)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+        else:
+            return False
     return True

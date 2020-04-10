@@ -98,6 +98,9 @@ def admin_upload():
             if create_csv_user(filename):
                 flash("File accepted and Users created", "success")
                 return redirect(url_for("auth.admin_upload"))
+            else:
+                flash("Either users already exist or there was an error in the csv upload", "error")
+                return redirect(url_for("auth.admin_upload")) 
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
     return render_template("auth/admin_upload.html")
@@ -113,6 +116,9 @@ def admin_upload_timesheet():
             filename = csv_file.save(request.files["csv_data"])
             if create_csv_timepunches(filename):
                 flash("File accepted and time punches uploaded ", "success")
+                return redirect(url_for("auth.admin_upload_timesheet"))
+            else:
+                flash("Either the time punches already exist or there was an error in the csv upload", "error")
                 return redirect(url_for("auth.admin_upload_timesheet"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
