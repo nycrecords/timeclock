@@ -30,7 +30,7 @@ from .modules import (
     create_user,
     get_changelog_by_user_id,
     update_user_information,
-    create_user_csv,
+    create_csv_user,
 )
 from .. import db
 from ..decorators import admin_required
@@ -83,8 +83,6 @@ def admin_register():
     return render_template("auth/admin_register.html", form=form)
 
 
-
-
 @auth.route("/admin_upload", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -99,15 +97,9 @@ def admin_upload():
     if request.method == "POST" and "csv_data" in request.files:
         try:
             filename = csv_file.save(request.files["csv_data"])
-            flash("File accepted", "success")
-            if create_user_csv(filename):
-                print(filename)
-            
-            # f = request.files[filename] 
-            # fstring = f.read()
-            # csv_dicts = [{k: v for k, v in row.items()} for row in csv.DictReader(fstring.splitlines(), skipinitialspace=True)]
-            # print(csv_dicts)
-            return redirect(url_for("auth.admin_upload"))
+            if create_csv_user(filename):
+                flash("File accepted and Users created", "success")
+                return redirect(url_for("auth.admin_upload"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
     return render_template("auth/admin_upload.html")

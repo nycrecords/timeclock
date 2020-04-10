@@ -7,7 +7,6 @@
 
 import re
 import sqlalchemy
-import pandas as pd
 from flask import flash, current_app
 from flask_login import current_user
 from werkzeug.security import check_password_hash
@@ -373,22 +372,46 @@ def update_user_information(
     db.session.commit()
     current_app.logger.info("End function update_user_information")
 
-def create_user_csv(filename):
-    data = pd.read_csv('static/user_csv/{}'.format(filename),sep=',')
+
+# def create_csv_user(filename):
+#     data = pd.read_csv('static/user_csv/{}'.format(filename),sep=',')
+#     from sqlalchemy.exc import IntegrityError
+#     for i in range(len(data.index)):
+#         if not User.query.filter_by(email=data['email'][i]).first():
+#             u = User(
+#                     first_name=data['first name'][i],
+#                     last_name=data['last name'][i],
+#                     email=data['email'][i],
+#                     password="Change4me",
+#                     role_id=Role.query.filter_by(id=1).first(),
+#                     tag_id=Tag.query.filter_by(name=data['tag'][i]).one(),
+#                     division=data['division'][i],
+#                 )
+#             db.session.add(u)
+#             try:
+#                 db.session.commit()
+#             except IntegrityError:
+#                 db.session.rollback()
+#     return True
+
+def create_csv_user(filename):
+    import csv
+    csv_file = csv.DictReader(open("static/user_csv/{}".format(filename)))
     from sqlalchemy.exc import IntegrityError
-    for i in range(len(data.index)):
-        if not User.query.filter_by(email=data['email'][i]).first():
+    for row in csv_file:
+        if not User.query.filter_by(email=row['email']).first():
             u = User(
-                    email=data['email'][i],
+                    first_name=row['first name'],
+                    last_name=row['last name'],
+                    email=row['email'],
                     password="Change4me",
-                    first_name=data['first name'][i],
-                    last_name=data['last name'][i],
-                    tag=Tag.query.filter_by(name=data['tag'][i]).one(),
-                    division=data['division'][i],
+                    role_id=Role.query.filter_by(id=1).first(),
+                    tag_id=Tag.query.filter_by(name=row['tag']).one(),
+                    division=row['division'],
                 )
             db.session.add(u)
             try:
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
-    return True
+    return True 
