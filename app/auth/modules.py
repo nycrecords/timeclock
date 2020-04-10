@@ -373,27 +373,6 @@ def update_user_information(
     current_app.logger.info("End function update_user_information")
 
 
-# def create_csv_user(filename):
-#     data = pd.read_csv('static/user_csv/{}'.format(filename),sep=',')
-#     from sqlalchemy.exc import IntegrityError
-#     for i in range(len(data.index)):
-#         if not User.query.filter_by(email=data['email'][i]).first():
-#             u = User(
-#                     first_name=data['first name'][i],
-#                     last_name=data['last name'][i],
-#                     email=data['email'][i],
-#                     password="Change4me",
-#                     role_id=Role.query.filter_by(id=1).first(),
-#                     tag_id=Tag.query.filter_by(name=data['tag'][i]).one(),
-#                     division=data['division'][i],
-#                 )
-#             db.session.add(u)
-#             try:
-#                 db.session.commit()
-#             except IntegrityError:
-#                 db.session.rollback()
-#     return True
-
 def create_csv_user(filename):
     import csv
     csv_file = csv.DictReader(open("static/user_csv/{}".format(filename)))

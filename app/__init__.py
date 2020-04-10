@@ -13,6 +13,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from flask_uploads import UploadSet, configure_uploads
 from simplekv.db.sql import SQLAlchemyStore
 
 from config import config
@@ -22,6 +23,7 @@ mail = Mail()
 moment = Moment()
 migrate = Migrate()
 db = SQLAlchemy()
+csv_file = UploadSet("files", ("csv",))
 
 login_manager = LoginManager()
 login_manager.session_protection = (
@@ -45,6 +47,7 @@ def create_app(config_name):  # App Factory
     else:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
     
+    configure_uploads(app, csv_file)
     config[config_name].init_app(app)
     bootstrap.init_app(app)
     mail.init_app(app)

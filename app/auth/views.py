@@ -11,7 +11,7 @@ from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash
-from flask_uploads import UploadSet, configure_uploads, UploadNotAllowed
+from flask_uploads import UploadNotAllowed
 
 
 from . import auth
@@ -32,7 +32,7 @@ from .modules import (
     update_user_information,
     create_csv_user,
 )
-from .. import db
+from .. import db, csv_file
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..models import User, Role
@@ -91,8 +91,6 @@ def admin_upload():
     View function to upload file of users.
     :return: HTML page where admins can register new users
     """
-    csv_file = UploadSet("files", ("csv",))
-    configure_uploads(current_app, csv_file)
     filename=''
     if request.method == "POST" and "csv_data" in request.files:
         try:
