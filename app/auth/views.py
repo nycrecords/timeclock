@@ -31,6 +31,7 @@ from .modules import (
     get_changelog_by_user_id,
     update_user_information,
     create_csv_user,
+    create_csv_timepunches
 )
 from .. import db, csv_file
 from ..decorators import admin_required
@@ -102,6 +103,21 @@ def admin_upload():
             flash("Only CSV files can be uploaded, please correct", "error")
     return render_template("auth/admin_upload.html")
 
+
+@auth.route("/admin_upload_timesheet", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_upload_timesheet():
+    filename=''
+    if request.method == "POST" and "csv_data" in request.files:
+        try:
+            filename = csv_file.save(request.files["csv_data"])
+            if create_csv_timepunches(filename):
+                flash("File accepted and time punches uploaded ", "success")
+                return redirect(url_for("auth.admin_upload_timesheet"))
+        except UploadNotAllowed:
+            flash("Only CSV files can be uploaded, please correct", "error")
+    return render_template("auth/admin_upload_timesheet.html")
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():

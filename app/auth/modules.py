@@ -394,3 +394,6 @@ def create_csv_user(filename):
             except IntegrityError:
                 db.session.rollback()
     return True 
+
+def create_csv_timepunches(filename):
+    return True
