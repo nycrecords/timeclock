@@ -399,7 +399,7 @@ def create_csv_user(filename):
     csv_file = csv.DictReader(open("static/user_csv/{}".format(filename)))
     from sqlalchemy.exc import IntegrityError
     for row in csv_file:
-        if not User.query.filter_by(email=row['email']).first():
+        if not User.query.filter_by(email=row['email'][i]).first():
             u = User(
                     first_name=row['first name'],
                     last_name=row['last name'],
