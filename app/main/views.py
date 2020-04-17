@@ -803,6 +803,11 @@ def user_list_page():
             .filter(Tag.name.ilike("%" + entry.title() + "%"))
             .all()
         )
+        #get rid of Search Duplicates
+        search_result_tag_no_duplicates=[] 
+        for usr in search_result_tag:
+            if usr not in search_result_email:
+                search_result_tag_no_duplicates.append(usr)
 
         if not entry:
             list_of_users = list_of_users_all
@@ -813,7 +818,7 @@ def user_list_page():
                     + search_result_fname
                     + search_result_lname
                     + search_result_division
-                    + search_result_tag
+                    + search_result_tag_no_duplicates
                 )
             )
 
