@@ -7,6 +7,7 @@
 
 import re
 import sqlalchemy
+from sqlalchemy import and_
 from flask import flash, current_app
 from flask_login import current_user
 from werkzeug.security import check_password_hash
@@ -399,10 +400,17 @@ def create_csv_user(filename):
 
 def create_csv_timepunches(filename):
     import csv
+    from sqlalchemy.exc import IntegrityError
     csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
     csv_file = sorted(csv_file, key=lambda k: k['id']) 
+    from sqlalchemy.orm import sessionmaker
+    Session = sessionmaker(bind = engine)
+    session = Session()
     for row in csv_file:
-        if not Event.query.filter(email=row['email']).filter(time=row['time']).first():
+        uid = User.query.filter_by(email=row['email']).first().id
+        # if not Event.query.filter_by(user_id=uid).first():
+        # if Event.query.filter_by(user_id=uid, time=row['time']).first():
+        if not session.query(User, Events).filter():    
             e = Event(
                 type=row['type'],
                 time=row['time'],
