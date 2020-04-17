@@ -118,7 +118,7 @@ def admin_upload_timesheet():
                 flash("File accepted and time punches uploaded ", "success")
                 return redirect(url_for("auth.admin_upload_timesheet"))
             else:
-                flash("Either the time punches already exist or there was an error in the csv upload", "error")
+                flash("There was an error in the csv upload", "error")
                 return redirect(url_for("auth.admin_upload_timesheet"))
         except UploadNotAllowed:
             flash("Only CSV files can be uploaded, please correct", "error")
