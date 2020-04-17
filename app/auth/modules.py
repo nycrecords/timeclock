@@ -403,11 +403,11 @@ def create_csv_timepunches(filename):
     csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
     csv_file = sorted(csv_file, key=lambda k: k['id']) 
     for row in csv_file:
-        print(datetime.strptime(row['time'],"%b %d, %Y %H:%M"))
+        clockin_type = (True if row['type'] == 'IN' else False)
         uid = User.query.filter_by(email=row['email']).first().id
-        if not Event.query.filter_by(user_id=uid, time=row['time']).first():
+        if not Event.query.filter_by(user_id=uid, time=row['time'], type=clockin_type).first():
             e = Event(
-                type= True, #(True if row['type'] == 'IN' else False),
+                type=clockin_type,
                 time=datetime.strptime(row['time'],"%b %d, %Y %H:%M"),
                 note=row['note'],
                 ip=row['ip'],
@@ -418,6 +418,5 @@ def create_csv_timepunches(filename):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
-        else:
-            return False
+                return False
     return True
