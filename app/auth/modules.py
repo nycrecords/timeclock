@@ -403,17 +403,15 @@ def create_csv_timepunches(filename):
     csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
     csv_file = sorted(csv_file, key=lambda k: k['id']) 
     for row in csv_file:
-        print(datetime.strptime(row['time'],"%Y-%m-%d-%H:%M:%S:%f"))
+        print(datetime.strptime(row['time'],"%b %d, %Y %H:%M"))
         uid = User.query.filter_by(email=row['email']).first().id
-        # if not Event.query.filter_by(user_id=uid).first():
         if not Event.query.filter_by(user_id=uid, time=row['time']).first():
-        # if not filter(Event.user_id=uid, Event.time=row['time']):
             e = Event(
-                type= (True if row['type'] == 'IN' else False),
-                time=row['time'],
+                type= True, #(True if row['type'] == 'IN' else False),
+                time=datetime.strptime(row['time'],"%b %d, %Y %H:%M"),
                 note=row['note'],
                 ip=row['ip'],
-                user_id=User.query.filter_by(email=row['email']).first()
+                user_id=uid
             )
             db.session.add(e)
             try:
