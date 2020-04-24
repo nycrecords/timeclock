@@ -405,10 +405,15 @@ def create_csv_timepunches(filename):
     for row in csv_file:
         clockin_type = (True if row['type'] == 'IN' else False)
         uid = User.query.filter_by(email=row['email']).first().id
+        if row['time'][0].isdigit():
+            i=row['time'].find('20 ')
+            row['time']=row['time'][:i]+'20'+row['time'][i:]
+            row['time']=datetime.strptime(row['time'],"%m/%d/%Y %H:%M")
+        else: row['time']=datetime.strptime(row['time'],"%b %d, %Y %H:%M")
         if not Event.query.filter_by(user_id=uid, time=row['time'], type=clockin_type).first():
             e = Event(
                 type=clockin_type,
-                time=datetime.strptime(row['time'],"%b %d, %Y %H:%M"),
+                time=row['time'],
                 note=row['note'],
                 ip=row['ip'],
                 user_id=uid
