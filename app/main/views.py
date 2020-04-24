@@ -50,6 +50,8 @@ from .modules import (
     generate_timesheet,
     generate_timesheets,
     create_csv,
+    create_userscsv,
+    create_sample_csv,
 )
 from .payments import get_payrate_before_or_after, calculate_hours_worked
 from .requests import (
@@ -839,7 +841,26 @@ def export_events():
     """
     return create_csv()
 
+@main.route("/export_sample_events", methods=["GET", "POST"])
+@login_required
+@admin_required
+def export_sample_events():
+    """
+    Exports all events in the db to a csv file
+    :return: CSV file response
+    """
+    return create_sample_csv()
 
+@main.route("/export_users", methods=["GET", "POST"])
+@login_required
+@admin_required
+def export_users():
+    """
+    create a sample csv file that could be used to import users
+    :return: CSV file response
+    """
+    return create_userscsv()
+    
 @main.route("/review_vacations", methods=["GET", "POST"])
 @login_required
 def review_vacations():

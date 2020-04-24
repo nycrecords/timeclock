@@ -11,6 +11,9 @@
 <div class="col-md-4">
     <!-- <h5>Register Users using a CSV file</h5> -->
     <br>
+    <span style="float:right">
+        {% include 'includes/users_sample_button.html' %}
+    </span>
     <form method=post enctype=multipart/form-data action="{{ url_for('auth.admin_upload') }}">
         <input type=file name=csv_data>
         <br>

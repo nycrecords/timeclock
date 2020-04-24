@@ -552,3 +552,53 @@ def create_csv(events=None):
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+def create_sample_csv(event=None):
+    """
+     Creates a csv file sample that would be used to import event data  by admin
+        :return: CSV file
+    """
+    import csv
+    import io
+
+    si = io.StringIO()
+    writer = csv.writer(si)
+    if not event:
+        event = Event.query.order_by(sqlalchemy.desc(Event.time)).first()
+    writer.writerow(
+        ["id", "email", "first name", "last name", "time", "type", "note", "ip"]
+    )
+    writer.writerow(
+            [
+                event.id,
+                event.user.email,
+                event.user.first_name,
+                event.user.last_name,
+                event.time.strftime("%b %d, %Y %H:%M"),
+                "IN" if event.type else "OUT",
+                event.note,
+                event.ip,
+            ]
+        )        
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+def create_userscsv():
+        """
+        Creates a csv file sample that would be used to import users by admin
+        :return: CSV file
+        """
+        import csv
+        import io
+        si = io.StringIO()
+        writer = csv.writer(si)
+        writer.writerow(
+            ["email", "first name", "last name", "tag", "division"]
+        )
+        writer.writerow(
+            [current_user.email, current_user.first_name, current_user.last_name, current_user.tag.name, current_user.division]
+        )
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+        output.headers["Content-type"] = "text/csv"
+        return output
