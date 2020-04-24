@@ -11,6 +11,8 @@ from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash
+from flask_uploads import UploadNotAllowed
+
 
 from . import auth
 from .forms import (
@@ -28,14 +30,15 @@ from .modules import (
     create_user,
     get_changelog_by_user_id,
     update_user_information,
+    create_csv_user,
+    create_csv_timepunches
 )
-from .. import db
+from .. import db, csv_file
 from ..decorators import admin_required
 from ..email_notification import send_email
 from ..models import User, Role
 from ..utils import InvalidResetToken
 from app.auth.constants import passwords
-
 
 @auth.route("/admin_register", methods=["GET", "POST"])
 @login_required
@@ -79,6 +82,47 @@ def admin_register():
     current_app.logger.info("End function admin_register() [VIEW]")
     return render_template("auth/admin_register.html", form=form)
 
+
+@auth.route("/admin_upload", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_upload():
+    """
+    View function to upload file of users.
+    :return: HTML page where admins can register new users
+    """
+    filename=""
+    if request.method == "POST" and "csv_data" in request.files:
+        try:
+            filename = csv_file.save(request.files["csv_data"])
+            if create_csv_user(filename):
+                flash("File accepted and Users created", "success")
+                return redirect(url_for("auth.admin_upload"))
+            else:
+                flash("Either users already exist or there was an error in the csv upload", "error")
+                return redirect(url_for("auth.admin_upload")) 
+        except UploadNotAllowed:
+            flash("Only CSV files can be uploaded, please correct", "error")
+    return render_template("auth/admin_upload.html")
+
+
+@auth.route("/admin_upload_timesheet", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_upload_timesheet():
+    filename=""
+    if request.method == "POST" and "csv_data" in request.files:
+        try:
+            filename = csv_file.save(request.files["csv_data"])
+            if create_csv_timepunches(filename):
+                flash("File accepted and time punches uploaded ", "success")
+                return redirect(url_for("auth.admin_upload_timesheet"))
+            else:
+                flash("There was an error in the csv upload", "error")
+                return redirect(url_for("auth.admin_upload_timesheet"))
+        except UploadNotAllowed:
+            flash("Only CSV files can be uploaded, please correct", "error")
+    return render_template("auth/admin_upload_timesheet.html")
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():

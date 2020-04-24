@@ -7,7 +7,6 @@
 
 import re
 import sqlalchemy
-
 from flask import flash, current_app
 from flask_login import current_user
 from werkzeug.security import check_password_hash
@@ -15,9 +14,8 @@ from datetime import datetime
 
 from app import db
 from app.email_notification import send_email
-from app.models import User, Role, ChangeLog
+from app.models import User, Role, ChangeLog, Tag, Event
 from app.utils import tags
-
 
 def check_password_requirements(email, old_password, password, password_confirmation):
     """
@@ -373,3 +371,57 @@ def update_user_information(
     db.session.add(user)
     db.session.commit()
     current_app.logger.info("End function update_user_information")
+
+
+def create_csv_user(filename):
+    import csv
+    csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
+    from sqlalchemy.exc import IntegrityError
+    for row in csv_file:
+        if not User.query.filter_by(email=row['email']).first():
+            u = User(
+                    first_name=row['first name'],
+                    last_name=row['last name'],
+                    email=row['email'],
+                    password="Change4me",
+                    role_id=Role.query.filter_by(id=1).first(),
+                    tag_id=Tag.query.filter_by(name=row['tag']).one().id,
+                    division=row['division']
+                )
+            db.session.add(u)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+        else:
+            return False
+    return True 
+
+def create_csv_timepunches(filename):
+    import csv
+    from sqlalchemy.exc import IntegrityError
+    csv_file = csv.DictReader(open("static/user_csv_data/{}".format(filename)))
+    csv_file = sorted(csv_file, key=lambda k: k['id']) 
+    for row in csv_file:
+        clockin_type = (True if row['type'] == 'IN' else False)
+        uid = User.query.filter_by(email=row['email']).first().id
+        if row['time'][0].isdigit():
+            i=row['time'].find('20 ')
+            row['time']=row['time'][:i]+'20'+row['time'][i:]
+            row['time']=datetime.strptime(row['time'],"%m/%d/%Y %H:%M")
+        else: row['time']=datetime.strptime(row['time'],"%b %d, %Y %H:%M")
+        if not Event.query.filter_by(user_id=uid, time=row['time'], type=clockin_type).first():
+            e = Event(
+                type=clockin_type,
+                time=row['time'],
+                note=row['note'],
+                ip=row['ip'],
+                user_id=uid
+            )
+            db.session.add(e)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                return False
+    return True

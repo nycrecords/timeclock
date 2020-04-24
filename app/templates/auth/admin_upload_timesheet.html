@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}TimeClock - Upload User{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased ">Upload Time Punches</h1>
+</div>
+
+
+<div >
+    <!-- <h5>Upload time punches of users. Make sure all time punches are for the same user. Conflicting time punches must be handled by your supervisor.</h5> -->
+    <br>
+    <span style="float:right">
+        {% include 'includes/data_sample_button.html' %}
+    </span>
+    <form method=post enctype=multipart/form-data action="{{ url_for('auth.admin_upload_timesheet') }}">
+        <input type=file name=csv_data>
+        <br>
+        <input type=submit class="btn btn-default" value=Upload>
+    </form>
+</div>
+</div>
+{% endblock %}
