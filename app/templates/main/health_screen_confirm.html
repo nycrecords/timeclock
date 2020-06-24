@@ -17,6 +17,10 @@
             {{ form.email(class="form-control") }}
         </div>
         <div class="form-group required">
+            {{ form.date.label }}
+            {{ form.date(class="form-control", readonly=true) }}
+        </div>
+        <div class="form-group required">
             {{ form.division.label }}
             {{ form.division(class="form-control") }}
         </div>

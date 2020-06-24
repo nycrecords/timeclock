@@ -9,8 +9,7 @@ from wtforms import (
     FloatField,
     BooleanField,
     SelectMultipleField,
-    ValidationError,
-    RadioField
+    ValidationError
 )
 from wtforms.validators import DataRequired, Optional, Length, Email
 
@@ -287,6 +286,7 @@ class ExportForm(Form):
 class HealthScreenForm(Form):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired()])
+    date = StringField("Date", default=datetime.today().strftime("%Y-%m-%d"), validators=[DataRequired()])
     division = StringField("Division", validators=[DataRequired()])
     questionnaire_confirmation = BooleanField(validators=[DataRequired()])
     report_to_work = SelectField(choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()])
