@@ -51,6 +51,7 @@ from .modules import (
     generate_timesheet,
     generate_timesheets,
     create_csv,
+    process_health_screen_confirmation,
 )
 from .payments import get_payrate_before_or_after, calculate_hours_worked
 from .requests import (
@@ -929,6 +930,7 @@ def health_screen_confirm():
         report_to_work = request.form["report_to_work"]
 
         # Generate and email PDF
+        process_health_screen_confirmation(name, email, division, date, report_to_work)
 
         flash("Screening completed. You will receive a confirmation email shortly.", category="success")
         return redirect(url_for("auth.login"))

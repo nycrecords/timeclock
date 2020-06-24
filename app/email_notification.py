@@ -36,3 +36,16 @@ def send_email(to, subject, template, **kwargs):
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return thr
+
+
+def send_health_screen_confirmation_email(to, bcc, subject, filename, attachment):
+    app = current_app._get_current_object()
+    msg = Message(subject,
+                  sender="healthcheck@records.nyc.gov",
+                  recipients=to,
+                  bcc=bcc)
+
+    msg.attach(filename, "application/pdf", attachment)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr
