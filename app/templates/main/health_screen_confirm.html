@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Employee Health Screening{% endblock %}
+
+{% block page_content %}
+    <h1 style="text-align: center;">Employee Health Screening</h1>
+    <h2>Please answer the questions below and click the Submit button when done.</h2>
+    <form id="health-screen-confirm-form" method="POST">
+        {{ form.csrf_token }}
+        <div class="form-group required">
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}
+        </div>
+        <div class="form-group required">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+        </div>
+        <div class="form-group required">
+            {{ form.division.label }}
+            {{ form.division(class="form-control") }}
+        </div>
+        <ol>
+            <li>Click here to confirm you completed the entire questionnaire.&nbsp;&nbsp;{{ form.questionnaire_confirmation }}</li><br>
+            <li>Based on your questionnaire results, you may report to work yes or no.&nbsp;&nbsp;{{ form.report_to_work }}</li><br>
+        </ol>
+    <p>If your response is “No”, please contact Naomi Pacheco (<a href="mailto:napacheco@records.nyc.gov">napacheco@records.nyc.gov</a>) in Human Resources.</p><br>
+    {{ form.submit(class="btn btn-default") }}
+    </form>
+{% endblock %}

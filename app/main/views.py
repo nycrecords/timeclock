@@ -34,6 +34,7 @@ from .forms import (
     RequestVacationForm,
     FilterVacationForm,
     ExportForm,
+    HealthScreenForm
 )
 from .modules import (
     process_clock,
@@ -912,4 +913,25 @@ def review_vacations():
         filter=filter_form,
         clear=clear_form,
         query_has_results=query_has_results,
+    )
+
+
+@main.route("/health_screen_confirm", methods=["GET", "POST"])
+def health_screen_confirm():
+    form = HealthScreenForm()
+
+    if form.validate_on_submit():
+        name = request.form["name"]
+        email = request.form["email"]
+        division = request.form["division"]
+        questionnaire_confirmation = request.form["division"]
+        report_to_work = request.form["report_to_work"]
+
+        # Generate and email PDF
+
+        flash("Screening completed. You will receive a confirmation email shortly.", category="success")
+        return redirect(url_for("auth.login"))
+    return render_template(
+        "main/health_screen_confirm.html",
+        form=form
     )
