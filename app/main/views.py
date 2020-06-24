@@ -923,6 +923,7 @@ def health_screen_confirm():
     if form.validate_on_submit():
         name = request.form["name"]
         email = request.form["email"]
+        date = request.form["date"]
         division = request.form["division"]
         questionnaire_confirmation = request.form["division"]
         report_to_work = request.form["report_to_work"]
