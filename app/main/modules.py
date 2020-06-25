@@ -571,14 +571,15 @@ def process_health_screen_confirmation(
     pdf = buffer.getvalue()
     buffer.close()
 
-    filename = "{username}-health-check-{date}.pdf".format(
+    filename = "{username}-health-check-report_to_work-{report_to_work}-{date}.pdf".format(
         username=email.split("@")[0],
+        report_to_work=report_to_work.lower(),
         date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
     )
     send_health_screen_confirmation_email(
         ["healthcheck@records.nyc.gov"],
         [email],
-        "Health Screening Confirmation - " + name,
+        "(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(report_to_work=report_to_work, date=date, name=name),
         filename,
         pdf,
         name,
