@@ -925,12 +925,13 @@ def health_screen_confirm():
 
     if form.validate_on_submit():
         if (
-            not request.form.get("email", "").split("@")[-1]
+            not request.form.get("email", "").split("@")[-1].lower()
             == current_app.config["EMAIL_DOMAIN"]
         ):
             form.email.errors.append("You must enter a @records.nyc.gov email address.")
             return render_template("main/health_screen_confirm.html", form=form)
-        email = request.form["email"]
+        name = request.form["name"]
+        email = request.form["email"].lower()
         date = request.form["date"]
         division = request.form["division"]
         questionnaire_confirmation = request.form["division"]

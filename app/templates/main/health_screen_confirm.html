@@ -4,8 +4,8 @@
 {% block title %}TimeClock - Employee Health Screening{% endblock %}
 
 {% block page_content %}
-<h1 style="text-align: center;">Employee Health Screening</h1>
-
+<h1 style="text-align: center;">Employee Health Screening <!--<sup><a href="#footnote1" id="ref1">1</a></sup>--></h1>
+<!-- 
 <h2>Please answer the following four (4) questions on your own before reporting to the office and then complete the health
     screening confirmation at the bottom of this page. </h2>
 
@@ -61,7 +61,8 @@
 </h3>
 <h3><span id="results"></span></h3>
 <hr>
-<h3>To submit your health screening confirmation, please fill out the form below and click the Submit button when done.
+ -->
+<h2>To submit your health screening confirmation, please fill out the form below and click the Submit button when done.
     </h2>
     {% for field, errors in form.errors.items() %}
 <div class="alert alert-danger">
@@ -96,4 +97,7 @@
                 href="mailto:healthcheck@records.nyc.gov">healthcheck@records.nyc.gov</a></p><br>
         {{ form.submit(class="btn btn-default") }}
     </form>
-    {% endblock %}
+<!-- 
+    <hr>
+    <p id="footnote1">1. The Department of Records and Information Services is using this questionnaire so as to comply with the NYS Phase 2 Office-Based Work Guidance. <a href="https://www.governor.ny.gov/sites/governor.ny.gov/files/atoms/files/offices-interim-guidance.pdf">https://www.governor.ny.gov/sites/governor.ny.gov/files/atoms/files/offices-interim-guidance.pdf</a>, pg. 9. <a href="#ref1" title="Jump back to footnote 1 in the text.">↩</a></p>
+    {% endblock %} -->
