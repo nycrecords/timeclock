@@ -1,0 +1,162 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}TimeClock{% endblock %}
+<!-- title block inherited from bootstrap/base.html -->
+
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+<link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet"
+    media="screen">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" rel="stylesheet"
+    media="screen">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css" rel="stylesheet"
+    media="screen">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css.map"
+    rel="stylesheet" media="screen">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js">
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" />
+{% endblock %}
+
+{% block navbar %}
+<!-- Navigation base HTML will go here -->
+<div class="navbar navbar-default" role="navigation" style="border-radius: 0; font-family: 'Sofia Pro Soft', 'Trebuchet MS'; -webkit-font-smoothing: antialiased;
+    background-color: #2a6496; border-color: #2a6496;">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ url_for('main.health_screen_confirm') }}" style="color:white">Employee
+                Health Screen</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="history-dropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                            Telework Instructions
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="history-dropdown">
+                            <li><a href="https://records-timeclock.readthedocs.io/en/latest/" target="_blank">TimeClock
+                                    Help</a></li>
+                </li>
+                <li>
+                    <a href="{{ url_for('static', filename="files/DORIS Remote Access Instructions.pdf") }}"
+                        target="_blank">Remote Access Instructions</a></li>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('static', filename="files/DORIS VM Quick Reference.pdf") }}"
+                        target="_blank">Voicemail Quick Reference Guide</a></li>
+                </li>
+                <li>
+                    <a href="{{ url_for('static', filename="files/DORIS - Guidelines for Teleworking Employees.pdf") }}"
+                        target="_blank">Guidelines for Teleworking </a></li>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        </li>
+        </ul>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="font-family: 'Sofia Pro Soft'; -webkit-font-smoothing: antialiased">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    {% if category == 'error' %}
+    <div class="alert alert-danger">
+        {% else %}
+        <div class="alert alert-{{ category }}">
+            {% endif %}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {% block page_content %}
+        {% endblock %}
+    </div>
+    {% endblock %}
+
+
+
+    {% block scripts %}
+    <!-- Include any JS scripts here -->
+    {{ super() }}
+    {{ moment.include_moment() }}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.js"></script>
+    <!-- <script>
+        $(document).ready(function () {
+            var questionOne = $('#questionOne');
+            var questionOneItem = $('#questionOneItem');
+            var questionTwo = $('#questionTwo');
+            var questionTwoItem = $('#questionTwoItem');
+            var questionThree = $('#questionThree');
+            var questionThreeItem = $('#questionThreeItem');
+            var questionFour = $('#questionFour');
+            var questionFourItem = $('#questionFourItem');
+            var resultsSpan = $('#results');
+
+            questionOne.change(function () {
+                var selectedValue = $(this).children("option:selected").val();
+                if (selectedValue === "yes") {
+                    questionTwoItem.hide();
+                    questionThreeItem.hide();
+                    questionFourItem.hide();
+                    resultsSpan.html("No further screening is needed. The employee may not report to work. Please submit the health screen confirmation below and contact the Administration Division by emailing <a href=\"mailto:healthcheck@records.nyc.gov\">healthcheck@records.nyc.gov</a>");
+                } else {
+                    questionTwoItem.show();
+                    questionThreeItem.show();
+                    questionFourItem.show();
+                    resultsSpan.html("");
+                }
+            })
+
+            questionTwo.change(function () {
+                var selectedValue = $(this).children("option:selected").val();
+                if (selectedValue === "yes") {
+                    questionThreeItem.hide();
+                    questionFourItem.hide();
+                    resultsSpan.html("No further screening is needed. The employee may not report to work. Please submit the health screen confirmation below and contact the Administration Division by emailing <a href=\"mailto:healthcheck@records.nyc.gov\">healthcheck@records.nyc.gov</a>");
+                } else {
+                    questionThreeItem.show();
+                    questionFourItem.show();
+                    resultsSpan.html("");
+                }
+            })
+
+            questionThree.change(function () {
+                var selectedValue = $(this).children("option:selected").val();
+                if (selectedValue === "yes") {
+                    questionFourItem.hide();
+                    resultsSpan.html("No further screening is needed. The employee may not report to work. Please submit the health screen confirmation below and contact the Administration Division by emailing <a href=\"mailto:healthcheck@records.nyc.gov\">healthcheck@records.nyc.gov</a>");
+                } else {
+                    questionFourItem.show();
+                    resultsSpan.html("");
+                }
+            })
+            questionFour.change(function () {
+                var selectedValue = $(this).children("option:selected").val();
+                if (selectedValue === "yes") {
+                    resultsSpan.html("No further screening is needed. The employee may not report to work. Please submit the health screen confirmation below and contact the Administration Division by emailing <a href=\"mailto:healthcheck@records.nyc.gov\">healthcheck@records.nyc.gov</a>");
+                } else {
+                    resultsSpan.html("The employee may report to work.");
+                }
+            })
+        });
+    </script> -->
+    {% endblock %}

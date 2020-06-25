@@ -281,3 +281,25 @@ class GenerateMultipleTimesheetsForm(Form):
 
 class ExportForm(Form):
     export = SubmitField("Export")
+
+
+class HealthScreenForm(Form):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Email("You must provide a valid @records.nyc.gov email address."),
+        ],
+    )
+    date = StringField(
+        "Date",
+        default=datetime.today().strftime("%-m/%-d/%Y"),
+        validators=[DataRequired()],
+    )
+    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
+    questionnaire_confirmation = BooleanField(validators=[DataRequired()])
+    report_to_work = SelectField(
+        choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()]
+    )
+    submit = SubmitField("Submit")

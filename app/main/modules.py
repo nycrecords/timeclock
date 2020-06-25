@@ -11,10 +11,14 @@ from .pdf import (
     generate_timetable,
     generate_signature_template,
     generate_footer,
+    generate_health_screen_confirmation,
 )
 from .. import db
-from ..email_notification import send_email
+from ..email_notification import send_email, send_health_screen_confirmation_email
 from ..models import User, Event, Tag, Vacation
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from pytz import timezone
 
 
@@ -552,3 +556,30 @@ def create_csv(events=None):
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+def process_health_screen_confirmation(
+    name, email, division, date, questionnaire_confirmation, report_to_work
+):
+
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    generate_health_screen_confirmation(
+        c, name, division, date, questionnaire_confirmation, report_to_work
+    )
+    c.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    filename = "{username}-health-check-{date}.pdf".format(
+        username=email.split("@")[0],
+        date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
+    )
+    send_health_screen_confirmation_email(
+        ["healthcheck@records.nyc.gov"],
+        [email],
+        "Health Screening Confirmation - " + name,
+        filename,
+        pdf,
+        name,
+    )

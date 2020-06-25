@@ -257,3 +257,42 @@ def generate_footer(canvas_field):
     canvas_field.drawString(470, 20, datetime.now().strftime("%b %d, %Y %l:%M:%S %p"))
     canvas_field.line(25, 30, width - 25, 30)
     current_app.logger.info("PDF: Finished generating footer...")
+
+
+def generate_health_screen_confirmation(
+    canvas_field, name, division, date, questionnaire_confirmation, report_to_work
+):
+    canvas_field.setFont("Times-Bold", 14)
+    canvas_field.drawString(220, length - 52, "Employee Health Screening")
+
+    canvas_field.setFont("Times-Roman", 12)
+    canvas_field.drawString(70, length - 110, "Name: " + name)
+
+    canvas_field.drawString(70, length - 140, "Division: " + division)
+
+    canvas_field.drawString(70, length - 170, "Date: " + date)
+
+    if questionnaire_confirmation:
+        canvas_field.drawString(
+            70,
+            length - 200,
+            "1.   Employee confirms they have completed the entire health check questionnaire: Yes",
+        )
+    else:
+        canvas_field.drawString(
+            70,
+            length - 200,
+            "1.   Employee confirms they have completed the entire health check questionnaire: No",
+        )
+    canvas_field.drawString(
+        70,
+        length - 230,
+        "2.   Based on the questionnaire results, the employee may return to work on {date}: {report_to_work}".format(
+            date=date, report_to_work=report_to_work
+        ),
+    )
+    canvas_field.drawString(
+        70,
+        length - 300,
+        "If your response is “no”, please contact the Administration Division at healthcheck@records.nyc.gov.",
+    )

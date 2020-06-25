@@ -9,12 +9,11 @@ divisions = [
     ("Administration", "Administration"),
     ("Archives", "Archives"),
     ("Executive", "Executive"),
-    ("Grants", "Grants"),
+    ("External Affairs", "External Affairs"),
+    ("IT", "IT"),
     ("Library", "Library"),
     ("Records Management", "Records Management"),
     ("Reference Room", "Reference Room"),
-    ("Social Media", "Social Media"),
-    ("Tech", "Tech"),
 ]
 
 roles = [("User", "User"), ("Administrator", "Administrator")]
