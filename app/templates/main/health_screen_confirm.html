@@ -1,11 +1,68 @@
-{% extends "base.html" %}
+{% extends "base_healthscreen.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}TimeClock - Employee Health Screening{% endblock %}
 
 {% block page_content %}
-    <h1 style="text-align: center;">Employee Health Screening</h1>
-    <h2>Please answer the questions below and click the Submit button when done.</h2>
+<h1 style="text-align: center;">Employee Health Screening</h1>
+
+<h2>Please answer the following four (4) questions on your own before reporting to the office and then complete the health
+    screening confirmation at the bottom of this page. </h2>
+
+<h3>By filling in the four (4) questions below <strong><em>you are not submitting your individual responses to your employer.</em></strong></h3>
+
+<p>
+    You are being asked to answer this questionnaire in order to determine whether you are experiencing any symptoms
+    that could be consistent with COVID-19. This is being done solely for the purpose of protecting your workplace from
+    potential spread of the disease. Any results you get, and/or any directive you receive to stay home, does not
+    constitute a diagnosis of COVID-19, nor are we advising you whether you need to get tested or contact a physician.
+    You can consult CDC and health department websites for guidance in that regard.
+</p>
+<ol>
+    <li id="questionOneItem">
+        Do you currently have a fever of 100.4 degrees F or greater?
+        <select id="questionOne">
+            <option value=""></option>
+            <option value="yes">Yes</option>
+            <option value="">No</option>
+        </select>
+    </li>
+    <li id="questionTwoItem">
+        Do you have a cough or shortness of breath that began within the past 14 days?
+        <select id="questionTwo">
+            <option value=""></option>
+            <option value="yes">Yes</option>
+            <option value="">No</option>
+        </select>
+    </li>
+    <li id="questionThreeItem">
+        In the past 14 days, have you gotten a positive result from a COVID-19 test that tested saliva or used a nose or
+        throat swab? (not a blood test) ?
+        <select id="questionThree">
+            <option value=""></option>
+            <option value="yes">Yes</option>
+            <option value="">No</option>
+        </select>
+    </li>
+    <li id="questionFourItem">
+        In the past 14 days, have you been in close contact (within 6 feet for at least 10 minutes) with anyone who
+        either tested positive for COVID-19 (not a blood test) or developed symptoms of COVID-19 (fever, cough, or
+        shortness of breath)?
+        <select id="questionFour">
+            <option value=""></option>
+            <option value="yes">Yes</option>
+            <option value="">No</option>
+        </select>
+    </li>
+</ol>
+
+<h3>
+    Questionnaire Results:
+</h3>
+<h3><span id="results"></span></h3>
+<hr>
+<h3>To submit your health screening confirmation, please fill out the form below and click the Submit button when done.
+    </h2>
     <form id="health-screen-confirm-form" method="POST">
         {{ form.csrf_token }}
         <div class="form-group required">
@@ -25,10 +82,13 @@
             {{ form.division(class="form-control") }}
         </div>
         <ol>
-            <li>Click here to confirm you completed the entire questionnaire.&nbsp;&nbsp;{{ form.questionnaire_confirmation }}</li><br>
-            <li>Based on your questionnaire results, you may report to work yes or no.&nbsp;&nbsp;{{ form.report_to_work }}</li><br>
+            <li>Click here to confirm you completed the entire
+                questionnaire.&nbsp;&nbsp;{{ form.questionnaire_confirmation }}</li><br>
+            <li>Based on your questionnaire results, you may report to work yes or
+                no.&nbsp;&nbsp;{{ form.report_to_work }}</li><br>
         </ol>
-    <p>If your response is “No”, please contact Naomi Pacheco (<a href="mailto:napacheco@records.nyc.gov">napacheco@records.nyc.gov</a>) in Human Resources.</p><br>
-    {{ form.submit(class="btn btn-default") }}
+        <p>If your response is “No”, please contact the Administration Division at <a
+                href="mailto:healthcheck@records.nyc.gov">healthcheck@records.nyc.gov</a></p><br>
+        {{ form.submit(class="btn btn-default") }}
     </form>
-{% endblock %}
+    {% endblock %}

@@ -38,12 +38,11 @@ def send_email(to, subject, template, **kwargs):
     return thr
 
 
-def send_health_screen_confirmation_email(to, bcc, subject, filename, attachment):
+def send_health_screen_confirmation_email(to, bcc, subject, filename, attachment, name):
     app = current_app._get_current_object()
-    msg = Message(subject,
-                  sender="healthcheck@records.nyc.gov",
-                  recipients=to,
-                  bcc=bcc)
+    msg = Message(subject, sender="healthcheck@records.nyc.gov", recipients=to, bcc=bcc)
+
+    msg.html = render_template("main/email/employee_health_screen_results.html", name=name)
 
     msg.attach(filename, "application/pdf", attachment)
     thr = Thread(target=send_async_email, args=[app, msg])

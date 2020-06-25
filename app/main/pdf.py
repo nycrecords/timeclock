@@ -259,86 +259,40 @@ def generate_footer(canvas_field):
     current_app.logger.info("PDF: Finished generating footer...")
 
 
-def generate_health_screen_confirmation(canvas_field, name, division, date, report_to_work):
+def generate_health_screen_confirmation(
+    canvas_field, name, division, date, questionnaire_confirmation, report_to_work
+):
     canvas_field.setFont("Times-Bold", 14)
-    canvas_field.drawString(
-        220,
-        length - 52,
-        "Employee Health Screening"
-    )
-
-    canvas_field.setFont("Times-Bold", 12)
-    canvas_field.drawString(
-        110,
-        length - 66,
-        "Please answer the questions below and click the Submit button when done."
-    )
+    canvas_field.drawString(220, length - 52, "Employee Health Screening")
 
     canvas_field.setFont("Times-Roman", 12)
-    canvas_field.drawString(
-        70,
-        length - 110,
-        "Name: " + name
-    )
+    canvas_field.drawString(70, length - 110, "Name: " + name)
 
-    canvas_field.drawString(
-        70,
-        length - 140,
-        "Division: " + division
-    )
+    canvas_field.drawString(70, length - 140, "Division: " + division)
 
-    canvas_field.drawString(
-        70,
-        length - 170,
-        "Date: " + date
-    )
+    canvas_field.drawString(70, length - 170, "Date: " + date)
 
-    canvas_field.drawString(
-        70,
-        length - 200,
-        "1.   Click here to confirm you completed the entire questionnaire."
-    )
-
-    canvas_field.acroForm.checkbox(checked=True,
-                                   size=13,
-                                   x=385,
-                                   y=length - 202)
-
-    if report_to_work == 'Yes':
-        checked_yes = True
-        checked_no = False
+    if questionnaire_confirmation:
+        canvas_field.drawString(
+            70,
+            length - 200,
+            "1.   Employee confirms they have completed the entire health check questionnaire: Yes",
+        )
     else:
-        checked_yes = False
-        checked_no = True
-
+        canvas_field.drawString(
+            70,
+            length - 200,
+            "1.   Employee confirms they have completed the entire health check questionnaire: No",
+        )
     canvas_field.drawString(
         70,
         length - 230,
-        "2.   Based on your questionnaire results, you may report to work yes or no."
+        "2.   Based on the questionnaire results, the employee may return to work on {date}: {report_to_work}".format(
+            date=date, report_to_work=report_to_work
+        ),
     )
-
     canvas_field.drawString(
-        435,
-        length - 230,
-        "Yes"
-    )
-    canvas_field.acroForm.checkbox(checked=checked_yes,
-                                   size=13,
-                                   x=455,
-                                   y=length - 232)
-
-    canvas_field.drawString(
-        472,
-        length - 230,
-        "No"
-    )
-    canvas_field.acroForm.checkbox(checked=checked_no,
-                                   size=13,
-                                   x=489,
-                                   y=length - 232)
-
-    canvas_field.drawString(
-        89,
-        length - 245,
-        "If your response is “no”, please contact healthcheck@records.nyc.gov in Human Resources."
+        70,
+        length - 300,
+        "If your response is “no”, please contact the Administration Division at healthcheck@records.nyc.gov.",
     )

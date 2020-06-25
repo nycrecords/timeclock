@@ -16,6 +16,9 @@ from .pdf import (
 from .. import db
 from ..email_notification import send_email, send_health_screen_confirmation_email
 from ..models import User, Event, Tag, Vacation
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 
 def process_clock(note_data, ip=None):
@@ -550,21 +553,29 @@ def create_csv(events=None):
     return output
 
 
-def process_health_screen_confirmation(name, email, division, date, report_to_work):
-    from io import BytesIO
-    from reportlab.lib.pagesizes import letter
-    from reportlab.pdfgen import canvas
+def process_health_screen_confirmation(
+    name, email, division, date, questionnaire_confirmation, report_to_work
+):
 
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
-    generate_health_screen_confirmation(c, name, division, date, report_to_work)
+    generate_health_screen_confirmation(
+        c, name, division, date, questionnaire_confirmation, report_to_work
+    )
     c.save()
     pdf = buffer.getvalue()
     buffer.close()
-    filename = "{}-{}-health-check.pdf".format(date, email.split("@")[0])
 
-    send_health_screen_confirmation_email(["gzhou@records.nyc.gov"],
-                                          [email],
-                                          "Health Screening Confirmation - " + name,
-                                          filename,
-                                          pdf)
+    filename = "{username}-health-check-{date}.pdf".format(
+        username=email.split("@")[0], date=datetime.strptime(date,'%m/%d/%Y').strftime('%Y-%m-%d')
+    )
+    print(date)
+
+    send_health_screen_confirmation_email(
+        ["healthcheck@records.nyc.gov"],
+        [email],
+        "Health Screening Confirmation - " + name,
+        filename,
+        pdf,
+        name
+    )

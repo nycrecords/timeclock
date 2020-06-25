@@ -60,6 +60,7 @@ psycopg2-binary = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 python-dotenv = "*"
+email-validator = "*"
 
 [requires]
 python_version = "3.7"
