@@ -575,8 +575,6 @@ def process_health_screen_confirmation(
         username=email.split("@")[0],
         date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
     )
-    print(date)
-
     send_health_screen_confirmation_email(
         ["healthcheck@records.nyc.gov"],
         [email],
