@@ -572,7 +572,8 @@ def process_health_screen_confirmation(
     buffer.close()
 
     filename = "{username}-health-check-{date}.pdf".format(
-        username=email.split("@")[0], date=datetime.strptime(date,'%m/%d/%Y').strftime('%Y-%m-%d')
+        username=email.split("@")[0],
+        date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
     )
     print(date)
 
@@ -582,5 +583,5 @@ def process_health_screen_confirmation(
         "Health Screening Confirmation - " + name,
         filename,
         pdf,
-        name
+        name,
     )

@@ -285,7 +285,13 @@ class ExportForm(Form):
 
 class HealthScreenForm(Form):
     name = StringField("Name", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired()])
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Email("You must provide a valid @records.nyc.gov email address."),
+        ],
+    )
     date = StringField(
         "Date",
         default=datetime.today().strftime("%-m/%-d/%Y"),

@@ -63,6 +63,11 @@
 <hr>
 <h3>To submit your health screening confirmation, please fill out the form below and click the Submit button when done.
     </h2>
+    {% for field, errors in form.errors.items() %}
+<div class="alert alert-danger">
+    {{ ', '.join(errors) }}
+</div>
+{% endfor %}
     <form id="health-screen-confirm-form" method="POST">
         {{ form.csrf_token }}
         <div class="form-group required">

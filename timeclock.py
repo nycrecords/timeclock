@@ -15,7 +15,7 @@ from app.models import (
     Tag,
 )
 
-if os.getenv('FLASK_ENV') == 'development':
+if os.getenv("FLASK_ENV") == "development":
     from faker import Faker
 from app.utils import divisions, tags
 
