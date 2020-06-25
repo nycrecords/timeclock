@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+faker = "*"
 ipdb = "*"
 ipython = "*"
 flask-shell-ipython = "*"
@@ -13,7 +14,6 @@ alembic = "*"
 blinker = "*"
 cairocffi = "*"
 cffi = "*"
-click = "*"
 cssselect = "*"
 gunicorn = "*"
 html5lib = "*"
@@ -63,7 +63,7 @@ python-dotenv = "*"
 email-validator = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true

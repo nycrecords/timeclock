@@ -1,6 +1,5 @@
 import os
 
-import click
 from flask_migrate import Migrate
 
 from app import create_app, db
@@ -15,6 +14,10 @@ from app.models import (
     Role,
     Tag,
 )
+
+if os.getenv('FLASK_ENV') == 'development':
+    from faker import Faker
+from app.utils import divisions, tags
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app, db)
@@ -46,15 +49,15 @@ def test():
     unittest.TextTestRunner(verbosity=2).run(tests)
 
 
-@app.cli.command()
-def db_setup():
+@app.cli.command("setup_db")
+def setup_db():
     """Setup the database."""
     db.create_all()
     Role.insert_roles()
     Tag.insert_tags()
 
 
-@app.cli.command()
+@app.cli.command("reset_db")
 def reset_db():
     """Reset the database."""
     db.drop_all()
@@ -63,7 +66,7 @@ def reset_db():
     Tag.insert_tags()
 
 
-@app.cli.command()
+@app.cli.command("setup_roles")
 def setup_roles():
     """Insert roles in the proper order."""
     Role.query.delete()
@@ -73,4 +76,78 @@ def setup_roles():
     db.session.add(user)
     db.session.add(moderator)
     db.session.add(administrator)
+    db.session.commit()
+
+
+@app.cli.command("create_dev_users")
+def create_dev_users():
+    """Create users for development."""
+    # Administrator
+    faker = Faker()
+    first_name = faker.first_name()
+    last_name = faker.last_name()
+    tag_id = faker.random_int(min=1, max=len(tags) - 1)
+    division = faker.random_elements(elements=divisions, length=1)[0][0]
+    administrator = User(
+        email="{first_initial}{last_name}@{email_domain}".format(
+            first_initial=first_name[0].lower(),
+            last_name=last_name.lower(),
+            email_domain=app.config["EMAIL_DOMAIN"],
+        ),
+        first_name=first_name,
+        last_name=last_name,
+        password="Change4me",
+        division=division,
+        role=Role.query.filter_by(name="Administrator").first(),
+        tag_id=tag_id,
+        is_supervisor=True,
+    )
+    db.session.add(administrator)
+    administrator.password_list.update(administrator.password_hash)
+
+    # Supervisor
+    first_name = faker.first_name()
+    last_name = faker.last_name()
+    tag_id = faker.random_int(min=1, max=len(tags) - 1)
+    division = faker.random_elements(elements=divisions, length=1)[0][0]
+    supervisor = User(
+        email="{first_initial}{last_name}@{email_domain}".format(
+            first_initial=first_name[0].lower(),
+            last_name=last_name.lower(),
+            email_domain=app.config["EMAIL_DOMAIN"],
+        ),
+        first_name=first_name,
+        last_name=last_name,
+        password="Change4me",
+        division=division,
+        role=Role.query.filter_by(name="User").first(),
+        tag_id=tag_id,
+        is_supervisor=True,
+    )
+    db.session.add(supervisor)
+    supervisor.password_list.update(supervisor.password_hash)
+
+    # Users
+    for i in range(10):
+        first_name = faker.first_name()
+        last_name = faker.last_name()
+        tag_id = faker.random_int(min=1, max=len(tags) - 1)
+        division = faker.random_elements(elements=divisions, length=1)[0][0]
+        user = User(
+            email="{first_initial}{last_name}@{email_domain}".format(
+                first_initial=first_name[0].lower(),
+                last_name=last_name.lower(),
+                email_domain=app.config["EMAIL_DOMAIN"],
+            ),
+            first_name=first_name,
+            last_name=last_name,
+            password="Change4me",
+            division=division,
+            role=Role.query.filter_by(name="User").first(),
+            tag_id=tag_id,
+            is_supervisor=False,
+        )
+        db.session.add(user)
+        user.password_list.update(user.password_hash)
+
     db.session.commit()
