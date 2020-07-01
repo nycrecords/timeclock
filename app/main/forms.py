@@ -294,7 +294,7 @@ class HealthScreenForm(Form):
     )
     date = StringField(
         "Date",
-        default=datetime.today().strftime("%-m/%-d/%Y"),
+        default="",
         validators=[DataRequired()],
     )
     division = SelectField("Division", choices=divisions, validators=[DataRequired()])
