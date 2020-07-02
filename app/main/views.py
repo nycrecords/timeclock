@@ -921,9 +921,9 @@ def review_vacations():
 
 @main.route("/healthscreen", methods=["GET", "POST"])
 def health_screen_confirm():
-    form = HealthScreenForm()
-    form.date.default = datetime.now().strftime('%-m/%-d/%Y')
-    form.process()
+    class HealthScreenData(object):
+        date = datetime.now().strftime('%-m/%-d/%Y')
+    form = HealthScreenForm(obj=HealthScreenData)
 
     if form.validate_on_submit():
         if (
