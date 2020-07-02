@@ -42,7 +42,11 @@
     <br/>
 
     {#  Collapsible form for filter options  #}
+    {%if filter_request %}
+    <div id="filter-form" class="panel-collapse collapse in">
+    {% else  %}
     <div id="filter-form" class="collapse">
+    {% endif  %}
         <div class="row" style="margin-bottom: 10px">
             <div class="col-md-8 col-md-offset-2">
                 {{ wtf.quick_form(form) }}
@@ -151,7 +155,11 @@
         <button data-toggle="collapse" data-target="#add-form" class="btn btn-info" style="float:left"> Add
             Event
         </button>
+        {% if add_request %}
+        <div id="add-form" class="panel-collapse collapse in">
+        {% else %}
         <div id="add-form" class="collapse">
+        {% endif %}
             <div class="row" style="margin-bottom: 10px">
                 <div class="col-md-8 col-md-offset-2">
                     {{ wtf.quick_form(addform) }}
