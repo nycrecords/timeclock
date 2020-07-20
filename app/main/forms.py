@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from flask import current_app
-from flask_wtf import Form
+from flask_wtf import Form, RecaptchaField
 from wtforms import (
     StringField,
     SubmitField,
@@ -302,4 +302,5 @@ class HealthScreenForm(Form):
     report_to_work = SelectField(
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()]
     )
+    recaptcha = RecaptchaField()
     submit = SubmitField("Submit")
