@@ -20,6 +20,10 @@ class Config:
     ADMIN = os.environ.get("ADMIN") or "admin@records.nyc.gov"
     EMAIL_DOMAIN = "records.nyc.gov"
 
+    # ReCaptcha v3
+    RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "")
+    RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
+    
     @staticmethod
     def init_app(app):
         pass
