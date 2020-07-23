@@ -12,9 +12,8 @@ from wtforms import (
     ValidationError,
 )
 from wtforms.validators import DataRequired, Optional, Length, Email
-
 from app.models import User
-from app.utils import tags, divisions, roles
+from app.utils import tags, divisions, roles, Recaptcha3Field
 
 
 class ClockInForm(Form):
@@ -302,5 +301,5 @@ class HealthScreenForm(Form):
     report_to_work = SelectField(
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()]
     )
-    recaptcha = RecaptchaField(validators=[Recaptcha(message="You must complete the captcha.")])
+    recaptcha = Recaptcha3Field(action="TestAction", execute_on_load=True)
     submit = SubmitField("Submit")

@@ -24,6 +24,9 @@ class Config:
     RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "")
     RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
     
+    RECAPTCHA3_PUBLIC_KEY = os.environ.get("RECAPTCHA_SITE_KEY_V3", "")
+    RECAPTCHA3_PRIVATE_KEY = os.environ.get("RECAPTCHA_SECRET_KEY_V3", "")
+    
     @staticmethod
     def init_app(app):
         pass
