@@ -10,6 +10,7 @@ from app import db
 from app import login_manager
 from app.utils import InvalidResetToken
 
+
 class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
@@ -53,6 +54,7 @@ class Role(db.Model):
 
     def __repr__(self):
         return "<Role %r>" % self.name
+
 
 class User(UserMixin, db.Model):
     """
@@ -395,6 +397,7 @@ class Vacation(db.Model):
     end = db.Column(db.DateTime())
     approved = db.Column(db.Boolean, default=False)
     pending = db.Column(db.Boolean, default=True)
+
 
 class HealthScreen(db.Model):
     """Model that stores health screen form submissions."""

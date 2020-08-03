@@ -4,7 +4,7 @@
    :synopsis: Handles all core URL endpoints for the timeclock application
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import current_app
 from flask import (
@@ -22,6 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from . import main
 from .forms import (
     AdminFilterEventsForm,
+    HealthScreenAdminForm,
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
@@ -63,7 +64,7 @@ from .requests import (
 )
 from .. import db
 from ..decorators import admin_required
-from ..models import Pay, User, Vacation, Tag
+from ..models import Pay, User, Vacation, Tag, HealthScreen
 from app.utils import eval_request_bool
 
 
@@ -922,7 +923,8 @@ def review_vacations():
 @main.route("/healthscreen", methods=["GET", "POST"])
 def health_screen_confirm():
     class HealthScreenData(object):
-        date = datetime.now().strftime('%-m/%-d/%Y')
+        date = datetime.now().strftime("%-m/%-d/%Y")
+
     form = HealthScreenForm(obj=HealthScreenData)
 
     if form.validate_on_submit():
@@ -930,7 +932,11 @@ def health_screen_confirm():
             not request.form.get("email", "").split("@")[-1].lower()
             == current_app.config["EMAIL_DOMAIN"]
         ):
-            form.email.errors.append("You must enter a {email_domain} email address.".format(email_domain=current_app.config["EMAIL_DOMAIN"]))
+            form.email.errors.append(
+                "You must enter a {email_domain} email address.".format(
+                    email_domain=current_app.config["EMAIL_DOMAIN"]
+                )
+            )
             return render_template("main/health_screen_confirm.html", form=form)
         name = request.form["name"]
         email = request.form["email"].lower()
@@ -950,3 +956,34 @@ def health_screen_confirm():
         )
         return redirect(url_for("main.health_screen_confirm"))
     return render_template("main/health_screen_confirm.html", form=form)
+
+
+@main.route("/healthscreen-admin", methods=["GET", "POST"])
+def health_screen_admin():
+    class HealthScreenData(object):
+        date = datetime.now().strftime("%-m/%-d/%Y")
+
+    form = HealthScreenAdminForm(obj=HealthScreenData)
+    import ipdb; ipdb.set_trace()
+
+    if form.validate_on_submit():
+        name = request.form["name"]
+        email = request.form["email"].lower()
+        date = request.form["date"]
+        division = request.form["division"]
+        report_to_work = eval_request_bool(request.form["report_to_work"])
+
+        results = HealthScreen.query.filter(
+            HealthScreen.name.like(name),
+            HealthScreen.email.like(email),
+            HealthScreen.date >= datetime.strptime(date, "%-m/%-d/%Y"),
+            HealthScreen.date < datetime.strptime(date, "%-m/%-d/%Y") + timedelta(days=1),
+            HealthScreen.division.like(division),
+            HealthScreen.report_to_work.like(report_to_work),
+        ).all()
+    else:
+        results = HealthScreen.query.filter(
+            HealthScreen.date >= ,
+            HealthScreen.date < datetime.today() + timedelta(days=1),
+        ).all()
+    return render_template("main/health_screen_admin.html", results=results, form=form)

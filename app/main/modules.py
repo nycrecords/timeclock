@@ -569,7 +569,7 @@ def process_health_screen_confirmation(
         division=division,
         date=date,
         questionnaire_confirmation=eval_request_bool(questionnaire_confirmation),
-        report_to_work=eval_request_bool(report_to_work)
+        report_to_work=eval_request_bool(report_to_work),
     )
     db.session.add(health_screen)
     db.session.commit()
@@ -591,7 +591,9 @@ def process_health_screen_confirmation(
     send_health_screen_confirmation_email(
         ["healthcheck@records.nyc.gov"],
         [email],
-        "(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(report_to_work=report_to_work, date=date, name=name),
+        "(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(
+            report_to_work=report_to_work, date=date, name=name
+        ),
         filename,
         pdf,
         name,

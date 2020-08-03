@@ -21,9 +21,11 @@ from app.utils import tags
 
 login_manager.anonymous_user = AnonymousUser
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 def check_password_requirements(email, old_password, password, password_confirmation):
     """

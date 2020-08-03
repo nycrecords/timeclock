@@ -50,6 +50,7 @@ def eval_request_bool(val, default=False):
             return True
     return default
 
+
 import logging
 
 import requests
@@ -62,7 +63,7 @@ logger = logging.getLogger(__name__)
 
 JSONEncoder = json.JSONEncoder
 
-RECAPTCHA_TEMPLATE = '''
+RECAPTCHA_TEMPLATE = """
 <script src='https://www.google.com/recaptcha/api.js?render={public_key}&onload=executeRecaptcha{action}' async defer></script>
 <script>
   var executeRecaptcha{action} = function() {{
@@ -74,9 +75,9 @@ RECAPTCHA_TEMPLATE = '''
   }};
 </script>
 <input type="hidden" id="{field_name}" name="{field_name}">
-'''
+"""
 
-RECAPTCHA_TEMPLATE_MANUAL = '''
+RECAPTCHA_TEMPLATE_MANUAL = """
 <script src='https://www.google.com/recaptcha/api.js?render={public_key}' async defer></script>
 <script>
   var executeRecaptcha{action} = function() {{
@@ -91,14 +92,14 @@ RECAPTCHA_TEMPLATE_MANUAL = '''
   }};
 </script>
 <input type="hidden" id="{field_name}" name="{field_name}">
-'''
+"""
 
-RECAPTCHA_VERIFY_SERVER = 'https://www.google.com/recaptcha/api/siteverify'
+RECAPTCHA_VERIFY_SERVER = "https://www.google.com/recaptcha/api/siteverify"
 RECAPTCHA_ERROR_CODES = {
-    'missing-input-secret': 'The secret parameter is missing.',
-    'invalid-input-secret': 'The secret parameter is invalid or malformed.',
-    'missing-input-response': 'The response parameter is missing.',
-    'invalid-input-response': 'The response parameter is invalid or malformed.'
+    "missing-input-secret": "The secret parameter is missing.",
+    "invalid-input-secret": "The secret parameter is invalid or malformed.",
+    "missing-input-response": "The response parameter is missing.",
+    "invalid-input-response": "The response parameter is invalid or malformed.",
 }
 
 
@@ -116,34 +117,36 @@ class Recaptcha3Validator(object):
 
         token = field.data
         if not token:
-            logger.warning("Token is not ready or incorrect configuration (check JavaScript error log).")
+            logger.warning(
+                "Token is not ready or incorrect configuration (check JavaScript error log)."
+            )
             raise ValidationError(field.gettext(self.message))
 
         remote_ip = request.remote_addr
         if not Recaptcha3Validator._validate_recaptcha(field, token, remote_ip):
-            field.recaptcha_error = 'incorrect-captcha-sol'
+            field.recaptcha_error = "incorrect-captcha-sol"
             raise ValidationError(field.gettext(self.message))
 
     @staticmethod
     def _validate_recaptcha(field, response, remote_addr):
         """Performs the actual validation."""
         try:
-            private_key = current_app.config['RECAPTCHA3_PRIVATE_KEY']
+            private_key = current_app.config["RECAPTCHA3_PRIVATE_KEY"]
         except KeyError:
             raise RuntimeError("RECAPTCHA3_PRIVATE_KEY is not set in app config.")
 
-        data = {
-            'secret': private_key,
-            'remoteip': remote_addr,
-            'response': response
-        }
+        data = {"secret": private_key, "remoteip": remote_addr, "response": response}
 
         http_response = requests.post(RECAPTCHA_VERIFY_SERVER, data)
         if http_response.status_code != 200:
             return False
 
         json_resp = http_response.json()
-        if json_resp["success"] and json_resp["action"] == field.action and json_resp["score"] > field.score_threshold:
+        if (
+            json_resp["success"]
+            and json_resp["action"] == field.action
+            and json_resp["score"] > field.score_threshold
+        ):
             logger.info(json_resp)
             return True
         else:
@@ -157,18 +160,21 @@ class Recaptcha3Validator(object):
 
 
 class Recaptcha3Widget(HiddenInput):
-
     def __call__(self, field, **kwargs):
         """Returns the recaptcha input HTML."""
-        public_key_name = 'RECAPTCHA3_PUBLIC_KEY'
+        public_key_name = "RECAPTCHA3_PUBLIC_KEY"
         try:
             public_key = current_app.config[public_key_name]
         except KeyError:
             raise RuntimeError(f"{public_key_name} is not set in app config.")
 
         return Markup(
-                (RECAPTCHA_TEMPLATE if field.execute_on_load else RECAPTCHA_TEMPLATE_MANUAL).format(
-                        public_key=public_key, action=field.action, field_name=field.name))
+            (
+                RECAPTCHA_TEMPLATE
+                if field.execute_on_load
+                else RECAPTCHA_TEMPLATE_MANUAL
+            ).format(public_key=public_key, action=field.action, field_name=field.name)
+        )
 
 
 class Recaptcha3Field(HiddenField):
@@ -177,9 +183,16 @@ class Recaptcha3Field(HiddenField):
     # error message if recaptcha validation fails
     recaptcha_error = None
 
-    def __init__(self, action, score_threshold=0.5, execute_on_load=True, validators=None, **kwargs):
-        '''If execute_on_load is False, recaptcha.execute needs to be manually bound to an event to obtain token,
-        the JavaScript function to call is executeRecaptcha{action}, e.g. onsubmit="executeRecaptchaSignIn" '''
+    def __init__(
+        self,
+        action,
+        score_threshold=0.5,
+        execute_on_load=True,
+        validators=None,
+        **kwargs,
+    ):
+        """If execute_on_load is False, recaptcha.execute needs to be manually bound to an event to obtain token,
+        the JavaScript function to call is executeRecaptcha{action}, e.g. onsubmit="executeRecaptchaSignIn" """
         if not action:
             # TODO: more validation on action, see https://developers.google.com/recaptcha/docs/v3#actions
             #   "actions may only contain alphanumeric characters and slashes, and must not be user-specific"
