@@ -10,7 +10,6 @@ from app import db
 from app import login_manager
 from app.utils import InvalidResetToken
 
-
 class Permission:
     """
     Used to provide user permissions and check to ensure users have proper rights.
@@ -54,50 +53,6 @@ class Role(db.Model):
 
     def __repr__(self):
         return "<Role %r>" % self.name
-
-
-# class Budget(db.Model):
-#     """
-#     Specifies the budget code and the corresponding budget name
-#     """
-#     __tablename__ = 'budget'
-#     id = db.Column(db.Integer, primary_key=True)
-#     budget_code = db.Column(db.Integer, default=0)
-#     object_id = db.Column(db.Integer, db.ForeignKey('object.id'))
-#
-#     def __repr__(self):
-#         return '<Budget %r' % self.budget_code
-#
-# class Object(db.Model):
-#     """
-#     Object codes and names for users
-#     """
-#     __tablename__ = 'object'
-#     id = db.Column(db.Integer, primary_key=True)
-#     object_name = db.Column(db.String(64))
-#     object_code = db.Column(db.Integer, default=0)
-#
-#
-#     @staticmethod
-#     def insert_objects():
-#         """
-#         Inserts object codes/names into database
-#         Call from manage.py with Object.insert_objects()
-#         """
-#         object_name = {
-#             'Contract Services' : 600
-#         }
-#         for obj in object_name:
-#             o = Object(object_name=obj)
-#             o.object_code=object_name[obj]
-#             db.session.add(o)
-#         db.session.commit()
-#
-#
-#
-#     def __repr__(self):
-#         return '<Object %r>' % self.object_name
-
 
 class User(UserMixin, db.Model):
     """
@@ -441,10 +396,13 @@ class Vacation(db.Model):
     approved = db.Column(db.Boolean, default=False)
     pending = db.Column(db.Boolean, default=True)
 
+class HealthScreen(db.Model):
+    """Model that stores health screen form submissions."""
 
-login_manager.anonymous_user = AnonymousUser
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    email = db.Column(db.String(64))
+    date = db.Column(db.DateTime())
+    division = db.Column(db.String(128))
+    questionnaire_confirmation = db.Column(db.Boolean, nullable=False)
+    report_to_work = db.Column(db.Boolean, nullable=False)

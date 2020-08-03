@@ -63,6 +63,11 @@
             </ul>
         </div>
         </li>
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.logout', next='/healthscreen') }}" style="color:white">Sign Out</a></li>
+        {% else %}
+            <li><a href="{{ url_for('auth.login', next='/healthscreen') }}" style="color:white">Sign In</a></li>
+        {% endif %}
         </ul>
     </div>
 </div>
@@ -86,8 +91,6 @@
         {% endblock %}
     </div>
     {% endblock %}
-
-
 
     {% block scripts %}
     <!-- Include any JS scripts here -->

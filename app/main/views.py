@@ -930,13 +930,13 @@ def health_screen_confirm():
             not request.form.get("email", "").split("@")[-1].lower()
             == current_app.config["EMAIL_DOMAIN"]
         ):
-            form.email.errors.append("You must enter a @records.nyc.gov email address.")
+            form.email.errors.append("You must enter a {email_domain} email address.".format(email_domain=current_app.config["EMAIL_DOMAIN"]))
             return render_template("main/health_screen_confirm.html", form=form)
         name = request.form["name"]
         email = request.form["email"].lower()
         date = request.form["date"]
         division = request.form["division"]
-        questionnaire_confirmation = request.form["division"]
+        questionnaire_confirmation = request.form["questionnaire_confirmation"]
         report_to_work = request.form["report_to_work"]
 
         # Generate and email PDF

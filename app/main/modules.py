@@ -5,7 +5,7 @@ import sqlalchemy
 from flask import session, current_app, send_file, make_response
 from flask_login import current_user
 
-from .pdf import (
+from app.main.pdf import (
     generate_header,
     generate_employee_info,
     generate_timetable,
@@ -13,9 +13,10 @@ from .pdf import (
     generate_footer,
     generate_health_screen_confirmation,
 )
-from .. import db
-from ..email_notification import send_email, send_health_screen_confirmation_email
-from ..models import User, Event, Tag, Vacation
+from app import db
+from app.email_notification import send_email, send_health_screen_confirmation_email
+from app.utils import eval_request_bool
+from app.models import User, Event, Tag, Vacation, HealthScreen
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -561,6 +562,17 @@ def create_csv(events=None):
 def process_health_screen_confirmation(
     name, email, division, date, questionnaire_confirmation, report_to_work
 ):
+    # Store Health Screen in DB
+    health_screen = HealthScreen(
+        name=name,
+        email=email,
+        division=division,
+        date=date,
+        questionnaire_confirmation=eval_request_bool(questionnaire_confirmation),
+        report_to_work=eval_request_bool(report_to_work)
+    )
+    db.session.add(health_screen)
+    db.session.commit()
 
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
