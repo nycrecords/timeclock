@@ -280,39 +280,3 @@ class GenerateMultipleTimesheetsForm(Form):
 
 class ExportForm(Form):
     export = SubmitField("Export")
-
-
-class HealthScreenForm(Form):
-    name = StringField("Name", validators=[DataRequired()])
-    email = StringField(
-        "Email",
-        validators=[
-            DataRequired(),
-            Email("You must provide a valid @records.nyc.gov email address."),
-        ],
-    )
-    date = StringField("Date", default="", validators=[DataRequired()],)
-    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
-    questionnaire_confirmation = BooleanField(validators=[DataRequired()])
-    report_to_work = SelectField(
-        choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()]
-    )
-    # recaptcha = Recaptcha3Field(action="TestAction", execute_on_load=True)
-    submit = SubmitField("Submit")
-
-
-class HealthScreenAdminForm(Form):
-    name = StringField("Name", validators=[Optional()])
-    email = StringField(
-        "Email",
-        validators=[
-            Optional(),
-            Email("You must provide a valid @records.nyc.gov email address."),
-        ],
-    )
-    date = StringField("Date", default="", validators=[Optional()],)
-    division = SelectField("Division", choices=divisions, validators=[Optional()])
-    report_to_work = SelectField(
-        choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[Optional()]
-    )
-    submit = SubmitField("Submit")

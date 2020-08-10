@@ -22,7 +22,6 @@ from sqlalchemy.orm import sessionmaker
 from . import main
 from .forms import (
     AdminFilterEventsForm,
-    HealthScreenAdminForm,
     UserFilterEventsForm,
     CreatePayRateForm,
     TimePunchForm,
@@ -35,7 +34,6 @@ from .forms import (
     RequestVacationForm,
     FilterVacationForm,
     ExportForm,
-    HealthScreenForm,
 )
 from .modules import (
     process_clock,
@@ -52,7 +50,6 @@ from .modules import (
     generate_timesheet,
     generate_timesheets,
     create_csv,
-    process_health_screen_confirmation,
 )
 from .payments import get_payrate_before_or_after, calculate_hours_worked
 from .requests import (
@@ -64,7 +61,7 @@ from .requests import (
 )
 from .. import db
 from ..decorators import admin_required
-from ..models import Pay, User, Vacation, Tag, HealthScreen
+from ..models import Pay, User, Vacation, Tag
 from app.utils import eval_request_bool
 
 
@@ -918,72 +915,3 @@ def review_vacations():
         clear=clear_form,
         query_has_results=query_has_results,
     )
-
-
-@main.route("/healthscreen", methods=["GET", "POST"])
-def health_screen_confirm():
-    class HealthScreenData(object):
-        date = datetime.now().strftime("%-m/%-d/%Y")
-
-    form = HealthScreenForm(obj=HealthScreenData)
-
-    if form.validate_on_submit():
-        if (
-            not request.form.get("email", "").split("@")[-1].lower()
-            == current_app.config["EMAIL_DOMAIN"]
-        ):
-            form.email.errors.append(
-                "You must enter a {email_domain} email address.".format(
-                    email_domain=current_app.config["EMAIL_DOMAIN"]
-                )
-            )
-            return render_template("main/health_screen_confirm.html", form=form)
-        name = request.form["name"]
-        email = request.form["email"].lower()
-        date = request.form["date"]
-        division = request.form["division"]
-        questionnaire_confirmation = request.form["questionnaire_confirmation"]
-        report_to_work = request.form["report_to_work"]
-
-        # Generate and email PDF
-        process_health_screen_confirmation(
-            name, email, division, date, questionnaire_confirmation, report_to_work
-        )
-
-        flash(
-            "Screening completed. You will receive a confirmation email shortly.",
-            category="success",
-        )
-        return redirect(url_for("main.health_screen_confirm"))
-    return render_template("main/health_screen_confirm.html", form=form)
-
-
-@main.route("/healthscreen-admin", methods=["GET", "POST"])
-def health_screen_admin():
-    class HealthScreenData(object):
-        date = datetime.now().strftime("%-m/%-d/%Y")
-
-    form = HealthScreenAdminForm(obj=HealthScreenData)
-    import ipdb; ipdb.set_trace()
-
-    if form.validate_on_submit():
-        name = request.form["name"]
-        email = request.form["email"].lower()
-        date = request.form["date"]
-        division = request.form["division"]
-        report_to_work = eval_request_bool(request.form["report_to_work"])
-
-        results = HealthScreen.query.filter(
-            HealthScreen.name.like(name),
-            HealthScreen.email.like(email),
-            HealthScreen.date >= datetime.strptime(date, "%-m/%-d/%Y"),
-            HealthScreen.date < datetime.strptime(date, "%-m/%-d/%Y") + timedelta(days=1),
-            HealthScreen.division.like(division),
-            HealthScreen.report_to_work.like(report_to_work),
-        ).all()
-    else:
-        results = HealthScreen.query.filter(
-            HealthScreen.date >= ,
-            HealthScreen.date < datetime.today() + timedelta(days=1),
-        ).all()
-    return render_template("main/health_screen_admin.html", results=results, form=form)

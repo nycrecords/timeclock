@@ -399,7 +399,7 @@ class Vacation(db.Model):
     pending = db.Column(db.Boolean, default=True)
 
 
-class HealthScreen(db.Model):
+class HealthScreenResults(db.Model):
     """Model that stores health screen form submissions."""
 
     id = db.Column(db.Integer, primary_key=True)
@@ -409,3 +409,12 @@ class HealthScreen(db.Model):
     division = db.Column(db.String(128))
     questionnaire_confirmation = db.Column(db.Boolean, nullable=False)
     report_to_work = db.Column(db.Boolean, nullable=False)
+
+
+class HealthScreenUsers(db.Model):
+    """Model that stores health screen users."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    email = db.Column(db.String(64))
+    division = db.Column(db.String(128))

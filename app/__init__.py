@@ -56,9 +56,9 @@ def create_app(config_name):  # App Factory
         store = SQLAlchemyStore(db.engine, db.metadata, "sessions")
         kvsession = KVSessionExtension(store, app)
         logfile_name = (
-            "logfile_directory" + "Timeclock" + time.strftime("%Y%m%d-%H%M%S") + ".log"
+            "Timeclock" + time.strftime("%Y%m%d-%H%M%S") + ".log"
         )
-        handler = RotatingFileHandler("LogFile", maxBytes=10000, backupCount=1)
+        handler = RotatingFileHandler(logfile_name, maxBytes=10000, backupCount=1)
         handler.setFormatter(
             Formatter(
                 "%(asctime)s %(levelname)s: %(message)s " "[in %(pathname)s:%(lineno)d]"
@@ -75,6 +75,10 @@ def create_app(config_name):  # App Factory
     from .auth import auth as auth_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
+
+    from .health_screen import health_screen_bp as health_screen_blueprint
+
+    app.register_blueprint(health_screen_blueprint, url_prefix="/healthscreen")
 
     app.permanent_session_lifetime = timedelta(minutes=15)
 
