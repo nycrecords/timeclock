@@ -7,8 +7,8 @@ from wtforms import (
     BooleanField,
 )
 from wtforms.validators import DataRequired, Optional, Email
-
 from app.utils import divisions
+
 
 class HealthScreenForm(Form):
     name = StringField("Name", validators=[DataRequired()])
@@ -19,7 +19,7 @@ class HealthScreenForm(Form):
             Email("You must provide a valid @records.nyc.gov email address."),
         ],
     )
-    date = DateField("Date", default="", validators=[DataRequired()],)
+    date = StringField("Date", default="", validators=[DataRequired()])
     division = SelectField("Division", choices=divisions, validators=[DataRequired()])
     questionnaire_confirmation = BooleanField(validators=[DataRequired()])
     report_to_work = SelectField(

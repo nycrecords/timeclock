@@ -43,7 +43,7 @@ def health_screen_confirm():
             "Screening completed. You will receive a confirmation email shortly.",
             category="success",
         )
-        return redirect(url_for("main.health_screen_confirm"))
+        return redirect(url_for("health_screen.health_screen_confirm"))
     return render_template("health_screen/health_screen_confirm.html", form=form)
 
 

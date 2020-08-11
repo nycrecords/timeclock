@@ -29,7 +29,7 @@ def process_health_screen_confirmation(
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     generate_health_screen_confirmation(
-        c, name, division, date, questionnaire_confirmation, report_to_work
+        c, health_screen
     )
     c.save()
     pdf = buffer.getvalue()
@@ -42,11 +42,11 @@ def process_health_screen_confirmation(
     )
     attachment = {"filename": filename, "mimetype": "application/pdf", "file": pdf}
     send_email(
-        to=["healthcheck@records.nyc.gov"],
+        to="healthcheck@records.nyc.gov",
         subject="(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(
             report_to_work=report_to_work, date=date, name=name
         ),
-        template="health_screen/email/results",
+        template="health_screen/emails/results",
         attachment=attachment,
         bcc=[email],
         health_screen_results=health_screen,
@@ -64,7 +64,7 @@ def generate_health_screen_confirmation(
 
     canvas_field.drawString(70, LENGTH - 140, "Division: " + health_screen_results.division)
 
-    canvas_field.drawString(70, LENGTH - 170, "Date: " + health_screen_results.date)
+    canvas_field.drawString(70, LENGTH - 170, "Date: " + health_screen_results.date.strftime("%-m/%-d/%Y"))
 
     if health_screen_results.questionnaire_confirmation:
         canvas_field.drawString(
@@ -82,7 +82,7 @@ def generate_health_screen_confirmation(
         70,
         LENGTH - 230,
         "2.   Based on the questionnaire results, the employee may return to work on {date}: {report_to_work}".format(
-            date=health_screen_results.date, report_to_work=health_screen_results.report_to_work
+            date=health_screen_results.date.strftime("%-m/%-d/%Y"), report_to_work=health_screen_results.report_to_work
         ),
     )
     canvas_field.drawString(
