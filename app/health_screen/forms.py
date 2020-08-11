@@ -44,3 +44,29 @@ class HealthScreenAdminForm(Form):
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[Optional()]
     )
     submit = SubmitField("Submit")
+
+
+class AddHealthScreenUserForm(Form):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Email("You must provide a valid @records.nyc.gov email address."),
+        ],
+    )
+    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+class EditHealthScreenUserForm(Form):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Email("You must provide a valid @records.nyc.gov email address."),
+        ],
+    )
+    division = SelectField("Division", choices=divisions, validators=[DataRequired()])
+    submit = SubmitField("Submit")

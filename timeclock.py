@@ -13,6 +13,7 @@ from app.models import (
     Vacation,
     Role,
     Tag,
+    HealthScreenUsers
 )
 
 if os.getenv("FLASK_ENV") == "development":
@@ -150,4 +151,26 @@ def create_dev_users():
         db.session.add(user)
         user.password_list.update(user.password_hash)
 
+    db.session.commit()
+
+
+@app.cli.command("create_health_screen_users")
+def create_dev_users():
+    """Create health screen users for development."""
+
+    faker = Faker()
+    for i in range(10):
+        first_name = faker.first_name()
+        last_name = faker.last_name()
+        division = faker.random_elements(elements=divisions, length=1)[0][0]
+        user = HealthScreenUsers(
+            name=first_name + ' ' + last_name,
+            email="{first_initial}{last_name}@{email_domain}".format(
+                first_initial=first_name[0].lower(),
+                last_name=last_name.lower(),
+                email_domain=app.config["EMAIL_DOMAIN"],
+            ),
+            division=division
+        )
+        db.session.add(user)
     db.session.commit()
