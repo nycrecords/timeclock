@@ -26,7 +26,7 @@ def health_screen_confirm():
                     email_domain=current_app.config["EMAIL_DOMAIN"]
                 )
             )
-            return render_template("main/health_screen_confirm.html", form=form)
+            return render_template("health_screen/health_screen_confirm.html", form=form)
         name = request.form["name"]
         email = request.form["email"].lower()
         date = request.form["date"]
@@ -44,7 +44,7 @@ def health_screen_confirm():
             category="success",
         )
         return redirect(url_for("main.health_screen_confirm"))
-    return render_template("main/health_screen_confirm.html", form=form)
+    return render_template("health_screen/health_screen_confirm.html", form=form)
 
 
 @health_screen_bp.route("/healthscreen-admin", methods=["GET", "POST"])
@@ -61,4 +61,6 @@ def health_screen_admin():
         division = request.form["division"]
         report_to_work = eval_request_bool(request.form["report_to_work"])
 
-    return render_template("main/health_screen_admin.html", results=results, form=form)
+    results = []
+
+    return render_template("health_screen/health_screen_admin.html", results=results, form=form)
