@@ -78,6 +78,7 @@
                     </ul>
                 </div>
             </li>
+            <li><a href="{{ url_for('health_screen.health_screen_daily_summary') }}" style="color:white">Daily Summary</a></li>
             <li><a href="{{ url_for('health_screen.health_screen_admin') }}" style="color:white">Admin</a></li>
         {% endif %}
         {% if current_user.is_authenticated %}

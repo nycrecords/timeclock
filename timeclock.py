@@ -13,6 +13,7 @@ from app.models import (
     Vacation,
     Role,
     Tag,
+    HealthScreenResults,
     HealthScreenUsers
 )
 
@@ -38,6 +39,8 @@ def make_shell_context():
         Vacation=Vacation,
         Role=Role,
         Tag=Tag,
+        HealthScreenResults=HealthScreenResults,
+        HealthScreenUsers=HealthScreenUsers
     )
 
 

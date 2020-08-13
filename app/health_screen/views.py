@@ -10,7 +10,7 @@ from app.health_screen.utils import process_health_screen_confirmation
 from app.utils import eval_request_bool
 from ..decorators import admin_required
 from app.models import HealthScreenResults, HealthScreenUsers
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, cast, Date, and_
 
 
 @health_screen_bp.route("/healthscreen", methods=["GET", "POST"])
@@ -60,18 +60,63 @@ def health_screen_admin():
 
     form = HealthScreenAdminForm(obj=HealthScreenData)
 
+    # Defaults
+    results = HealthScreenResults.query.filter(HealthScreenResults.date.cast(Date) == datetime.today().date()).order_by(
+        desc(HealthScreenResults.id)).all()
+
     if form.validate_on_submit():
+        date = request.form["date"]
+        if date is not "":
+            try:
+                date = datetime.strptime(date, "%m/%d/%Y")
+            except ValueError:
+                form.date.errors.append("Date must be in MM-DD-YYYY format.")
+                return render_template("health_screen/health_screen_admin.html", results=[], form=form)
         name = request.form["name"]
         email = request.form["email"].lower()
-        date = request.form["date"]
         division = request.form["division"]
-        report_to_work = eval_request_bool(request.form["report_to_work"])
+        report_to_work = request.form["report_to_work"]
+        if report_to_work is not "":
+            report_to_work = eval_request_bool(report_to_work)
+        else:
+            report_to_work = None
 
-    # defaults
-    users = HealthScreenUsers.query.order_by(desc(HealthScreenUsers.name)).all()
-    results = HealthScreenResults.query.all()
+        query_filters = []
+        if date:
+            query_filters.append(HealthScreenResults.date.cast(Date) == date)
+        if name:
+            query_filters.append(HealthScreenResults.name == name)
+        if email:
+            query_filters.append(HealthScreenResults.email == email)
+        if division:
+            query_filters.append(HealthScreenResults.division == division)
+        if report_to_work is not None:
+            query_filters.append(HealthScreenResults.report_to_work == report_to_work)
 
-    return render_template("health_screen/health_screen_admin.html", results=results, form=form, users=users)
+        search_results = HealthScreenResults.query.filter(and_(*query_filters)).order_by(
+            desc(HealthScreenResults.id)).all()
+        return render_template("health_screen/health_screen_admin.html", results=search_results, form=form)
+    return render_template("health_screen/health_screen_admin.html", results=results, form=form)
+
+
+@health_screen_bp.route("/healthscreen-daily-summary", methods=["GET", "POST"])
+@login_required
+@admin_required
+def health_screen_daily_summary():
+    results = HealthScreenResults.query.filter(HealthScreenResults.date.cast(Date) == datetime.today().date()).order_by(
+        asc(HealthScreenResults.id)).all()
+    users = HealthScreenUsers.query.order_by(asc(HealthScreenUsers.name)).all()
+    daily_results = []
+
+    for user in users:
+        questionnaire_confirmation = None
+        report_to_work = None
+        for result in results:
+            if user.email == result.email:
+                report_to_work = result.report_to_work
+                questionnaire_confirmation = result.questionnaire_confirmation
+        daily_results.append((user, questionnaire_confirmation, report_to_work))
+    return render_template("health_screen/health_screen_daily_summary.html", results=daily_results)
 
 
 @health_screen_bp.route("/healthscreen-users", methods=["GET", "POST"])

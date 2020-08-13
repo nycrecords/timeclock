@@ -38,7 +38,7 @@ class HealthScreenAdminForm(Form):
             Email("You must provide a valid @records.nyc.gov email address."),
         ],
     )
-    date = StringField("Date", default="", validators=[Optional()],)
+    date = StringField("Date", default="", validators=[Optional()])
     division = SelectField("Division", choices=divisions, validators=[Optional()])
     report_to_work = SelectField(
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[Optional()]
