@@ -145,7 +145,7 @@ def health_screen_daily_summary():
         health_screen_export = generate_health_screen_daily_summary_export(daily_results)
         return send_file(
             BytesIO(health_screen_export),
-            attachment_filename="health_screen_results_{}.csv".format(datetime.now().strftime("%-m/%-d/%Y")),
+            attachment_filename="health_screen_results_{}.csv".format(date.strftime("%-m/%-d/%Y")),
             as_attachment=True
         )
     return render_template("health_screen/health_screen_daily_summary.html", results=daily_results, form=form)
