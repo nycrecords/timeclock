@@ -1,17 +1,17 @@
 {% extends "base_healthscreen.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}TimeClock - Employee Health Screening Administration{% endblock %}
+{% block title %}TimeClock - Employee Health Screen Filtering{% endblock %}
 
 {% block page_content %}
-<h1 style="text-align: center;">Employee Health Screening Administration</h1>
+<h1 style="text-align: center;">Employee Health Screen Filtering</h1>
 {% if current_user.is_authenticated and current_user.is_administrator %}
     {% for field, errors in form.errors.items() %}
         <div class="alert alert-danger">
             {{ ', '.join(errors) }}
         </div>
     {% endfor %}
-<form id="health-screen-admin-form" method="POST">
+<form id="health-screen-filter-form" method="POST">
     {{ form.csrf_token }}
     <div class="form-group">
         {{ form.date.label }}
@@ -35,7 +35,7 @@
     </div>
     <div>
         {{ form.submit(class="btn btn-default") }}
-        <a href="{{ url_for('health_screen.health_screen_admin') }}" class="btn btn-default" role="button">Reset</a>
+        <a href="{{ url_for('health_screen.health_screen_filter') }}" class="btn btn-default" role="button">Reset</a>
         {{ form.export(class="btn btn-default") }}
     </div>
 </form>

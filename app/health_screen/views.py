@@ -14,7 +14,7 @@ from app.models import HealthScreenResults, HealthScreenUsers
 from sqlalchemy import asc, desc, cast, Date, and_
 
 
-@health_screen_bp.route("/healthscreen", methods=["GET", "POST"])
+@health_screen_bp.route("/", methods=["GET", "POST"])
 def health_screen_confirm():
     class HealthScreenData(object):
         date = datetime.now().strftime("%-m/%-d/%Y")
@@ -52,10 +52,10 @@ def health_screen_confirm():
     return render_template("health_screen/health_screen_confirm.html", form=form)
 
 
-@health_screen_bp.route("/healthscreen-admin", methods=["GET", "POST"])
+@health_screen_bp.route("/healthscreen-filter", methods=["GET", "POST"])
 @login_required
 @admin_required
-def health_screen_admin():
+def health_screen_filter():
     class HealthScreenData(object):
         date = datetime.now().strftime("%-m/%-d/%Y")
 
@@ -72,7 +72,7 @@ def health_screen_admin():
                 date = datetime.strptime(date, "%m/%d/%Y")
             except ValueError:
                 form.date.errors.append("Date must be in MM-DD-YYYY format.")
-                return render_template("health_screen/health_screen_admin.html", results=[], form=form)
+                return render_template("health_screen/health_screen_filter.html", results=[], form=form)
         name = request.form["name"]
         email = request.form["email"].lower()
         division = request.form["division"]
@@ -104,8 +104,8 @@ def health_screen_admin():
                 attachment_filename="health_screen_results.csv",
                 as_attachment=True
             )
-        return render_template("health_screen/health_screen_admin.html", results=search_results, form=form)
-    return render_template("health_screen/health_screen_admin.html", results=results, form=form)
+        return render_template("health_screen/health_screen_filter.html", results=search_results, form=form)
+    return render_template("health_screen/health_screen_filter.html", results=results, form=form)
 
 
 @health_screen_bp.route("/healthscreen-daily-summary", methods=["GET", "POST"])

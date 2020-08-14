@@ -69,22 +69,22 @@
                     <button class="btn btn-default dropdown-toggle" type="button" id="healthscreen-users-dropdown"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
                                       border: 0">
-                        Users
+                        Health Screen Administration
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="healthscreen-users-dropdown">
+                        <li><a href="{{ url_for('health_screen.health_screen_filter') }}">Filter</a></li>
+                        <li><a href="{{ url_for('health_screen.health_screen_daily_summary') }}">Daily Summary</a></li>
                         <li><a href="{{ url_for('health_screen.add_health_screen_user') }}">Add User</a></li>
                         <li><a href="{{ url_for('health_screen.health_screen_users') }}">View Users</a></li>
                     </ul>
                 </div>
             </li>
-            <li><a href="{{ url_for('health_screen.health_screen_daily_summary') }}" style="color:white">Daily Summary</a></li>
-            <li><a href="{{ url_for('health_screen.health_screen_admin') }}" style="color:white">Admin</a></li>
         {% endif %}
         {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('auth.logout', next='/healthscreen') }}" style="color:white">Sign Out</a></li>
+            <li><a href="{{ url_for('auth.logout', next='/healthscreen/') }}" style="color:white">Sign Out</a></li>
         {% else %}
-            <li><a href="{{ url_for('auth.login', next='/healthscreen') }}" style="color:white">Sign In</a></li>
+            <li><a href="{{ url_for('auth.login', next='/healthscreen/healthscreen-filter') }}" style="color:white">Sign In</a></li>
         {% endif %}
         </ul>
     </div>
