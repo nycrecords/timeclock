@@ -43,6 +43,7 @@ class HealthScreenAdminForm(Form):
     report_to_work = SelectField(
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[Optional()]
     )
+    export = SubmitField("Export")
     submit = SubmitField("Submit")
 
 

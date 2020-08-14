@@ -5,33 +5,46 @@
 
 {% block page_content %}
     <h1 style="text-align: center;">Employee Health Screening Daily Summary</h1>
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active">
-            <br>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Division</th>
-                    <th>Completed Questionnaire?</th>
-                    <th>Report to Work?</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for result in results %}
-                    <tr {% if result[2] == True %}style="color: green"
-                        {% elif result[2] == False %}style="color: red"
-                        {% endif %}>
-                        <td>{{ result[0].name }}</td>
-                        <td>{{ result[0].email }}</td>
-                        <td>{{ result[0].division }}</td>
-                        <td>{% if result[1] != None %}{{ result[1] }}{% else %}{% endif %}</td>
-                        <td>{% if result[2] != None %}{{ result[2] }}{% else %}{% endif %}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    <br>
+    {% for field, errors in form.errors.items() %}
+        <div class="alert alert-danger">
+            {{ ', '.join(errors) }}
         </div>
-    </div>
+    {% endfor %}
+    <form id="health-screen-daily-summary-export-form" method="POST">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.date.label }}
+            {{ form.date(class="form-control") }}
+        </div>
+        <div>
+            {{ form.submit(class="btn btn-default") }}
+            {{ form.export(class="btn btn-default") }}
+        </div>
+    </form>
+    <br>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Division</th>
+            <th>Completed Questionnaire?</th>
+            <th>Report to Work?</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for result in results %}
+            <tr {% if result[2] == True %}style="color: green"
+                {% elif result[2] == False %}style="color: red"
+                {% endif %}>
+                <td>{{ result[0].name }}</td>
+                <td>{{ result[0].email }}</td>
+                <td>{{ result[0].division }}</td>
+                <td>{% if result[1] != None %}{{ result[1] }}{% else %}{% endif %}</td>
+                <td>{% if result[2] != None %}{{ result[2] }}{% else %}{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

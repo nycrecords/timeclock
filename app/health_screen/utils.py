@@ -1,11 +1,12 @@
-from io import BytesIO
+import csv
+from io import BytesIO, StringIO
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 from app import db
 from app.email_notification import send_async_email, send_email
-from app.models import HealthScreenResults, HealthScreenUsers
+from app.models import HealthScreenResults
 from app.utils import eval_request_bool
 
 WIDTH, LENGTH = letter
@@ -90,3 +91,55 @@ def generate_health_screen_confirmation(
         LENGTH - 300,
         "If your response is “no”, please contact the Administration Division at healthcheck@records.nyc.gov.",
     )
+
+
+def generate_health_screen_export(results):
+    buffer = StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "Date",
+            "Name",
+            "Email",
+            "Division",
+            "Completed Questionnaire?",
+            "Report to Work?"
+        ]
+    )
+    for result in results:
+        writer.writerow(
+            [
+                result.date,
+                result.name,
+                result.email,
+                result.division,
+                result.questionnaire_confirmation,
+                result.report_to_work
+            ]
+        )
+    return buffer.getvalue().encode("UTF-8")
+
+
+def generate_health_screen_daily_summary_export(results):
+    buffer = StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "Name",
+            "Email",
+            "Division",
+            "Completed Questionnaire?",
+            "Report to Work?"
+        ]
+    )
+    for result in results:
+        writer.writerow(
+            [
+                result[0].name,
+                result[0].email,
+                result[0].division,
+                result[1],
+                result[2]
+            ]
+        )
+    return buffer.getvalue().encode("UTF-8")

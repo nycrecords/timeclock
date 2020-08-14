@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from io import BytesIO
 
-from flask import current_app, render_template, flash, request, url_for, redirect
+from flask import current_app, render_template, flash, request, url_for, redirect, send_file
 from flask_login import login_required, current_user
 
 from app import db
 from app.health_screen import health_screen_bp
 from app.health_screen.forms import HealthScreenForm, HealthScreenAdminForm, AddHealthScreenUserForm, EditHealthScreenUserForm
-from app.health_screen.utils import process_health_screen_confirmation
+from app.health_screen.utils import process_health_screen_confirmation, generate_health_screen_export, generate_health_screen_daily_summary_export
 from app.utils import eval_request_bool
 from ..decorators import admin_required
 from app.models import HealthScreenResults, HealthScreenUsers
@@ -95,6 +96,14 @@ def health_screen_admin():
 
         search_results = HealthScreenResults.query.filter(and_(*query_filters)).order_by(
             desc(HealthScreenResults.id)).all()
+
+        if "export" in request.form:
+            health_screen_export = generate_health_screen_export(search_results)
+            return send_file(
+                BytesIO(health_screen_export),
+                attachment_filename="health_screen_results.csv",
+                as_attachment=True
+            )
         return render_template("health_screen/health_screen_admin.html", results=search_results, form=form)
     return render_template("health_screen/health_screen_admin.html", results=results, form=form)
 
@@ -103,7 +112,22 @@ def health_screen_admin():
 @login_required
 @admin_required
 def health_screen_daily_summary():
-    results = HealthScreenResults.query.filter(HealthScreenResults.date.cast(Date) == datetime.today().date()).order_by(
+    class HealthScreenData(object):
+        date = datetime.now().strftime("%-m/%-d/%Y")
+
+    form = HealthScreenAdminForm(obj=HealthScreenData)
+
+    date = HealthScreenData.date
+
+    if form.validate_on_submit():
+        date = request.form["date"]
+        try:
+            date = datetime.strptime(date, "%m/%d/%Y")
+        except ValueError:
+            form.date.errors.append("Date must be in MM-DD-YYYY format.")
+            return render_template("health_screen/health_screen_daily_summary.html", results=[], form=form)
+
+    results = HealthScreenResults.query.filter(HealthScreenResults.date.cast(Date) == date).order_by(
         asc(HealthScreenResults.id)).all()
     users = HealthScreenUsers.query.order_by(asc(HealthScreenUsers.name)).all()
     daily_results = []
@@ -116,7 +140,15 @@ def health_screen_daily_summary():
                 report_to_work = result.report_to_work
                 questionnaire_confirmation = result.questionnaire_confirmation
         daily_results.append((user, questionnaire_confirmation, report_to_work))
-    return render_template("health_screen/health_screen_daily_summary.html", results=daily_results)
+
+    if "export" in request.form:
+        health_screen_export = generate_health_screen_daily_summary_export(daily_results)
+        return send_file(
+            BytesIO(health_screen_export),
+            attachment_filename="health_screen_results_{}.csv".format(datetime.now().strftime("%-m/%-d/%Y")),
+            as_attachment=True
+        )
+    return render_template("health_screen/health_screen_daily_summary.html", results=daily_results, form=form)
 
 
 @health_screen_bp.route("/healthscreen-users", methods=["GET", "POST"])
