@@ -39,10 +39,10 @@
                 {% elif result[3] == False %}style="color: red"
                 {% endif %}>
                 <td>{{ result[1].name }}</td>
-                <td>{{ result[1].email }}</td>
+                <td><a href="mailto:{{ result[1].email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result[1].email }}</a>
                 <td>{{ result[1].division }}</td>
-                <td>{% if result[2] != None %}{{ result[2] }}{% else %}{% endif %}</td>
-                <td>{% if result[3] != None %}{{ result[3] }}{% else %}{% endif %}</td>
+                <td>{% if result[2] %}Yes{% else %}No{% endif %}</td>
+                <td>{% if result[3]%}Yes{% else %}No{% endif %}</td>
             </tr>
         {% endfor %}
         </tbody>
