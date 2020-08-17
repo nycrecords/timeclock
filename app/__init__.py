@@ -55,9 +55,7 @@ def create_app(config_name):  # App Factory
         # load_db(db)
         store = SQLAlchemyStore(db.engine, db.metadata, "sessions")
         kvsession = KVSessionExtension(store, app)
-        logfile_name = (
-            "Timeclock" + time.strftime("%Y%m%d-%H%M%S") + ".log"
-        )
+        logfile_name = "Timeclock" + time.strftime("%Y%m%d-%H%M%S") + ".log"
         handler = RotatingFileHandler(logfile_name, maxBytes=10000, backupCount=1)
         handler.setFormatter(
             Formatter(

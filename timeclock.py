@@ -14,7 +14,7 @@ from app.models import (
     Role,
     Tag,
     HealthScreenResults,
-    HealthScreenUsers
+    HealthScreenUsers,
 )
 
 if os.getenv("FLASK_ENV") == "development":
@@ -40,7 +40,7 @@ def make_shell_context():
         Role=Role,
         Tag=Tag,
         HealthScreenResults=HealthScreenResults,
-        HealthScreenUsers=HealthScreenUsers
+        HealthScreenUsers=HealthScreenUsers,
     )
 
 
@@ -167,13 +167,13 @@ def create_dev_users():
         last_name = faker.last_name()
         division = faker.random_elements(elements=divisions, length=1)[0][0]
         user = HealthScreenUsers(
-            name=first_name + ' ' + last_name,
+            name=first_name + " " + last_name,
             email="{first_initial}{last_name}@{email_domain}".format(
                 first_initial=first_name[0].lower(),
                 last_name=last_name.lower(),
                 email_domain=app.config["EMAIL_DOMAIN"],
             ),
-            division=division
+            division=division,
         )
         db.session.add(user)
     db.session.commit()

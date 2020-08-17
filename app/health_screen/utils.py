@@ -1,11 +1,11 @@
-import csv
-from io import BytesIO, StringIO
+from io import BytesIO
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import xlsxwriter
 
 from app import db
-from app.email_notification import send_async_email, send_email
+from app.email_notification import send_email
 from app.models import HealthScreenResults
 from app.utils import eval_request_bool
 
@@ -29,9 +29,7 @@ def process_health_screen_confirmation(
 
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
-    generate_health_screen_confirmation(
-        c, health_screen
-    )
+    generate_health_screen_confirmation(c, health_screen)
     c.save()
     pdf = buffer.getvalue()
     buffer.close()
@@ -54,18 +52,20 @@ def process_health_screen_confirmation(
     )
 
 
-def generate_health_screen_confirmation(
-    canvas_field, health_screen_results
-):
+def generate_health_screen_confirmation(canvas_field, health_screen_results):
     canvas_field.setFont("Times-Bold", 14)
     canvas_field.drawString(220, LENGTH - 52, "Employee Health Screening")
 
     canvas_field.setFont("Times-Roman", 12)
     canvas_field.drawString(70, LENGTH - 110, "Name: " + health_screen_results.name)
 
-    canvas_field.drawString(70, LENGTH - 140, "Division: " + health_screen_results.division)
+    canvas_field.drawString(
+        70, LENGTH - 140, "Division: " + health_screen_results.division
+    )
 
-    canvas_field.drawString(70, LENGTH - 170, "Date: " + health_screen_results.date.strftime("%-m/%-d/%Y"))
+    canvas_field.drawString(
+        70, LENGTH - 170, "Date: " + health_screen_results.date.strftime("%-m/%-d/%Y")
+    )
 
     if health_screen_results.questionnaire_confirmation:
         canvas_field.drawString(
@@ -83,7 +83,8 @@ def generate_health_screen_confirmation(
         70,
         LENGTH - 230,
         "2.   Based on the questionnaire results, the employee may return to work on {date}: {report_to_work}".format(
-            date=health_screen_results.date.strftime("%-m/%-d/%Y"), report_to_work=health_screen_results.report_to_work
+            date=health_screen_results.date.strftime("%-m/%-d/%Y"),
+            report_to_work=health_screen_results.report_to_work,
         ),
     )
     canvas_field.drawString(
@@ -93,53 +94,90 @@ def generate_health_screen_confirmation(
     )
 
 
-def generate_health_screen_export(results):
-    buffer = StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow(
-        [
-            "Date",
-            "Name",
-            "Email",
-            "Division",
-            "Completed Questionnaire?",
-            "Report to Work?"
-        ]
-    )
+def generate_health_screen_export(results, filename):
+    workbook = xlsxwriter.Workbook(filename)
+    worksheet = workbook.add_worksheet()
+
+    bold = workbook.add_format({"bold": True})
+    red = workbook.add_format({"font_color": "red"})
+    green = workbook.add_format({"font_color": "green"})
+
+    worksheet.write("A1", "Date", bold)
+    worksheet.write("B1", "Name", bold)
+    worksheet.write("C1", "Email", bold)
+    worksheet.write("D1", "Division", bold)
+    worksheet.write("E1", "Completed Questionnaire?", bold)
+    worksheet.write("F1", "Report to Work?", bold)
+
+    row = 1
+    col = 0
+
     for result in results:
-        writer.writerow(
-            [
-                result.date,
-                result.name,
-                result.email,
-                result.division,
-                result.questionnaire_confirmation,
-                result.report_to_work
-            ]
-        )
-    return buffer.getvalue().encode("UTF-8")
+        if result.report_to_work:
+            worksheet.write(row, col, result.date, green)
+            worksheet.write(row, col + 1, result.name, green)
+            worksheet.write(row, col + 2, result.email, green)
+            worksheet.write(row, col + 3, result.division, green)
+            worksheet.write(row, col + 4, "Yes", green)
+            worksheet.write(row, col + 5, "Yes", green)
+        elif result.report_to_work and result.questionnaire_confirmation:
+            worksheet.write(row, col, result.date, red)
+            worksheet.write(row, col + 1, result.name, red)
+            worksheet.write(row, col + 2, result.email, red)
+            worksheet.write(row, col + 3, result.division, red)
+            worksheet.write(row, col + 4, "Yes", red)
+            worksheet.write(row, col + 5, "No", red)
+        else:
+            worksheet.write(row, col, result.date)
+            worksheet.write(row, col + 1, result.name)
+            worksheet.write(row, col + 2, result.email)
+            worksheet.write(row, col + 3, result.division)
+        row += 1
+
+    workbook.close()
+    with open(filename, "rb") as f:
+        data = f.read()
+
+    return data
 
 
-def generate_health_screen_daily_summary_export(results):
-    buffer = StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow(
-        [
-            "Name",
-            "Email",
-            "Division",
-            "Completed Questionnaire?",
-            "Report to Work?"
-        ]
-    )
+def generate_health_screen_daily_summary_export(results, filename):
+    workbook = xlsxwriter.Workbook(filename)
+    worksheet = workbook.add_worksheet()
+
+    bold = workbook.add_format({"bold": True})
+    red = workbook.add_format({"font_color": "red"})
+    green = workbook.add_format({"font_color": "green"})
+
+    worksheet.write("A1", "Name", bold)
+    worksheet.write("B1", "Email", bold)
+    worksheet.write("C1", "Division", bold)
+    worksheet.write("D1", "Completed Questionnaire?", bold)
+    worksheet.write("E1", "Report to Work?", bold)
+
+    row = 1
+    col = 0
+
     for result in results:
-        writer.writerow(
-            [
-                result[0].name,
-                result[0].email,
-                result[0].division,
-                result[1],
-                result[2]
-            ]
-        )
-    return buffer.getvalue().encode("UTF-8")
+        if result[3]:
+            worksheet.write(row, col, result[1].name, green)
+            worksheet.write(row, col + 1, result[1].email, green)
+            worksheet.write(row, col + 2, result[1].division, green)
+            worksheet.write(row, col + 3, "Yes", green)
+            worksheet.write(row, col + 4, "Yes", green)
+        elif not result[3] and result[2]:
+            worksheet.write(row, col, result[1].name, red)
+            worksheet.write(row, col + 1, result[1].email, red)
+            worksheet.write(row, col + 2, result[1].division, red)
+            worksheet.write(row, col + 3, "Yes", red)
+            worksheet.write(row, col + 4, "No", red)
+        else:
+            worksheet.write(row, col, result[1].name)
+            worksheet.write(row, col + 1, result[1].email)
+            worksheet.write(row, col + 2, result[1].division)
+            worksheet.write(row, col + 3, "No")
+        row += 1
+    workbook.close()
+    with open(filename, "rb") as f:
+        data = f.read()
+    return data
