@@ -67,7 +67,7 @@
                     </td>
                     <td>{{ result.division }}</td>
                     <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
-                    <td>{% if result.report_to_work %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if result.questionnaire_confirmation %}{% if result.report_to_work %}Yes{% else %}No{% endif %}{% else %}N/A{% endif%}</td>
                 </tr>
                 {% else %}
                 <tr style="color: red">

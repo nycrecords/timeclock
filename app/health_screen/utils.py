@@ -132,6 +132,8 @@ def generate_health_screen_export(results, filename):
             worksheet.write(row, col + 1, result.name)
             worksheet.write(row, col + 2, result.email)
             worksheet.write(row, col + 3, result.division)
+            worksheet.write(row, col + 4, "No")
+            worksheet.write(row, col + 4, "N/A")
         row += 1
 
     workbook.close()
@@ -176,6 +178,7 @@ def generate_health_screen_daily_summary_export(results, filename):
             worksheet.write(row, col + 1, result[1].email)
             worksheet.write(row, col + 2, result[1].division)
             worksheet.write(row, col + 3, "No")
+            worksheet.write(row, col + 4, "N/A")
         row += 1
     workbook.close()
     with open(filename, "rb") as f:
