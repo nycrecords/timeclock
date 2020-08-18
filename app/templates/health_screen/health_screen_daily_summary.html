@@ -1,0 +1,50 @@
+{% extends "base_healthscreen.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Employee Health Screening Daily Summary{% endblock %}
+
+{% block page_content %}
+    <h1 style="text-align: center;">Employee Health Screening Daily Summary</h1>
+    <br>
+    {% for field, errors in form.errors.items() %}
+        <div class="alert alert-danger">
+            {{ ', '.join(errors) }}
+        </div>
+    {% endfor %}
+    <form id="health-screen-daily-summary-export-form" method="POST">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.date.label }}
+            {{ form.date(class="form-control") }}
+        </div>
+        <div>
+            {{ form.submit(class="btn btn-default") }}
+            {{ form.export(class="btn btn-default") }}
+        </div>
+    </form>
+    <br>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Division</th>
+            <th>Completed Questionnaire?</th>
+            <th>Report to Work?</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for result in results %}
+            <tr {% if result[3] == True %}style="color: green"
+                {% elif result[3] == False %}style="color: red"
+                {% endif %}>
+                <td>{{ result[1].name }}</td>
+                <td><a href="mailto:{{ result[1].email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result[1].email }}</a>
+                <td>{{ result[1].division }}</td>
+                <td>{% if result[2] %}Yes{% else %}No{% endif %}</td>
+                <td>{% if result[2] %}{% if result[3] %}Yes{% else %}No{% endif %}{% else %}N/A{%endif%}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

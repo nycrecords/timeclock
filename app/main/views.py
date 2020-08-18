@@ -4,7 +4,7 @@
    :synopsis: Handles all core URL endpoints for the timeclock application
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import current_app
 from flask import (
@@ -34,7 +34,6 @@ from .forms import (
     RequestVacationForm,
     FilterVacationForm,
     ExportForm,
-    HealthScreenForm,
 )
 from .modules import (
     process_clock,
@@ -51,7 +50,6 @@ from .modules import (
     generate_timesheet,
     generate_timesheets,
     create_csv,
-    process_health_screen_confirmation,
 )
 from .payments import get_payrate_before_or_after, calculate_hours_worked
 from .requests import (
@@ -917,36 +915,3 @@ def review_vacations():
         clear=clear_form,
         query_has_results=query_has_results,
     )
-
-
-@main.route("/healthscreen", methods=["GET", "POST"])
-def health_screen_confirm():
-    class HealthScreenData(object):
-        date = datetime.now().strftime('%-m/%-d/%Y')
-    form = HealthScreenForm(obj=HealthScreenData)
-
-    if form.validate_on_submit():
-        if (
-            not request.form.get("email", "").split("@")[-1].lower()
-            == current_app.config["EMAIL_DOMAIN"]
-        ):
-            form.email.errors.append("You must enter a @records.nyc.gov email address.")
-            return render_template("main/health_screen_confirm.html", form=form)
-        name = request.form["name"]
-        email = request.form["email"].lower()
-        date = request.form["date"]
-        division = request.form["division"]
-        questionnaire_confirmation = request.form["division"]
-        report_to_work = request.form["report_to_work"]
-
-        # Generate and email PDF
-        process_health_screen_confirmation(
-            name, email, division, date, questionnaire_confirmation, report_to_work
-        )
-
-        flash(
-            "Screening completed. You will receive a confirmation email shortly.",
-            category="success",
-        )
-        return redirect(url_for("main.health_screen_confirm"))
-    return render_template("main/health_screen_confirm.html", form=form)

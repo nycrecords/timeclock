@@ -62,6 +62,7 @@ sphinx-rtd-theme = "*"
 python-dotenv = "*"
 email-validator = "*"
 faker = "*"
+xlsxwriter = "*"
 
 [requires]
 python_version = "3.6"

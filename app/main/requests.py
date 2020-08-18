@@ -39,7 +39,7 @@ def create_timepunch(punch_type, punch_time, reason):
     db.session.commit()
     send_email(
         current_user.supervisor.email,
-        "TimePunch Request from {} {}".format(
+        "Timeclock - TimePunch Request from {} {}".format(
             current_user.first_name, current_user.last_name
         ),
         "/main/email/request_timepunch",

@@ -1,0 +1,29 @@
+{% extends "base_healthscreen.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Add Employee Health Screening User{% endblock %}
+
+{% block page_content %}
+<h1 style="text-align: center;">Add Health Screen User</h1>
+{% for field, errors in form.errors.items() %}
+<div class="alert alert-danger">
+    {{ ', '.join(errors) }}
+</div>
+{% endfor %}
+<form id="add-health-screen-user-form" method="POST">
+    {{ form.csrf_token }}
+    <div class="form-group required">
+        {{ form.name.label }}
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group required">
+        {{ form.email.label }}
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group required">
+        {{ form.division.label }}
+        {{ form.division(class="form-control") }}
+    </div>
+    {{ form.submit(class="btn btn-default") }}
+</form>
+{% endblock %}

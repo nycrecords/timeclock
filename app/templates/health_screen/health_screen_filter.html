@@ -1,0 +1,92 @@
+{% extends "base_healthscreen.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Employee Health Screen Filtering{% endblock %}
+
+{% block page_content %}
+<h1 style="text-align: center;">Employee Health Screen Filtering</h1>
+{% if current_user.is_authenticated and current_user.is_administrator %}
+{% for field, errors in form.errors.items() %}
+<div class="alert alert-danger">
+    {{ ', '.join(errors) }}
+</div>
+{% endfor %}
+<form id="health-screen-filter-form" method="POST">
+    {{ form.csrf_token }}
+    <div class="form-group">
+        {{ form.date.label }}
+        {{ form.date(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.name.label }}
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.email.label }}
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.division.label }}
+        {{ form.division(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.report_to_work.label }}
+        {{ form.report_to_work(class="form-control") }}
+    </div>
+    <div>
+        {{ form.submit(class="btn btn-default") }}
+        <a href="{{ url_for('health_screen.health_screen_filter') }}" class="btn btn-default" role="button">Reset</a>
+        {{ form.export(class="btn btn-default") }}
+    </div>
+</form>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="clocked-in-today">
+        <br>
+        <table class="table" style="padding:4px">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Division</th>
+                    <th>Completed Questionnaire?</th>
+                    <th>Report to Work?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                {% if current_user.is_administrator() %}
+                {% if result.report_to_work %}
+                <tr style="color: green">
+                    <td>{{ result.date.strftime("%m/%d/%Y") }}</td>
+                    <td>{{ result.name }}</td>
+                    <td>
+                        <a
+                            href="mailto:{{ result.email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result.email }}</a>
+                    </td>
+                    <td>{{ result.division }}</td>
+                    <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if result.questionnaire_confirmation %}{% if result.report_to_work %}Yes{% else %}No{% endif %}{% else %}N/A{% endif%}</td>
+                </tr>
+                {% else %}
+                <tr style="color: red">
+                    <td>{{ result.date.strftime("%m/%d/%Y") }}</td>
+                    <td>{{ result.name }}</td>
+                    <td>
+                        <a
+                            href="mailto:{{ result.email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result.email }}</a>
+                    </td>
+                    <td>{{ result.division }}</td>
+                    <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if result.report_to_work %}Yes{% else %}No{% endif %}</td>
+                </tr>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

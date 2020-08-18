@@ -13,10 +13,18 @@ from flask_login import current_user
 from werkzeug.security import check_password_hash
 from datetime import datetime
 
-from app import db
+from app import db, login_manager
 from app.email_notification import send_email
-from app.models import User, Role, ChangeLog
+from app.models import User, Role, ChangeLog, AnonymousUser
 from app.utils import tags
+
+
+login_manager.anonymous_user = AnonymousUser
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 def check_password_requirements(email, old_password, password, password_confirmation):

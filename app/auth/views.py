@@ -303,7 +303,7 @@ def password_reset_request():
             token = user.generate_reset_token()
             send_email(
                 user.email,
-                "Reset Your Password",
+                "Timeclock - Reset Your Password",
                 "auth/email/reset_password",
                 user=user,
                 token=token,

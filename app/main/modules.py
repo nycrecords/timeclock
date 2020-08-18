@@ -5,20 +5,16 @@ import sqlalchemy
 from flask import session, current_app, send_file, make_response
 from flask_login import current_user
 
-from .pdf import (
+from app.main.pdf import (
     generate_header,
     generate_employee_info,
     generate_timetable,
     generate_signature_template,
     generate_footer,
-    generate_health_screen_confirmation,
 )
-from .. import db
-from ..email_notification import send_email, send_health_screen_confirmation_email
-from ..models import User, Event, Tag, Vacation
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from app import db
+from app.email_notification import send_email
+from app.models import User, Event, Tag, Vacation
 from pytz import timezone
 
 
@@ -45,7 +41,7 @@ def process_clock(note_data, ip=None):
         if (datetime.now() - get_last_clock().time).seconds / float(3600) >= 8:
             send_email(
                 "bwaite@records.nyc.gov",
-                "Overtime - {}".format(current_user.email),
+                "Timeclock - Overtime - {}".format(current_user.email),
                 "/main/email/employee_overtime",
                 email=current_user.email,
             )
@@ -556,31 +552,3 @@ def create_csv(events=None):
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-type"] = "text/csv"
     return output
-
-
-def process_health_screen_confirmation(
-    name, email, division, date, questionnaire_confirmation, report_to_work
-):
-
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    generate_health_screen_confirmation(
-        c, name, division, date, questionnaire_confirmation, report_to_work
-    )
-    c.save()
-    pdf = buffer.getvalue()
-    buffer.close()
-
-    filename = "{username}-health-check-report_to_work-{report_to_work}-{date}.pdf".format(
-        username=email.split("@")[0],
-        report_to_work=report_to_work.lower(),
-        date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
-    )
-    send_health_screen_confirmation_email(
-        ["healthcheck@records.nyc.gov"],
-        [email],
-        "(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(report_to_work=report_to_work, date=date, name=name),
-        filename,
-        pdf,
-        name,
-    )

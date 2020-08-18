@@ -29,7 +29,7 @@
     background-color: #2a6496; border-color: #2a6496;">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="{{ url_for('main.health_screen_confirm') }}" style="color:white">Employee
+            <a class="navbar-brand" href="{{ url_for('health_screen.health_screen_confirm') }}" style="color:white">Employee
                 Health Screen</a>
         </div>
         <div class="navbar-collapse collapse">
@@ -63,6 +63,29 @@
             </ul>
         </div>
         </li>
+        {% if current_user.is_authenticated and current_user.is_administrator %}
+            <li>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="healthscreen-users-dropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="margin-top:9px; color:white; background-color:#2a6496;
+                                      border: 0">
+                        Health Screen Administration
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="healthscreen-users-dropdown">
+                        <li><a href="{{ url_for('health_screen.health_screen_filter') }}">Filter</a></li>
+                        <li><a href="{{ url_for('health_screen.health_screen_daily_summary') }}">Daily Summary</a></li>
+                        <li><a href="{{ url_for('health_screen.add_health_screen_user') }}">Add User</a></li>
+                        <li><a href="{{ url_for('health_screen.health_screen_users') }}">View Users</a></li>
+                    </ul>
+                </div>
+            </li>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.logout', next='/healthscreen/') }}" style="color:white">Sign Out</a></li>
+        {% else %}
+            <li><a href="{{ url_for('auth.login', next='/healthscreen/healthscreen-filter') }}" style="color:white">Sign In</a></li>
+        {% endif %}
         </ul>
     </div>
 </div>
@@ -86,8 +109,6 @@
         {% endblock %}
     </div>
     {% endblock %}
-
-
 
     {% block scripts %}
     <!-- Include any JS scripts here -->

@@ -1,0 +1,46 @@
+{% extends "base_healthscreen.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimeClock - Employee Health Screening{% endblock %}
+
+{% block page_content %}
+<h1 style="text-align: center;">Employee Health Screening</h1>
+<h2>To submit your health screening confirmation, please fill out the form below and click the Submit button when done.
+</h2>
+{% for field, errors in form.errors.items() %}
+<div class="alert alert-danger">
+    {{ ', '.join(errors) }}
+</div>
+{% endfor %}
+<form id="health-screen-confirm-form" method="POST">
+    {{ form.csrf_token }}
+    <div class="form-group required">
+        {{ form.name.label }}
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group required">
+        {{ form.email.label }}
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group required">
+        {{ form.date.label }}
+        {{ form.date(class="form-control", readonly=true) }}
+    </div>
+    <div class="form-group required">
+        {{ form.division.label }}
+        {{ form.division(class="form-control") }}
+    </div>
+    <ol>
+        <li>Click here to confirm you completed the entire
+            questionnaire.&nbsp;&nbsp;{{ form.questionnaire_confirmation }}</li><br>
+        <li>Based on your questionnaire results, you may physically report to work &nbsp;&nbsp;{{ form.report_to_work }}
+        </li><br>
+    </ol>
+    <p>If your response is “No”, please contact the Administration Division.
+        {{ form.recaptcha }}
+        {{ form.submit(class="btn btn-default") }}
+</form>
+<!-- 
+    <hr>
+    <p id="footnote1">1. The Department of Records and Information Services is using this questionnaire so as to comply with the NYS Phase 2 Office-Based Work Guidance. <a href="https://www.governor.ny.gov/sites/governor.ny.gov/files/atoms/files/offices-interim-guidance.pdf">https://www.governor.ny.gov/sites/governor.ny.gov/files/atoms/files/offices-interim-guidance.pdf</a>, pg. 9. <a href="#ref1" title="Jump back to footnote 1 in the text.">↩</a></p>
+    {% endblock %} -->
