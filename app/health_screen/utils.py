@@ -36,19 +36,20 @@ def process_health_screen_confirmation(
 
     filename = "{username}-health-check-report_to_work-{report_to_work}-{date}.pdf".format(
         username=email.split("@")[0],
-        report_to_work=report_to_work.lower(),
+        report_to_work="Yes" if report_to_work else "No",
         date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
     )
     attachment = {"filename": filename, "mimetype": "application/pdf", "file": pdf}
     send_email(
         to="healthcheck@records.nyc.gov",
         subject="(Report to Work: {report_to_work} - {date}) Health Screening Confirmation - {name}".format(
-            report_to_work=report_to_work, date=date, name=name
+            report_to_work="Yes" if report_to_work else "No", date=date, name=name
         ),
         template="health_screen/emails/results",
         attachment=attachment,
         bcc=[email],
         health_screen_results=health_screen,
+        sender="healthcheck@records.nyc.gov"
     )
 
 
@@ -114,13 +115,13 @@ def generate_health_screen_export(results, filename):
 
     for result in results:
         if result.report_to_work:
-            worksheet.write(row, col, result.date, green)
+            worksheet.write(row, col, datetime.strftime(result.date, '%m/%d/%Y'), green)
             worksheet.write(row, col + 1, result.name, green)
             worksheet.write(row, col + 2, result.email, green)
             worksheet.write(row, col + 3, result.division, green)
             worksheet.write(row, col + 4, "Yes", green)
             worksheet.write(row, col + 5, "Yes", green)
-        elif result.report_to_work and result.questionnaire_confirmation:
+        elif not result.report_to_work and result.questionnaire_confirmation:
             worksheet.write(row, col, result.date, red)
             worksheet.write(row, col + 1, result.name, red)
             worksheet.write(row, col + 2, result.email, red)
