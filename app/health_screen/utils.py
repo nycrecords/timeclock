@@ -80,14 +80,22 @@ def generate_health_screen_confirmation(canvas_field, health_screen_results):
             LENGTH - 200,
             "1.   Employee confirms they have completed the entire health check questionnaire: No",
         )
-    canvas_field.drawString(
-        70,
-        LENGTH - 230,
-        "2.   Based on the questionnaire results, the employee may return to work on {date}: {report_to_work}".format(
-            date=health_screen_results.date.strftime("%-m/%-d/%Y"),
-            report_to_work=health_screen_results.report_to_work,
-        ),
-    )
+    if health_screen_results.report_to_work:
+        canvas_field.drawString(
+            70,
+            LENGTH - 230,
+            "2.   Based on the questionnaire results, the employee may return to work on {date}: Yes".format(
+                date=health_screen_results.date.strftime("%-m/%-d/%Y")
+            )
+        )
+    else:
+        canvas_field.drawString(
+            70,
+            LENGTH - 230,
+            "2.   Based on the questionnaire results, the employee may return to work on {date}: No".format(
+                date=health_screen_results.date.strftime("%-m/%-d/%Y")
+            )
+        )
     canvas_field.drawString(
         70,
         LENGTH - 300,
