@@ -7,7 +7,7 @@ from wtforms import (
     BooleanField,
 )
 from wtforms.validators import DataRequired, Optional, Email
-from app.utils import divisions
+from app.utils import divisions, Recaptcha3Field
 
 
 class HealthScreenForm(Form):
@@ -25,7 +25,7 @@ class HealthScreenForm(Form):
     report_to_work = SelectField(
         choices=[("", ""), ("Yes", "Yes"), ("No", "No")], validators=[DataRequired()]
     )
-    # recaptcha = Recaptcha3Field(action="TestAction", execute_on_load=True)
+    recaptcha = Recaptcha3Field(action="TestAction", execute_on_load=True)
     submit = SubmitField("Submit")
 
 

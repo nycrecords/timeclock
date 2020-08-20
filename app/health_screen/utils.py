@@ -122,14 +122,14 @@ def generate_health_screen_export(results, filename):
             worksheet.write(row, col + 4, "Yes", green)
             worksheet.write(row, col + 5, "Yes", green)
         elif not result.report_to_work and result.questionnaire_confirmation:
-            worksheet.write(row, col, result.date, red)
+            worksheet.write(row, col, datetime.strftime(result.date, '%m/%d/%Y'), red)
             worksheet.write(row, col + 1, result.name, red)
             worksheet.write(row, col + 2, result.email, red)
             worksheet.write(row, col + 3, result.division, red)
             worksheet.write(row, col + 4, "Yes", red)
             worksheet.write(row, col + 5, "No", red)
         else:
-            worksheet.write(row, col, result.date)
+            worksheet.write(row, col, datetime.strftime(result.date, '%m/%d/%Y'))
             worksheet.write(row, col + 1, result.name)
             worksheet.write(row, col + 2, result.email)
             worksheet.write(row, col + 3, result.division)
