@@ -1,1 +1,7 @@
-<p>Employee Health Screen results for {{ health_screen_results.name }} attached.</p>
+{% if health_screen_results.report_to_work == "Yes" %}
+<body style="background-color: rgba(0, 128, 0, 0.3);">
+{% else %}
+<body style="background-color: rgba(128, 0, 0, 0.3);">
+{% endif %}
+    <p>Employee Health Screen results for {{ health_screen_results.name }} attached.</p>
+</div>

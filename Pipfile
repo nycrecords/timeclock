@@ -63,6 +63,7 @@ python-dotenv = "*"
 email-validator = "*"
 faker = "*"
 xlsxwriter = "*"
+flask-shell-ipython = "*"
 
 [requires]
 python_version = "3.6"
