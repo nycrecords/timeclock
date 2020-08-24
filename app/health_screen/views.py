@@ -91,11 +91,11 @@ def health_screen_filter():
 
     if form.validate_on_submit():
         date = request.form["date"]
-        if date is not "":
+        if date != "":
             try:
                 date = datetime.strptime(date, "%m/%d/%Y")
             except ValueError:
-                form.date.errors.append("Date must be in MM-DD-YYYY format.")
+                form.date.errors.append("Date must be in MM/DD/YYYY format.")
                 return render_template(
                     "health_screen/health_screen_filter.html", results=[], form=form
                 )
@@ -103,7 +103,7 @@ def health_screen_filter():
         email = request.form["email"].lower()
         division = request.form["division"]
         report_to_work = request.form["report_to_work"]
-        if report_to_work is not "":
+        if report_to_work != "":
             report_to_work = eval_request_bool(report_to_work)
         else:
             report_to_work = None
@@ -164,38 +164,49 @@ def health_screen_daily_summary():
                 "health_screen/health_screen_daily_summary.html", results=[], form=form
             )
 
-    results = (
-        HealthScreenResults.query.filter(HealthScreenResults.date.cast(Date) == date)
+    users = HealthScreenUsers.query.order_by(asc(HealthScreenUsers.name)).all()
+    user_emails = [user.email for user in users]
+    expected_but_not_complete = [
+        (None, user, None, None)
+        for user in HealthScreenUsers.query.filter(
+            ~HealthScreenUsers.email.in_(
+                HealthScreenResults.query.with_entities(
+                    HealthScreenResults.email
+                ).filter(HealthScreenResults.date.cast(Date) == date)
+            )
+        ).all()
+    ]
+    expected_users_results = [
+        (
+            result.id,
+            HealthScreenUsers(name=result.name, email=result.email, division=result.division),
+            result.questionnaire_confirmation,
+            result.report_to_work,
+        )
+        for result in HealthScreenResults.query.filter(
+            HealthScreenResults.date.cast(Date) == date,
+            HealthScreenResults.email.in_(user_emails),
+        )
         .order_by(asc(HealthScreenResults.id))
         .all()
+    ]
+    new_users_results = [
+        (
+            result.id,
+            HealthScreenUsers(name=result.name, email=result.email, division=result.division),
+            result.questionnaire_confirmation,
+            result.report_to_work,
+        )
+        for result in HealthScreenResults.query.filter(
+            HealthScreenResults.date.cast(Date) == date,
+            HealthScreenResults.email.notin_(user_emails),
+        )
+        .order_by(asc(HealthScreenResults.id))
+        .all()
+    ]
+    daily_results = (
+        expected_but_not_complete + expected_users_results + new_users_results
     )
-    users = HealthScreenUsers.query.order_by(asc(HealthScreenUsers.name)).all()
-    daily_results = []
-
-    for user in users:
-        questionnaire_confirmation = None
-        report_to_work = None
-        result_id = None
-        for result in results:
-            if user.email == result.email:
-                report_to_work = result.report_to_work
-                questionnaire_confirmation = result.questionnaire_confirmation
-                result_id = result.id
-        daily_results.append(
-            (result_id, user, questionnaire_confirmation, report_to_work)
-        )
-
-    completed_results = [r[0] for r in daily_results]
-
-    for result in results:
-        if result.id in completed_results:
-            continue
-        user = HealthScreenUsers(
-            name=result.name, email=result.email, division=result.division
-        )
-        daily_results.append(
-            (result.id, user, result.questionnaire_confirmation, result.report_to_work)
-        )
 
     if "export" in request.form:
         health_screen_export = generate_health_screen_daily_summary_export(

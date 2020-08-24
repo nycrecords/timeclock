@@ -28,7 +28,7 @@ def send_email(to, subject, template, **kwargs):
     :return: A thread to be used in send_async_email
     """
     app = current_app._get_current_object()
-    sender = kwargs.get('sender', app.config["MAIL_SENDER"])
+    sender = kwargs.get("sender", app.config["MAIL_SENDER"])
     msg = Message(
         subject,
         sender=sender,

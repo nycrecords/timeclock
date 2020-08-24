@@ -35,8 +35,8 @@
         </thead>
         <tbody>
         {% for result in results %}
-            <tr {% if result[3] == True %}style="color: green"
-                {% elif result[3] == False %}style="color: red"
+            <tr {% if result[3] == "Yes" %}style="color: green"
+                {% elif result[3] == "No" %}style="color: red"
                 {% endif %}>
                 <td>{{ result[1].name }}</td>
                 <td><a href="mailto:{{ result[1].email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result[1].email }}</a>

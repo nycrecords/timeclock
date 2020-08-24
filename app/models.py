@@ -407,8 +407,26 @@ class HealthScreenResults(db.Model):
     email = db.Column(db.String(64))
     date = db.Column(db.DateTime())
     division = db.Column(db.String(128))
-    questionnaire_confirmation = db.Column(db.Boolean, nullable=False)
-    report_to_work = db.Column(db.Boolean, nullable=False)
+    _questionnaire_confirmation = db.Column(
+        db.Boolean, nullable=False, name="questionnaire_confirmation"
+    )
+    _report_to_work = db.Column(db.Boolean, nullable=False, name="report_to_work")
+
+    @property
+    def report_to_work(self):
+        return "Yes" if self._report_to_work is True else "No"
+
+    @report_to_work.setter
+    def report_to_work(self, value):
+        self._report_to_work = value
+
+    @property
+    def questionnaire_confirmation(self):
+        return "Yes" if self._questionnaire_confirmation is True else "No"
+
+    @questionnaire_confirmation.setter
+    def questionnaire_confirmation(self, value):
+        self._questionnaire_confirmation = value
 
 
 class HealthScreenUsers(db.Model):
