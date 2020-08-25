@@ -66,8 +66,8 @@
                             href="mailto:{{ result.email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result.email }}</a>
                     </td>
                     <td>{{ result.division }}</td>
-                    <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
-                    <td>{% if result.questionnaire_confirmation %}{% if result.report_to_work %}Yes{% else %}No{% endif %}{% else %}N/A{% endif%}</td>
+                    <td>{{ result.questionnaire_confirmation }}</td>
+                    <td>{% if result.questionnaire_confirmation == "Yes" %}{{ result.report_to_work }}{% else %}N/A{% endif%}</td>
                 </tr>
                 {% elif result.report_to_work == "No" %}
                 <tr style="color: red">
@@ -78,8 +78,8 @@
                             href="mailto:{{ result.email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result.email }}</a>
                     </td>
                     <td>{{ result.division }}</td>
-                    <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
-                    <td>{% if result.report_to_work %}Yes{% else %}No{% endif %}</td>
+                    <td>{{ result.questionnaire_confirmation }}</td>
+                    <td>{% if result.questionnaire_confirmation == "Yes" %}{{ result.report_to_work }}{% else %}N/A{% endif%}</td>
                 </tr>
                 {% else %}
                 <tr>
@@ -90,8 +90,8 @@
                             href="mailto:{{ result.email }}?subject=Reminder Health Screen Confirmation&cc=healthscreen@records.nyc.gov&body=Dear DORIS Employee,%0D%0A%0D%0AWe have not received your health screening confirmation.%0D%0A%0D%0APlease click on the link below to submit your response.%0D%0A%0D%0Ahttps://healthscreen.getinfo.nyc/healthscreen%0D%0A%0D%0AThank you">{{ result.email }}</a>
                     </td>
                     <td>{{ result.division }}</td>
-                    <td>{% if result.questionnaire_confirmation %}Yes{% else %}No{% endif %}</td>
-                    <td>{% if result.report_to_work %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if result.questionnaire_confirmation == "Yes" %}{{ result.report_to_work }}{% else %}N/A{% endif%}</td>
+                    <td>"N/A"</td>
                 </tr>
                 {% endif %}
                 {% endif %}
