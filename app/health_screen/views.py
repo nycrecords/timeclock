@@ -167,9 +167,9 @@ def health_screen_daily_summary():
     users = HealthScreenUsers.query.order_by(asc(HealthScreenUsers.name)).all()
     user_emails = [user.email for user in users]
     expected_but_not_complete = [
-        (None, user, None, None)
+        (None, user, "No", "N/A")
         for user in HealthScreenUsers.query.filter(
-            ~HealthScreenUsers.email.in_(
+            HealthScreenUsers.email.notin_(
                 HealthScreenResults.query.with_entities(
                     HealthScreenResults.email
                 ).filter(HealthScreenResults.date.cast(Date) == date)
