@@ -156,7 +156,6 @@ def generate_health_screen_daily_summary_export(results, filename):
     col = 0
 
     for result in results:
-        print(result)
         if result[3] == "Yes":
             worksheet.write(row, col, result[1].name, green)
             worksheet.write(row, col + 1, result[1].email, green)
