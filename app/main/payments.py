@@ -32,7 +32,7 @@ def get_payrate_before_or_after(email_input, start, before_or_after):
                 .order_by(sqlalchemy.desc(Pay.start))
                 .all()
             )
-            p = p[-1]
+            p = p[0]
             # Get the first payment before the given date
         else:
             p = pay_query.filter(Pay.start >= start).first()
