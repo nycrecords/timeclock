@@ -51,7 +51,7 @@ class TimePunchForm(Form):
         choices=[("In", "In"), ("Out", "Out")],
     )
     punch_date = DateField(
-        u"Date", default=datetime.today(), validators=[DataRequired()]
+        u"Date", default=datetime.today, validators=[DataRequired()]
     )
     punch_time = StringField(
         u"Time (24-hour)", default="9:00", validators=[DataRequired()]
@@ -66,10 +66,10 @@ class RequestVacationForm(Form):
     """
 
     vac_start = DateField(
-        u"Start Date", default=datetime.today(), validators=[DataRequired()]
+        u"Start Date", default=datetime.today, validators=[DataRequired()]
     )
     vac_end = DateField(
-        u"End Date", default=datetime.today(), validators=[DataRequired()]
+        u"End Date", default=datetime.today, validators=[DataRequired()]
     )
     vac_request = SubmitField("Submit Request")
 
@@ -82,13 +82,11 @@ class AdminFilterEventsForm(Form):
     Administrators can search for clock events created by a given user between first_date and second_date.
     """
 
-    from .modules import get_time_period
+    from .modules import start_of_week
 
     email = StringField("Username/Email", validators=[Optional()])
-    first_date = DateField(
-        "From", default=get_time_period("w")[0], validators=[Optional()]
-    )
-    last_date = DateField("To", default=date.today(), validators=[Optional()])
+    first_date = DateField("From", default=start_of_week, validators=[Optional()])
+    last_date = DateField("To", default=datetime.today, validators=[Optional()])
     tag = SelectField("Tag", choices=tags, coerce=int, validators=[Optional()])
     division = SelectField("Division", choices=divisions, validators=[Optional()])
     submit = SubmitField("Filter")
@@ -132,7 +130,7 @@ class CreatePayRateForm(Form):
     """
 
     email = StringField("Email", validators=[DataRequired(), Email()])
-    start_date = DateField("Start", default=date.today(), validators=[DataRequired()])
+    start_date = DateField("Start", default=datetime.today, validators=[DataRequired()])
     rate = FloatField("Rate", validators=[DataRequired()])
     submit = SubmitField("Create Pay Rate")
 
@@ -164,7 +162,7 @@ class AddEventForm(Form):
     """
 
     addemail = StringField("Email", validators=[DataRequired(), Email()])
-    add_date = DateField(u"Date", default=datetime.today(), validators=[DataRequired()])
+    add_date = DateField(u"Date", default=datetime.today, validators=[DataRequired()])
     add_time = StringField(
         u"Time (24-hour)", default="9:00", validators=[DataRequired()]
     )
@@ -270,10 +268,10 @@ class GenerateMultipleTimesheetsForm(Form):
 
     emails = SelectMultipleField(choices=[], validators=[DataRequired()], coerce=str)
     start_date = DateField(
-        u"Start Date", default=datetime.today(), validators=[DataRequired()]
+        u"Start Date", default=datetime.today, validators=[DataRequired()]
     )
     end_date = DateField(
-        u"End Date", default=datetime.today(), validators=[DataRequired()]
+        u"End Date", default=datetime.today, validators=[DataRequired()]
     )
     gen_timesheets = SubmitField("Generate Timesheets")
 
