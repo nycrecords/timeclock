@@ -295,6 +295,15 @@ def get_time_period(period="d"):
     return interval
 
 
+def start_of_week():
+    """
+    Gets the start of the work week (Monday).
+    Used primarily for setting the default value of date fields.
+    :return: A datetime of the first work day of the current week.
+    """
+    return datetime.today() - timedelta(days=datetime.today().weekday())
+
+
 def process_time_periods(form):
     """
     Runs through the possible submit buttons on AdminFilterEventsForms and UserFilterEventsForms.
