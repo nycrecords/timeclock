@@ -179,6 +179,12 @@ def all_history():
 
     addform = AddEventForm()
     today = datetime.today()
+    add_event_request = False
+    filter_request = False
+    if request.method == 'POST':
+        if "add" not in request.form:
+            filter_request = True
+        else : add_event_request = True
     if addform.validate_on_submit() and addform.add.data:
         if addform.addemail.data.lower() == current_user.email:
             flash("Administrators cannot edit their own clock events", "error")
@@ -255,6 +261,8 @@ def all_history():
         tags=tags,
         generation_events=events_query.all(),
         query_has_results=query_has_results,
+        filter_request=filter_request,
+        add_request=add_event_request,
     )
 
 
