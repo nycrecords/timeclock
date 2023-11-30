@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 from dateutil.relativedelta import *
 import dateutil.relativedelta
 import sqlalchemy
-from flask import session, current_app, send_file, make_response
+from flask import session, current_app, send_file, make_response,request
 from flask_login import current_user
 
 from app.main.pdf import (
@@ -47,7 +47,8 @@ def process_clock(note_data, ip=None):
             )
 
     # Create clock event
-    typ = True if not last else not last.type
+    # typ = True if not last else not last.type
+    typ = True if ("ClockIn" in request.form) else False
     event = Event(
         type=typ, time=datetime.now(), user_id=current_user.id, note=note_data, ip=ip
     )
@@ -58,23 +59,23 @@ def process_clock(note_data, ip=None):
     current_app.logger.info("End function process_clock()")
 
 
-def set_clock_form():
-    """
-    For use in main/views.py: Determine the type of form to be rendered to index.html.
-    :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
-    """
-    from .forms import ClockInForm, ClockOutForm
+# def set_clock_form():
+#     """
+#     For use in main/views.py: Determine the type of form to be rendered to index.html.
+#     :return: ClockInForm if user is clocked out. ClockOutForm if user is clocked in.
+#     """
+#     from .forms import ClockInForm, ClockOutForm
 
-    current_app.logger.info("Start function get_clock_form()")
-    last = get_last_clock()
-    if last and last.type:
-        current_app.logger.info("Setting clock form to: clock out")
-        form = ClockOutForm()
-    else:
-        current_app.logger.info("Setting clock form to: clock in")
-        form = ClockInForm()
-    current_app.logger.info("End function get_clock_form()")
-    return form
+#     current_app.logger.info("Start function get_clock_form()")
+#     last = get_last_clock()
+#     if last and last.type:
+#         current_app.logger.info("Setting clock form to: clock out")
+#         form = ClockOutForm()
+#     else:
+#         current_app.logger.info("Setting clock form to: clock in")
+#         form = ClockInForm()
+#     current_app.logger.info("End function get_clock_form()")
+#     return form
 
 
 def get_last_clock(user=current_user, time=None):

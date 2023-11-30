@@ -15,29 +15,39 @@ from wtforms.validators import DataRequired, Optional, Length, Email
 from app.models import User
 from app.utils import tags, divisions, roles, Recaptcha3Field
 
-
-class ClockInForm(Form):
-    """
-    Form for clocked out users.
-    """
-
+class ClockForm(Form):
     note = StringField("Note: ")
-    submit = SubmitField(
+    ClockIn = SubmitField(
         "Clock In",
         render_kw={"style": "background-color:#5cb85c; border-color:#4cae4c"},
     )
-
-
-class ClockOutForm(Form):
-    """
-    Form for clocked in users.
-    """
-
-    note = StringField("Note: ")
-    submit = SubmitField(
+    ClockOut = SubmitField(
         "Clock Out",
         render_kw={"style": "background-color:#f0ad4e; border-color:#eea236"},
     )
+
+# class ClockInForm(Form):
+#     """
+#     Form for clocked out users.
+#     """
+
+#     note = StringField("Note: ")
+#     submit = SubmitField(
+#         "Clock In",
+#         render_kw={"style": "background-color:#5cb85c; border-color:#4cae4c"},
+#     )
+
+
+# class ClockOutForm(Form):
+#     """
+#     Form for clocked in users.
+#     """
+
+#     note = StringField("Note: ")
+#     submit = SubmitField(
+#         "Clock Out",
+#         render_kw={"style": "background-color:#f0ad4e; border-color:#eea236"},
+#     )
 
 
 class TimePunchForm(Form):

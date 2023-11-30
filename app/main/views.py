@@ -34,10 +34,11 @@ from .forms import (
     RequestVacationForm,
     FilterVacationForm,
     ExportForm,
+    ClockForm,
 )
 from .modules import (
     process_clock,
-    set_clock_form,
+    # set_clock_form,
     get_last_clock,
     get_events_by_date,
     get_clocked_in_users,
@@ -87,8 +88,13 @@ def index():
         current_app.logger.info("End function index")
         return redirect(url_for("auth.change_password"))
 
-    form = set_clock_form()
+    form = ClockForm()
+    last = get_last_clock()
+    last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
+    last_type = last.type if last else False
     if form.validate_on_submit():
+        if (form.ClockIn.data and last_type) or (form.ClockOut.data and not last_type):
+            flash("Your last two clocks are of the same type, if this was done by mistake then contact your supervisor.", category="warning")
         if form.note.data is not None and len(form.note.data) > 60:
             flash("Your note cannot exceed 60 characters", category="warning")
             current_app.logger.error(
@@ -104,14 +110,11 @@ def index():
             process_clock(form.note.data, ip)
             flash("Clock submission successfully processed", category="success")
 
-    last = get_last_clock()
-    last_time = last.time.strftime("%b %d, %Y | %H:%M") if last else ""
-    last_type = last.type if last else False
     clocked_in_users, clocked_in_users_today = get_clocked_in_users()
     current_app.logger.info("End function index")
     return render_template(
         "main/index.html",
-        form=set_clock_form(),
+        form=form,
         last_event=last_time,
         clocked_in_users=clocked_in_users,
         clocked_in_users_today=clocked_in_users_today,
