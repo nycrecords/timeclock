@@ -816,13 +816,18 @@ def user_list_page():
                     + search_result_tag
                 )
             )
+        
+        list_of_user__no_duplicates=[]
+        for usr in list_of_users:
+            if usr not in list_of_user__no_duplicates:
+                list_of_user__no_duplicates.append(usr)
 
-    if not list_of_users:
+    if not list_of_user__no_duplicates:
         flash("No results found", category="error")
     # Pass in separate list of users with and without divisions
     return render_template(
         "main/user_list.html",
-        list_of_users=list_of_users,
+        list_of_users=list_of_user__no_duplicates,
         tags=tags,
         nondivision_users=nondivision_users,
         active_users=active,
