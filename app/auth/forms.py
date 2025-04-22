@@ -35,7 +35,7 @@ class RegistrationForm(Form):
         validators=[
             DataRequired(),
             EqualTo("password2", message="Passwords must match"),
-            Length(min=8),
+            Length(min=8, max=32),
         ],
     )
     password2 = PasswordField("Confirm password", validators=[DataRequired()])
@@ -261,9 +261,11 @@ class PasswordResetForm(Form):
         validators=[
             DataRequired(),
             EqualTo("password2", message="Passwords must match"),
+            Length(min=15, max=32)
         ],
     )
-    password2 = PasswordField("Confirm password", validators=[DataRequired()])
+    password2 = PasswordField("Confirm password", validators=[DataRequired(), Length(min=15, max=32)]
+                              )
     submit = SubmitField("Reset Password")
 
     def validate_email(self, field):
