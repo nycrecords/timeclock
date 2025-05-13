@@ -19,6 +19,7 @@ from app.models import (
 
 if os.getenv("FLASK_ENV") == "development":
     from faker import Faker
+
 from app.utils import divisions, tags
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
@@ -82,17 +83,32 @@ def setup_roles():
     db.session.add(administrator)
     db.session.commit()
 
-
 @app.cli.command("create_dev_users")
 def create_dev_users():
     """Create users for development."""
-    # Administrator
     faker = Faker()
+
+    # Hardcoded administrator for local dev convenience
+    admin = User(
+        email=f"admin@{app.config['EMAIL_DOMAIN']}",
+        first_name="Administrator",
+        last_name="Account",
+        password="password",
+        division="Administration",
+        role=Role.query.filter_by(name="Administrator").first(),
+        tag_id=faker.random_int(min=1, max=len(tags) - 1),
+        is_supervisor=True,
+        validated=True # Allows skipping the "Change Password" screen
+    )
+    db.session.add(admin)
+    admin.password_list.update(admin.password_hash)
+
+    # Admnistrator
     first_name = faker.first_name()
     last_name = faker.last_name()
     tag_id = faker.random_int(min=1, max=len(tags) - 1)
     division = faker.random_elements(elements=divisions, length=1)[0][0]
-    administrator = User(
+    random_admin = User(
         email="{first_initial}{last_name}@{email_domain}".format(
             first_initial=first_name[0].lower(),
             last_name=last_name.lower(),
@@ -106,8 +122,8 @@ def create_dev_users():
         tag_id=tag_id,
         is_supervisor=True,
     )
-    db.session.add(administrator)
-    administrator.password_list.update(administrator.password_hash)
+    db.session.add(random_admin)
+    random_admin.password_list.update(random_admin.password_hash)
 
     # Supervisor
     first_name = faker.first_name()
@@ -158,11 +174,10 @@ def create_dev_users():
 
 
 @app.cli.command("create_health_screen_users")
-def create_dev_users():
+def create_health_screen_users():
     """Create health screen users for development."""
-
     faker = Faker()
-    for i in range(10):
+    for i in range(3):
         first_name = faker.first_name()
         last_name = faker.last_name()
         division = faker.random_elements(elements=divisions, length=1)[0][0]

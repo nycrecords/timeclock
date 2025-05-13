@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5001:5001"
+    depends_on:
+      - db
+    env_file:
+      - .env.docker
+    volumes:
+      - .:/app
+    restart: always
+
+  db:
+    image: postgres:17
+    command: ["postgres", "-c", "log_statement=all"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=developer
+      - POSTGRES_PASSWORD=developer_password
+      - POSTGRES_DB=timeclock_dev
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+    # Force new volume to avoid version mismatch
+    name: postgres_data_new
