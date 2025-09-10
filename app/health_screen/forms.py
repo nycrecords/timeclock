@@ -1,4 +1,4 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
     SubmitField,
@@ -10,7 +10,7 @@ from wtforms.validators import DataRequired, Optional, Email
 from app.utils import divisions, Recaptcha3Field
 
 
-class HealthScreenForm(Form):
+class HealthScreenForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField(
         "Email",
@@ -29,7 +29,7 @@ class HealthScreenForm(Form):
     submit = SubmitField("Submit")
 
 
-class HealthScreenAdminForm(Form):
+class HealthScreenAdminForm(FlaskForm):
     name = StringField("Name", validators=[Optional()])
     email = StringField(
         "Email",
@@ -47,7 +47,7 @@ class HealthScreenAdminForm(Form):
     submit = SubmitField("Submit")
 
 
-class AddHealthScreenUserForm(Form):
+class AddHealthScreenUserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField(
         "Email",
@@ -60,7 +60,7 @@ class AddHealthScreenUserForm(Form):
     submit = SubmitField("Submit")
 
 
-class EditHealthScreenUserForm(Form):
+class EditHealthScreenUserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField(
         "Email",

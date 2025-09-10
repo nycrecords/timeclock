@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: timeclock
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Force DB host to the service name 'db' regardless of .env
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/timeclock
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_APP: timeclock.py
+    ports:
+      - "8000:8000"
+    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "timeclock:app"]
+
+volumes:
+  pgdata:

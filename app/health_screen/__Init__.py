@@ -1,6 +1,8 @@
-from flask import Blueprint, session
+from flask import Blueprint
 
+# Blueprint for health screen module
 health_screen_bp = Blueprint("health_screen", __name__)
 
-from app.health_screen import views
-from app.models import HealthScreenResults, HealthScreenUsers
+# Register routes
+from app.health_screen import views  # noqa: E402,F401
+

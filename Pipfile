@@ -66,7 +66,7 @@ xlsxwriter = "*"
 flask-shell-ipython = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.13"
 
 [pipenv]
 allow_prereleases = true

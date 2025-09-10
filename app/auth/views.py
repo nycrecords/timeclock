@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import current_app, jsonify
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from werkzeug.security import check_password_hash
 
 from . import auth
@@ -345,7 +345,8 @@ def password_reset(token):
     if form.validate_on_submit():
         s = Serializer(current_app.config["SECRET_KEY"])
         try:
-            data = s.loads(token)
+            # Enforce a 1-hour max age, matching previous behavior
+            data = s.loads(token, max_age=3600)
         except:
             # Token has timed out
             current_app.logger.error("EXCEPTION (ValueError): Token no longer valid")
@@ -598,7 +599,7 @@ def user_profile(user_id):
     changes = get_changelog_by_user_id(user.id)
 
     page = request.args.get("page", 1, type=int)
-    pagination = changes.paginate(page, per_page=10, error_out=False)
+    pagination = changes.paginate(page=page, per_page=10, error_out=False)
     changes = pagination.items
 
     return render_template(

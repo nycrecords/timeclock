@@ -16,11 +16,21 @@ def process_health_screen_confirmation(
     name, email, division, date, questionnaire_confirmation, report_to_work
 ):
     # Store Health Screen in DB
+    # Normalize date to datetime
+    if isinstance(date, str):
+        try:
+            parsed_date = datetime.strptime(date, "%m/%d/%Y")
+        except ValueError:
+            # Fallback: try ISO
+            parsed_date = datetime.fromisoformat(date)
+    else:
+        parsed_date = date
+
     health_screen = HealthScreenResults(
         name=name,
         email=email,
         division=division,
-        date=date,
+        date=parsed_date,
         questionnaire_confirmation=eval_request_bool(questionnaire_confirmation),
         report_to_work=eval_request_bool(report_to_work),
     )
@@ -37,7 +47,7 @@ def process_health_screen_confirmation(
     filename = "{username}-health-check-report_to_work-{report_to_work}-{date}.pdf".format(
         username=email.split("@")[0],
         report_to_work=health_screen.report_to_work,
-        date=datetime.strptime(date, "%m/%d/%Y").strftime("%Y-%m-%d"),
+        date=parsed_date.strftime("%Y-%m-%d"),
     )
     attachment = {"filename": filename, "mimetype": "application/pdf", "file": pdf}
     send_email(

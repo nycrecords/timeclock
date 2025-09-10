@@ -59,7 +59,7 @@ def check_password_requirements(email, old_password, password, password_confirma
 
     # Use a score based system to ensure that users match password security requirements
     score = 0
-    if re.search("\d+", password):
+    if re.search(r"\d+", password):
         # If the password contains a digit, increment score
         score += 1
     if re.search("[a-z]", password) and re.search("[A-Z]", password):

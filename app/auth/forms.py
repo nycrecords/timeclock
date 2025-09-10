@@ -1,4 +1,4 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
     PasswordField,
@@ -14,7 +14,7 @@ from app.models import User
 from app.utils import tags, divisions, roles
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     """Used for registered users to log into the system."""
 
     email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
@@ -22,7 +22,7 @@ class LoginForm(Form):
     submit = SubmitField("Log In")
 
 
-class RegistrationForm(Form):
+class RegistrationForm(FlaskForm):
     """Used to register new users into the system."""
 
     email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
@@ -109,7 +109,7 @@ class RegistrationForm(Form):
             raise ValidationError("Password must contain at least one capital letter")
 
 
-class AdminRegistrationForm(Form):
+class AdminRegistrationForm(FlaskForm):
     """Used by admins to register new users into the system."""
 
     email = StringField("Email", validators=[DataRequired(), Length(1, 64), Email()])
@@ -230,7 +230,7 @@ class AdminRegistrationForm(Form):
         )
 
 
-class ChangePasswordForm(Form):
+class ChangePasswordForm(FlaskForm):
     """Form for changing password"""
 
     old_password = PasswordField("Old password", validators=[DataRequired()])
@@ -246,14 +246,14 @@ class ChangePasswordForm(Form):
     submit = SubmitField("Update Password")
 
 
-class PasswordResetRequestForm(Form):
+class PasswordResetRequestForm(FlaskForm):
     """Initial request form for password reset"""
 
     email = StringField("Email", validators=[DataRequired(), Length(1, 100), Email()])
     submit = SubmitField("Reset Password")
 
 
-class PasswordResetForm(Form):
+class PasswordResetForm(FlaskForm):
     """Password reset form after email confirmation"""
 
     password = PasswordField(
@@ -271,7 +271,7 @@ class PasswordResetForm(Form):
             raise ValidationError("Unknown email address.")
 
 
-class ChangeUserDataForm(Form):
+class ChangeUserDataForm(FlaskForm):
     """
     Form administrators use to change a User's information.
     """

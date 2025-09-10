@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import current_app, session
 from flask_login import UserMixin, AnonymousUserMixin
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
@@ -111,18 +111,22 @@ class User(UserMixin, db.Model):
         :param password: String to hash.
         :return: None.
         """
-        self.password_hash = generate_password_hash(password)
+        # Use a hash compatible with VARCHAR(128) in the database
+        self.password_hash = generate_password_hash(
+            password, method="pbkdf2:sha256", salt_length=16
+        )
 
-    # generates token with default validity for 1 hour
     def generate_reset_token(self, expiration=3600):
         """
         Generates a token users can use to reset their accounts if locked out.
         :param expiration: Seconds the token is valid for after being created (default one hour).
         :return: the token.
         """
-        s = Serializer(current_app.config["SECRET_KEY"], expiration)
-        session["reset_token"] = {"token": s, "valid": True}
-        return s.dumps({"reset": self.id})
+        # Note: URLSafeTimedSerializer encodes a timestamp; enforce expiration at loads time.
+        s = Serializer(current_app.config["SECRET_KEY"])
+        token = s.dumps({"reset": self.id})
+        session["reset_token"] = {"valid": True}
+        return token
 
     def reset_password(self, new_password):
         """
@@ -135,7 +139,7 @@ class User(UserMixin, db.Model):
         if len(new_password) < 8:
             return False
         score = 0
-        if re.search("\d+", new_password):
+        if re.search(r"\d+", new_password):
             # If the new password contains a digit, increment score
             score += 1
         if re.search("[a-z]", new_password) and re.search("[A-Z]", new_password):

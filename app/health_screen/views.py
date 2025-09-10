@@ -132,7 +132,7 @@ def health_screen_filter():
             )
             return send_file(
                 BytesIO(health_screen_export),
-                attachment_filename="health_screen_results.xlsx",
+                download_name="health_screen_results.xlsx",
                 as_attachment=True,
             )
         return render_template(
@@ -217,7 +217,7 @@ def health_screen_daily_summary():
         )
         return send_file(
             BytesIO(health_screen_export),
-            attachment_filename="health_screen_results_{}.xlsx".format(
+            download_name="health_screen_results_{}.xlsx".format(
                 date.strftime("%-m-%-d-%Y")
             ),
             as_attachment=True,

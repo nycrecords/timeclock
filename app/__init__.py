@@ -7,13 +7,12 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask, session
 from flask_bootstrap import Bootstrap
-from flask_kvsession import KVSessionExtension
+from flask_session import Session
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-from simplekv.db.sql import SQLAlchemyStore
 
 from config import config
 
@@ -52,9 +51,9 @@ def create_app(config_name):  # App Factory
     migrate.init_app(app, db)
     db.init_app(app)
     with app.app_context():
-        # load_db(db)
-        store = SQLAlchemyStore(db.engine, db.metadata, "sessions")
-        kvsession = KVSessionExtension(store, app)
+        # Server-side sessions via Flask-Session (filesystem)
+        app.config.setdefault("SESSION_TYPE", "filesystem")
+        Session(app)
         logfile_name = "Timeclock" + time.strftime("%Y%m%d-%H%M%S") + ".log"
         handler = RotatingFileHandler(logfile_name, maxBytes=10000, backupCount=1)
         handler.setFormatter(

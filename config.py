@@ -21,10 +21,11 @@ class Config:
     ADMIN = os.environ.get("ADMIN") or "admin@records.nyc.gov"
     EMAIL_DOMAIN = "records.nyc.gov"
 
-    # ReCaptcha v3
+    # ReCaptcha v2 (optional)
     RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_SITE_KEY", "")
     RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "")
 
+    # ReCaptcha v3 (optional)
     RECAPTCHA3_PUBLIC_KEY = os.environ.get("RECAPTCHA_SITE_KEY_V3", "")
     RECAPTCHA3_PRIVATE_KEY = os.environ.get("RECAPTCHA_SECRET_KEY_V3", "")
 

@@ -12,3 +12,4 @@ LogFile*
 docs/_build/*
 .env*
 !.env.example
+.DS_Store

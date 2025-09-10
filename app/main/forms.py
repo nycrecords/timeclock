@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from flask import current_app
-from flask_wtf import Form, Recaptcha, RecaptchaField
+from flask_wtf import FlaskForm, Recaptcha, RecaptchaField
 from wtforms import (
     StringField,
     SubmitField,
@@ -16,7 +16,7 @@ from app.models import User
 from app.utils import tags, divisions, roles, Recaptcha3Field
 
 
-class ClockInForm(Form):
+class ClockInForm(FlaskForm):
     """
     Form for clocked out users.
     """
@@ -28,7 +28,7 @@ class ClockInForm(Form):
     )
 
 
-class ClockOutForm(Form):
+class ClockOutForm(FlaskForm):
     """
     Form for clocked in users.
     """
@@ -40,7 +40,7 @@ class ClockOutForm(Form):
     )
 
 
-class TimePunchForm(Form):
+class TimePunchForm(FlaskForm):
     """
     Form for requesting a time punch.
     """
@@ -60,7 +60,7 @@ class TimePunchForm(Form):
     submit = SubmitField("Submit Request")
 
 
-class RequestVacationForm(Form):
+class RequestVacationForm(FlaskForm):
     """
     Form for users to request a vacation.
     """
@@ -74,7 +74,7 @@ class RequestVacationForm(Form):
     vac_request = SubmitField("Submit Request")
 
 
-class AdminFilterEventsForm(Form):
+class AdminFilterEventsForm(FlaskForm):
     """
     Form for Administrators to filter all clock events.
     Administrators can search users by email.
@@ -113,7 +113,7 @@ class AdminFilterEventsForm(Form):
             raise ValidationError("No account with that email exists")
 
 
-class UserFilterEventsForm(Form):
+class UserFilterEventsForm(FlaskForm):
     """
     Form for users to filter their own clock events by date. Users can look
     at self-generated clock events between first_date and last_date.
@@ -126,7 +126,7 @@ class UserFilterEventsForm(Form):
     this_week = SubmitField("This Week")
 
 
-class CreatePayRateForm(Form):
+class CreatePayRateForm(FlaskForm):
     """
     Form for creating payrates. Should only be usable by admins.
     """
@@ -148,7 +148,7 @@ class CreatePayRateForm(Form):
             raise ValidationError("No account with that email exists")
 
 
-class ApproveOrDenyForm(Form):
+class ApproveOrDenyForm(FlaskForm):
     """
     Form administrators use to approve or deny a request.
     Implemented in review_timepunches.html and review_vacations.html
@@ -158,7 +158,7 @@ class ApproveOrDenyForm(Form):
     deny = SubmitField("")
 
 
-class AddEventForm(Form):
+class AddEventForm(FlaskForm):
     """
     Form administrators use to add events. Implemented in all_history.html
     """
@@ -187,7 +187,7 @@ class AddEventForm(Form):
             raise ValidationError("No account with that email exists")
 
 
-class DeleteEventForm(Form):
+class DeleteEventForm(FlaskForm):
     """
     Form administrators use to delete events. Implemented in all_history.html
     """
@@ -195,7 +195,7 @@ class DeleteEventForm(Form):
     delete = SubmitField("")
 
 
-class FilterTimePunchForm(Form):
+class FilterTimePunchForm(FlaskForm):
     """
     Form administrators use to filter through TimePunches.
     """
@@ -225,7 +225,7 @@ class FilterTimePunchForm(Form):
             raise ValidationError("No account with that email exists")
 
 
-class ClearForm(Form):
+class ClearForm(FlaskForm):
     """
     Form administrators use to clear their filters.
     """
@@ -233,7 +233,7 @@ class ClearForm(Form):
     clear = SubmitField("Clear Filter")
 
 
-class FilterVacationForm(Form):
+class FilterVacationForm(FlaskForm):
     """
      Form administrators use to filter through Vacations.
     """
@@ -263,7 +263,7 @@ class FilterVacationForm(Form):
             raise ValidationError("No account with that email exists")
 
 
-class GenerateMultipleTimesheetsForm(Form):
+class GenerateMultipleTimesheetsForm(FlaskForm):
     """
     Form to generate multiple timesheets (used only by administrators)
     """
@@ -278,5 +278,5 @@ class GenerateMultipleTimesheetsForm(Form):
     gen_timesheets = SubmitField("Generate Timesheets")
 
 
-class ExportForm(Form):
+class ExportForm(FlaskForm):
     export = SubmitField("Export")

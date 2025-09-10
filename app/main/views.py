@@ -233,7 +233,7 @@ def all_history():
         return create_csv(events_query.all())
 
     # Pagination
-    pagination = events_query.paginate(page, per_page=15, error_out=False)
+    pagination = events_query.paginate(page=page, per_page=15, error_out=False)
     events = pagination.items
 
     current_app.logger.info("Querying (calling get_all_tags)")
@@ -292,7 +292,7 @@ def history():
     events_query = get_events_by_date()
     current_app.logger.info("Finished querying")
 
-    pagination = events_query.paginate(page, per_page=15, error_out=False)
+    pagination = events_query.paginate(page=page, per_page=15, error_out=False)
     events = pagination.items
 
     current_app.logger.info("Querying (calling get_all_tags)")
@@ -742,7 +742,7 @@ def review_timepunch():
                 )
             )
 
-    pagination = timepunch_query.paginate(page, per_page=15, error_out=False)
+    pagination = timepunch_query.paginate(page=page, per_page=15, error_out=False)
 
     query_has_results = True if timepunch_query.first() else False
 
@@ -900,7 +900,7 @@ def review_vacations():
                 )
             )
 
-    pagination = vacation_query.paginate(page, per_page=15, error_out=False)
+    pagination = vacation_query.paginate(page=page, per_page=15, error_out=False)
 
     query_has_results = True if vacation_query.first() else False
 

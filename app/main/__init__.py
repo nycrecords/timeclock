@@ -1,4 +1,4 @@
-from flask import Blueprint, session
+from flask import Blueprint, session, jsonify
 
 main = Blueprint("main", __name__)
 
@@ -14,3 +14,8 @@ def inject_permissions():
 @main.before_request
 def func():
     session.modified = True
+
+# Quell Chrome devtools probe logs
+@main.route("/.well-known/appspecific/com.chrome.devtools.json")
+def chrome_devtools_probe():
+    return jsonify({})

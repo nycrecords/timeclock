@@ -1,0 +1,39 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.coverage
+.tox
+.venv
+venv
+.envrc
+
+# OS / Editor
+.DS_Store
+*.swp
+
+# Project files not needed in image
+README.md
+STARTUP.md
+AGENTS.md
+Vagrantfile.example
+flask_session/
+tests/
+docs/
+build_scripts/
+# keep scripts in image for admin ops; do not ignore
+# scripts/
+timeclock_*.sql
+*.pem
+*.key
+*.crt
+
+# Node (if any in future)
+node_modules/

@@ -27,15 +27,15 @@ def get_payrate_before_or_after(email_input, start, before_or_after):
         )
         pay_query = Pay.query.filter(Pay.user_id == user.id)
         if before_or_after:
-            p = (
+            results = (
                 pay_query.filter(Pay.start <= start)
                 .order_by(sqlalchemy.desc(Pay.start))
                 .all()
             )
-            p = p[0]
-            # Get the first payment before the given date
+            p = results[0] if results else None
+            # Get the most recent payment on/before the given date
         else:
-            p = pay_query.filter(Pay.start >= start).first()
+            p = pay_query.filter(Pay.start >= start).order_by(Pay.start.asc()).first()
             # Get the first payment after the given date
         if not p:
             current_app.logger.error(

@@ -514,8 +514,8 @@ def generate_timesheets(emails, start, end):
     shutil.rmtree(dirpath)
     return send_file(
         memoryfile,
-        mimetype="zip",
-        attachment_filename="timesheets.zip",
+        mimetype="application/zip",
+        download_name="timesheets.zip",
         as_attachment=True,
     )
 
