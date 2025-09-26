@@ -73,9 +73,6 @@ def create_app(config_name):  # App Factory
 
     app.register_blueprint(auth_blueprint, url_prefix="/auth")
 
-    from .health_screen import health_screen_bp as health_screen_blueprint
-
-    app.register_blueprint(health_screen_blueprint, url_prefix="/healthscreen")
 
     app.permanent_session_lifetime = timedelta(minutes=15)
 

@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: timeclock
     ports:
-      - "5432:5432"
+      - "5438:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -26,8 +26,8 @@ services:
       FLASK_ENV: ${FLASK_ENV:-production}
       FLASK_APP: timeclock.py
     ports:
-      - "8000:8000"
-    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "timeclock:app"]
+      - "5000:5000"
+    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "timeclock:app"]
 
 volumes:
   pgdata:

@@ -28,15 +28,13 @@ RUN set -eux; \
 
 WORKDIR /app
 
-# Install Pipenv and lock to latest allowed versions (no cache)
-COPY Pipfile ./
+# Install Pipenv dependencies from lock file (deterministic build)
+COPY Pipfile Pipfile.lock ./
 RUN python -m pip install --upgrade --no-cache-dir pip pipenv && \
-    PIPENV_YES=1 pipenv lock --clear && \
-    PIPENV_YES=1 PIPENV_VENV_IN_PROJECT=0 pipenv install --system --deploy
+    PIPENV_YES=1 PIPENV_VENV_IN_PROJECT=0 pipenv install --deploy --system
 
 # Copy application (only what is needed to run)
 COPY app ./app
-COPY scripts ./scripts
 COPY timeclock.py config.py Procfile ./
 COPY migrations ./migrations
 COPY docker-entrypoint.sh ./
@@ -47,7 +45,7 @@ RUN useradd -m -u 10001 appuser && \
     chmod +x /app/docker-entrypoint.sh
 USER appuser
 
-EXPOSE 8000
+EXPOSE 5000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "timeclock:app"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "timeclock:app"]
