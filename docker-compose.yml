@@ -10,13 +10,20 @@ services:
       - "5438:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d timeclock"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   web:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
     env_file:
       - .env
@@ -25,9 +32,21 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/timeclock
       FLASK_ENV: ${FLASK_ENV:-production}
       FLASK_APP: timeclock.py
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
     ports:
       - "5000:5000"
-    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "timeclock:app"]
+    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "--timeout", "120", "--log-level", "info", "timeclock:app"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/auth/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pgdata:
