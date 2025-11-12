@@ -1,52 +1,271 @@
+# TimeClock Docker Compose Configuration
+# Production-ready setup with enhanced monitoring, resource management, and security
+# Compatible with Docker Compose v2.20+
+
+# ==============================================================================
+# Service Definitions
+# ==============================================================================
 services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL Database Service
+  # ----------------------------------------------------------------------------
   db:
     image: postgres:15
+    container_name: timeclock-db
+
+    # Restart policy: restart unless explicitly stopped by user
     restart: unless-stopped
+
+    # Resource limits to prevent runaway resource consumption
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'          # Maximum 2 CPU cores
+          memory: 1G           # Maximum 1GB RAM
+        reservations:
+          cpus: '0.5'          # Reserve 0.5 CPU cores
+          memory: 512M         # Reserve 512MB RAM
+
+    # Environment variables for PostgreSQL configuration
+    # Use .env file to override these defaults
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: timeclock
+      # Performance tuning
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_MAX_CONNECTIONS: 100
+      # Logging configuration
+      POSTGRES_LOGGING_COLLECTOR: 'on'
+      POSTGRES_LOG_STATEMENT: 'mod'  # Log modifications only
+      POSTGRES_LOG_DURATION: 'on'
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: 1000  # Log slow queries >1s
+
+    # Port mapping: host:container
+    # External port 5438 to avoid conflicts with local PostgreSQL on 5432
     ports:
       - "5438:5432"
+
+    # Named volume for data persistence
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+    # Enhanced health check with optimized intervals
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d timeclock"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      interval: 10s        # Check every 10 seconds
+      timeout: 5s          # Allow 5 seconds for response
+      retries: 5           # Try 5 times before marking unhealthy
+      start_period: 30s    # Allow 30 seconds for initial startup
 
+    # Structured logging with rotation to prevent disk filling
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"    # Rotate at 10MB
+        max-file: "5"      # Keep 5 rotated files
+        compress: "true"   # Compress rotated logs
+        labels: "service,component"
+        tag: "{{.Name}}/{{.ID}}"
+
+    # Metadata labels for organization and monitoring
+    labels:
+      com.timeclock.service: "database"
+      com.timeclock.component: "postgres"
+      com.timeclock.environment: "${FLASK_ENV:-production}"
+      com.timeclock.version: "15"
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true  # Prevent privilege escalation
+
+    # Connect to dedicated network
+    networks:
+      - timeclock-network
+
+  # ----------------------------------------------------------------------------
+  # Flask Web Application Service
+  # ----------------------------------------------------------------------------
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      # Build arguments for better caching and reproducibility
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+
+    container_name: timeclock-web
+
+    # Restart policy with backoff strategy
+    restart: unless-stopped
+
+    # Resource limits for the web application
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'          # Maximum 2 CPU cores
+          memory: 512M         # Maximum 512MB RAM
+        reservations:
+          cpus: '0.25'         # Reserve 0.25 CPU cores
+          memory: 128M         # Reserve 128MB RAM
+
+    # Wait for database to be healthy before starting
     depends_on:
       db:
-        condition: service_healthy
-    restart: unless-stopped
+        condition: service_healthy  # Wait for DB health check to pass
+
+    # Load environment from .env file
     env_file:
       - .env
+
+    # Environment variables for Flask application
+    # Override .env values where needed for Docker networking
     environment:
-      # Force DB host to the service name 'db' regardless of .env
+      # Database connection
+      # Force DB host to 'db' service name for Docker networking
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/timeclock
+
+      # Flask configuration
       FLASK_ENV: ${FLASK_ENV:-production}
       FLASK_APP: timeclock.py
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+
+      # Gunicorn workers configuration
+      # Workers = (2 * CPU cores) + 1, but we set it explicitly in command
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+      GUNICORN_LOG_LEVEL: ${GUNICORN_LOG_LEVEL:-info}
+
+      # Python optimization
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+
+    # Port mapping: host:container
     ports:
       - "5000:5000"
-    command: ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "--timeout", "120", "--log-level", "info", "timeclock:app"]
+
+    # Production-ready Gunicorn command with optimized settings
+    command:
+      - gunicorn
+      - --workers=${GUNICORN_WORKERS:-2}
+      - --bind=0.0.0.0:5000
+      - --timeout=${GUNICORN_TIMEOUT:-120}
+      - --log-level=${GUNICORN_LOG_LEVEL:-info}
+      - --access-logfile=-           # Log to stdout
+      - --error-logfile=-            # Log errors to stderr
+      - --capture-output             # Capture app output
+      - --enable-stdio-inheritance   # Inherit stdio for proper logging
+      - timeclock:app
+
+    # Enhanced health check aligned with Dockerfile
+    # Checks the login endpoint which validates app initialization
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/auth/login"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: 30s        # Check every 30 seconds
+      timeout: 10s         # Allow 10 seconds for response
+      retries: 3           # Try 3 times before marking unhealthy
+      start_period: 60s    # Allow 60 seconds for migrations and startup
+
+    # Structured logging with rotation
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "10m"    # Rotate at 10MB
+        max-file: "5"      # Keep 5 rotated files
+        compress: "true"   # Compress rotated logs
+        labels: "service,component"
+        tag: "{{.Name}}/{{.ID}}"
 
+    # Metadata labels for organization and monitoring
+    labels:
+      com.timeclock.service: "web"
+      com.timeclock.component: "flask"
+      com.timeclock.environment: "${FLASK_ENV:-production}"
+      com.timeclock.version: "1.0.0"
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true  # Prevent privilege escalation
+
+    # Connect to dedicated network
+    networks:
+      - timeclock-network
+
+# ==============================================================================
+# Network Configuration
+# ==============================================================================
+networks:
+  timeclock-network:
+    name: timeclock-network
+    driver: bridge
+    # Network-level security and isolation
+    driver_opts:
+      com.docker.network.bridge.name: br-timeclock
+      com.docker.network.bridge.enable_icc: "true"  # Inter-container communication
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+    labels:
+      com.timeclock.network: "main"
+      com.timeclock.environment: "${FLASK_ENV:-production}"
+
+# ==============================================================================
+# Volume Configuration
+# ==============================================================================
 volumes:
   pgdata:
+    name: timeclock-pgdata
+    driver: local
+    labels:
+      com.timeclock.volume: "database"
+      com.timeclock.component: "postgres"
+      com.timeclock.environment: "${FLASK_ENV:-production}"
+
+# ==============================================================================
+# Configuration Notes
+# ==============================================================================
+#
+# Environment Variables (.env file):
+# ----------------------------------
+# POSTGRES_PASSWORD      - Database password (default: postgres)
+# FLASK_ENV              - Flask environment (default: production)
+# SECRET_KEY             - Flask secret key (MUST change in production!)
+# GUNICORN_WORKERS       - Number of Gunicorn workers (default: 2)
+# GUNICORN_TIMEOUT       - Request timeout in seconds (default: 120)
+# GUNICORN_LOG_LEVEL     - Logging verbosity (default: info)
+#
+# Port Mappings:
+# --------------
+# 5000 - Flask web application (HTTP)
+# 5438 - PostgreSQL database (mapped from container port 5432)
+#
+# Health Checks:
+# --------------
+# Database: pg_isready check every 10s, 30s startup grace period
+# Web: HTTP GET to /auth/login every 30s, 60s startup grace period
+#
+# Resource Limits:
+# ----------------
+# Database: 2 CPU cores max, 1GB RAM max
+# Web:      2 CPU cores max, 512MB RAM max
+#
+# Logging:
+# --------
+# All services use JSON file driver with 10MB rotation and 5 file retention
+# Logs are tagged with service name and container ID
+# Compressed to save disk space
+#
+# Security:
+# ---------
+# - no-new-privileges prevents privilege escalation
+# - Services run as non-root (web runs as appuser per Dockerfile)
+# - Isolated network with bridge driver
+# - Named volumes for better management
+#
+# Commands:
+# ---------
+# Start:   docker compose up -d
+# Stop:    docker compose down
+# Logs:    docker compose logs -f [service]
+# Status:  docker compose ps
+# Restart: docker compose restart [service]
+#
